@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Reseaver - 研究救星 (Web & Mobile)</title>
   
   <!-- PWA & Mobile Meta Tags -->
@@ -601,14 +602,17 @@
 
       <!-- 官方 Google 一鍵直接串聯登入按鈕 (Sign in with Google) -->
       <div class="space-y-2 pt-1">
-        <button onclick="loginWithGoogleSSO()" class="w-full py-2.5 px-4 bg-white hover:bg-slate-100 text-slate-800 rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-2.5 transition active:scale-95 border border-slate-200 group">
+        <!-- 官方 Google GIS 原生渲染容器 (由 Google 官方驗證並直接彈出手機/瀏覽器已登入帳戶) -->
+        <div id="googleNativeButtonDiv" class="w-full flex justify-center"></div>
+
+        <button id="googleCustomSignInBtn" onclick="loginWithGoogleSSO()" class="w-full py-2.5 px-4 bg-white hover:bg-slate-100 text-slate-800 rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-2.5 transition active:scale-95 border border-slate-200 group">
           <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
           </svg>
-          <span>使用 Google 帳號直接登入</span>
+          <span id="googleCustomSignInBtnText">使用 Google 帳戶登入 (直接選擇已登入帳戶)</span>
         </button>
       </div>
 
@@ -716,16 +720,15 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- MODAL: Google 帳戶直接選擇視窗 (Google Account Chooser) -->
+  <!-- MODAL: Google 官方原生 OAuth 快速設定視窗 -->
   <!-- ========================================== -->
-  <div id="googleDirectLoginModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+  <div id="googleOAuthSetupModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-sm sm:max-w-md p-6 shadow-2xl space-y-4 relative max-h-[92vh] overflow-y-auto">
-      <button onclick="closeGoogleDirectLoginModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg transition">
+      <button onclick="closeGoogleOAuthSetupModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg transition">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <!-- Google 標誌與帳戶選擇標題 -->
-      <div class="text-center space-y-1.5 pt-1">
+      <div class="text-center space-y-2 pt-1">
         <div class="w-12 h-12 mx-auto rounded-2xl bg-white flex items-center justify-center shadow-md">
           <svg class="w-6 h-6" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -734,41 +737,47 @@
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
           </svg>
         </div>
-        <h3 class="text-base sm:text-lg font-extrabold text-white tracking-tight">選擇 Google 帳戶</h3>
-        <p class="text-xs text-slate-400">點擊即可直接登入 Reseaver，完全無需手動輸入</p>
+        <h3 class="text-base font-extrabold text-white">啟用 Google 官方原生帳號選擇器</h3>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          若要讓手機或瀏覽器自動彈出目前裝置<strong>已登入的 Google 帳號清單</strong>供使用者直接點選，Google 規定必須綁定一組 OAuth Client ID。
+        </p>
       </div>
 
-      <!-- Google 帳戶列表容器 (一鍵點擊直接登入) -->
-      <div id="googleAccountListContainer" class="space-y-2 pt-1">
-        <!-- 由 JavaScript 動態生成帳戶卡片 -->
-      </div>
-
-      <!-- 切換/新增其他 Google 帳戶區塊 -->
-      <div class="pt-2 border-t border-slate-800 space-y-2">
-        <button type="button" onclick="toggleAddGoogleAccountForm()" class="w-full py-2.5 px-3 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition border border-slate-700/80">
-          <i data-lucide="user-plus" class="w-4 h-4 text-sky-400"></i>
-          <span>使用另一個 Google 帳戶</span>
-        </button>
-
-        <!-- 點擊展開的新增輸入表單 -->
-        <form id="addGoogleAccountForm" onsubmit="handleAddNewGoogleAccount(event)" class="space-y-2 hidden pt-1">
-          <div class="space-y-1">
-            <label class="block text-[11px] font-semibold text-slate-300">輸入新 Google / Gmail 帳號</label>
-            <input id="googleNewEmailInput" type="email" placeholder="例：new_account@gmail.com" 
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+      <!-- 設定指引 -->
+      <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-3.5 space-y-2.5 text-xs text-slate-300">
+        <div class="flex items-start gap-2">
+          <span class="w-4 h-4 rounded-full bg-sky-500/20 text-sky-400 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">1</span>
+          <p>前往 <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-sky-400 underline font-semibold">Google Cloud 憑證控制台</a> 建立 OAuth Client ID（網頁應用程式）。</p>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="w-4 h-4 rounded-full bg-sky-500/20 text-sky-400 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">2</span>
+          <div class="space-y-1 w-full">
+            <p>在「已授權的 JavaScript 來源」新增本站網址：</p>
+            <div class="flex items-center gap-1.5 bg-slate-900 px-2 py-1.5 rounded-lg border border-slate-800 font-mono text-[11px] text-sky-300">
+              <span id="currentOriginText" class="truncate">https://tyc9189354-droid.github.io</span>
+              <button type="button" onclick="copyCurrentOrigin()" class="text-slate-400 hover:text-white p-1 ml-auto">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
           </div>
-          <button type="submit" class="w-full py-2 bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-md shadow-indigo-600/20">
-            加入帳戶並直接登入
-          </button>
-        </form>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="w-4 h-4 rounded-full bg-sky-500/20 text-sky-400 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">3</span>
+          <p>將產生的 Client ID 貼到下方並按儲存（僅需設定一次，永久生效）：</p>
+        </div>
       </div>
 
-      <!-- 說明與 Google OAuth 2.0 Client ID 設定 -->
-      <div class="text-center pt-1">
-        <button type="button" onclick="setupGoogleOAuthClientId()" class="text-[10px] text-slate-400 hover:text-sky-300 underline transition">
-          ⚙️ 綁定 Google Cloud OAuth Client ID (支援 Google Drive 雲端備份)
+      <form onsubmit="handleSaveGoogleClientId(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Google OAuth Client ID</label>
+          <input id="setupGoogleClientIdInput" type="text" required placeholder="例如：xxxxxx.apps.googleusercontent.com" 
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition font-mono">
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center justify-center gap-1.5 transition active:scale-95">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i>
+          <span>儲存並立即喚起 Google 官方帳號選擇器</span>
         </button>
-      </div>
+      </form>
     </div>
   </div>
 
@@ -1153,6 +1162,7 @@
       initGmailSyncOnStartup();
       updateHeaderAccountUI();
       updatePersonalCloudStats();
+      initGoogleIdentityServices();
       window.addEventListener('resize', applyDeviceEnvironment);
 
       document.getElementById('noteInput').addEventListener('keydown', (e) => {
@@ -2315,6 +2325,7 @@
           input.value = localStorage.getItem(STORAGE_KEY_GMAIL) || '';
           setTimeout(() => input.focus(), 50);
         }
+        initGoogleIdentityServices();
       }
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
@@ -2413,179 +2424,139 @@
     }
 
     // ==========================================
-    // Google 帳戶直接選擇與登入 (Google Account Chooser SSO)
+    // 官方 Google 原生帳號選擇器與登入 (Google Identity Services SSO)
     // ==========================================
-    function getStoredGoogleAccounts() {
-      let accounts = [];
+    function initGoogleIdentityServices() {
+      const clientId = localStorage.getItem(STORAGE_KEY_GD_CLIENT_ID);
+      if (!clientId) return;
+
+      if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+        setTimeout(initGoogleIdentityServices, 300);
+        return;
+      }
+
       try {
-        accounts = JSON.parse(localStorage.getItem(STORAGE_KEY_SAVED_GOOGLE_ACCS)) || [];
-      } catch {
-        accounts = [];
-      }
-
-      // 如果尚未有帳戶記錄，預設提供使用者的 Google 帳戶以及目前已儲存的 Gmail 帳戶
-      const defaultUserEmail = 'tyc9189354@gmail.com';
-      const currentSavedEmail = localStorage.getItem(STORAGE_KEY_GMAIL);
-
-      if (accounts.length === 0) {
-        accounts.push({
-          email: defaultUserEmail,
-          name: 'YU',
-          avatarLetter: 'Y',
-          color: 'from-sky-500 via-indigo-600 to-violet-600',
-          desc: '本機常用 Google 帳戶'
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true
         });
-      }
 
-      if (currentSavedEmail && currentSavedEmail.includes('@') && !accounts.some(a => a.email.toLowerCase() === currentSavedEmail.toLowerCase())) {
-        accounts.push({
-          email: currentSavedEmail,
-          name: currentSavedEmail.split('@')[0],
-          avatarLetter: currentSavedEmail.charAt(0).toUpperCase(),
-          color: 'from-rose-500 via-pink-600 to-indigo-600',
-          desc: '最近使用帳戶'
-        });
-      }
-
-      return accounts;
-    }
-
-    function saveStoredGoogleAccounts(accounts) {
-      localStorage.setItem(STORAGE_KEY_SAVED_GOOGLE_ACCS, JSON.stringify(accounts));
-    }
-
-    function renderGoogleAccountChooserList() {
-      const container = document.getElementById('googleAccountListContainer');
-      if (!container) return;
-      const accounts = getStoredGoogleAccounts();
-
-      container.innerHTML = accounts.map((acc) => {
-        const letter = acc.avatarLetter || (acc.name ? acc.name.charAt(0).toUpperCase() : acc.email.charAt(0).toUpperCase());
-        const color = acc.color || 'from-sky-500 via-indigo-600 to-violet-600';
-        const safeEmail = acc.email.replace(/'/g, "\\'");
-        const safeName = (acc.name || acc.email.split('@')[0]).replace(/'/g, "\\'");
-
-        return `
-          <button type="button" onclick="selectGoogleAccountDirectly('${safeEmail}', '${safeName}')" 
-            class="w-full p-3 bg-slate-800/90 hover:bg-slate-750 hover:bg-slate-700/80 border border-slate-700/80 hover:border-sky-500/60 rounded-2xl flex items-center justify-between text-left transition group active:scale-[0.99] shadow-sm">
-            <div class="flex items-center gap-3 min-w-0">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-tr ${color} flex-shrink-0 flex items-center justify-center text-white font-extrabold text-sm shadow-md">
-                ${letter}
-              </div>
-              <div class="flex flex-col min-w-0">
-                <div class="flex items-center gap-1.5">
-                  <span class="text-xs font-bold text-white group-hover:text-sky-300 transition truncate">${acc.name || 'Google 使用者'}</span>
-                  <span class="text-[9px] bg-sky-500/10 text-sky-400 font-semibold px-1.5 py-0.2 rounded border border-sky-500/20 flex-shrink-0">Google</span>
-                </div>
-                <span class="text-[11px] text-slate-400 font-mono truncate">${acc.email}</span>
-              </div>
-            </div>
-            <div class="flex items-center gap-1 text-[11px] font-bold text-sky-400 group-hover:translate-x-0.5 transition flex-shrink-0 ml-2">
-              <span>選擇登入</span>
-              <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-            </div>
-          </button>
-        `;
-      }).join('');
-
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-
-    function selectGoogleAccountDirectly(email, name) {
-      applyGoogleLoginSuccess(email, name);
-      closeGoogleDirectLoginModal();
-    }
-
-    function toggleAddGoogleAccountForm() {
-      const form = document.getElementById('addGoogleAccountForm');
-      if (form) {
-        form.classList.toggle('hidden');
-        if (!form.classList.contains('hidden')) {
-          setTimeout(() => document.getElementById('googleNewEmailInput')?.focus(), 50);
+        const btnDiv = document.getElementById('googleNativeButtonDiv');
+        const customBtn = document.getElementById('googleCustomSignInBtn');
+        if (btnDiv) {
+          btnDiv.innerHTML = '';
+          google.accounts.id.renderButton(btnDiv, {
+            theme: 'outline',
+            size: 'large',
+            type: 'standard',
+            shape: 'pill',
+            text: 'continue_with',
+            logo_alignment: 'left',
+            width: 320
+          });
+          if (customBtn) customBtn.classList.add('hidden');
         }
-      }
-    }
 
-    function handleAddNewGoogleAccount(event) {
-      if (event) event.preventDefault();
-      const input = document.getElementById('googleNewEmailInput');
-      const email = input ? input.value.trim().toLowerCase() : '';
-      if (!email || !email.includes('@')) {
-        return showToast('請輸入有效的 Google / Gmail 電子信箱！');
-      }
-
-      const accounts = getStoredGoogleAccounts();
-      if (!accounts.some(a => a.email.toLowerCase() === email)) {
-        accounts.push({
-          email: email,
-          name: email.split('@')[0],
-          avatarLetter: email.charAt(0).toUpperCase(),
-          color: 'from-emerald-500 via-teal-600 to-sky-600',
-          desc: '自訂 Google 帳戶'
+        // 同時喚起 Google 原生 One-Tap 帳號選擇浮窗 (手機底部滑出/電腦右上角彈出)
+        google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            console.log('[Google GIS One-Tap Prompt]', notification.getNotDisplayedReason() || notification.getSkippedReason());
+          }
         });
-        saveStoredGoogleAccounts(accounts);
+      } catch (err) {
+        console.warn('[Google GIS Init]', err);
       }
-
-      applyGoogleLoginSuccess(email, email.split('@')[0]);
-      closeGoogleDirectLoginModal();
     }
 
-    function openGoogleDirectLoginModal() {
-      closeLoginModal();
-      const modal = document.getElementById('googleDirectLoginModal');
-      if (modal) {
-        renderGoogleAccountChooserList();
-        modal.classList.remove('hidden');
+    // Google 官方原生憑證驗證回調
+    function handleGoogleCredentialResponse(response) {
+      if (!response || !response.credential) return;
+      try {
+        const payload = decodeJwtResponse(response.credential);
+        if (payload && payload.email) {
+          applyGoogleLoginSuccess(payload.email, payload.name, payload.picture);
+          closeLoginModal();
+          closeGoogleOAuthSetupModal();
+        }
+      } catch (e) {
+        console.warn('Failed to parse Google JWT credential:', e);
       }
-      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    function closeGoogleDirectLoginModal() {
-      document.getElementById('googleDirectLoginModal')?.classList.add('hidden');
-      document.getElementById('addGoogleAccountForm')?.classList.add('hidden');
+    // 安全解析 Google JWT 憑證
+    function decodeJwtResponse(token) {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
     }
 
     function loginWithGoogleSSO() {
       const clientId = localStorage.getItem(STORAGE_KEY_GD_CLIENT_ID);
 
-      // 1. 如果已設定 Google OAuth Client ID 且 GIS 支援，嘗試觸發 Google 官方帳號選擇彈窗
-      if (clientId && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
-        try {
-          const tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: clientId,
-            scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.file',
-            prompt: 'select_account',
-            callback: async (resp) => {
-              if (resp && resp.access_token) {
-                googleDriveAccessToken = resp.access_token;
-                localStorage.setItem(STORAGE_KEY_GD_TOKEN, resp.access_token);
-
-                try {
-                  const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: { Authorization: `Bearer ${resp.access_token}` }
-                  });
-                  const userInfo = await userInfoRes.json();
-                  if (userInfo && userInfo.email) {
-                    applyGoogleLoginSuccess(userInfo.email, userInfo.name, userInfo.picture);
-                    return;
-                  }
-                } catch (err) {
-                  console.warn('[Google UserInfo]', err);
-                }
-                showToast('🎉 Google 授權成功！');
-              }
-            }
-          });
-          tokenClient.requestAccessToken();
-          closeLoginModal();
+      // 1. 如果已有 Google Client ID 且 Google Identity Services 已就緒，觸發 Google 原生帳號選擇器
+      if (clientId) {
+        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+          initGoogleIdentityServices();
+          google.accounts.id.prompt();
           return;
-        } catch (err) {
-          console.warn('GIS Token client request failed:', err);
         }
       }
 
-      // 2. 直接開啟 Google 帳戶選擇清單 (免輸入帳號，點選即可登入)
-      openGoogleDirectLoginModal();
+      // 2. 若尚未配置 Client ID，打開設定引導以取得 Google 授權
+      openGoogleOAuthSetupModal();
+    }
+
+    function openGoogleOAuthSetupModal() {
+      closeLoginModal();
+      const modal = document.getElementById('googleOAuthSetupModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        const originText = document.getElementById('currentOriginText');
+        if (originText) {
+          originText.textContent = window.location.origin;
+        }
+        const input = document.getElementById('setupGoogleClientIdInput');
+        if (input) {
+          input.value = localStorage.getItem(STORAGE_KEY_GD_CLIENT_ID) || '';
+          setTimeout(() => input.focus(), 50);
+        }
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeGoogleOAuthSetupModal() {
+      document.getElementById('googleOAuthSetupModal')?.classList.add('hidden');
+    }
+
+    function copyCurrentOrigin() {
+      const origin = window.location.origin;
+      navigator.clipboard.writeText(origin).then(() => {
+        showToast('已複製網址來源：' + origin);
+      }).catch(() => {
+        showToast(origin);
+      });
+    }
+
+    function handleSaveGoogleClientId(event) {
+      if (event) event.preventDefault();
+      const input = document.getElementById('setupGoogleClientIdInput');
+      const clientId = input ? input.value.trim() : '';
+      if (!clientId || !clientId.includes('.apps.googleusercontent.com')) {
+        return showToast('請輸入正確的 Google Client ID (需含 .apps.googleusercontent.com)！');
+      }
+
+      localStorage.setItem(STORAGE_KEY_GD_CLIENT_ID, clientId);
+      closeGoogleOAuthSetupModal();
+      showToast('🎉 Google Client ID 儲存成功！正在啟動 Google 原生帳號選擇器...');
+
+      // 啟動 Google 原生選擇器並重新開啟登入視窗
+      initGoogleIdentityServices();
+      openLoginModal();
     }
 
     function applyGoogleLoginSuccess(email, name, picture) {
@@ -2603,12 +2574,12 @@
 
       initGmailPeer(email);
       updateHeaderAccountUI();
-      showToast(`🎉 Google 帳號登入成功！已連線：${email}`);
+      showToast(`🎉 Google 帳戶登入成功！已連線：${email}`);
     }
 
     function setupGoogleOAuthClientId() {
-      closeGoogleDirectLoginModal();
-      connectGoogleDriveAuth();
+      openGoogleOAuthSetupModal();
+    }
     }
 
     // ==========================================
