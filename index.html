@@ -1008,7 +1008,8 @@
           id: 'meet-1',
           title: '指導教授個別咪挺',
           targetTime: getDefaultMeetingTime(),
-          repeatWeekly: true
+          repeatWeekly: true,
+          updatedAt: new Date(0).toISOString()
         }
       ];
       localStorage.setItem(STORAGE_KEY_MEETINGS, JSON.stringify(initial));
@@ -1191,12 +1192,14 @@
       if (!title || !targetTime) return showToast('請完整輸入會議名稱與時間！');
 
       const meetings = getStoredMeetings();
+      const nowIso = new Date().toISOString();
       if (editId) {
         const idx = meetings.findIndex(m => m.id === editId);
         if (idx !== -1) {
           meetings[idx].title = title;
           meetings[idx].targetTime = new Date(targetTime).toISOString();
           meetings[idx].repeatWeekly = repeatWeekly;
+          meetings[idx].updatedAt = nowIso;
         }
         showToast('已更新會議設定！');
       } else {
@@ -1204,7 +1207,8 @@
           id: `meet-${Date.now()}`,
           title,
           targetTime: new Date(targetTime).toISOString(),
-          repeatWeekly
+          repeatWeekly,
+          updatedAt: nowIso
         };
         meetings.push(newMeet);
         setActiveMeetingId(newMeet.id);
@@ -1993,6 +1997,7 @@
         timestamp: new Date().toISOString(),
         logs: getLocal(STORAGE_KEY_LOGS),
         meetings: getLocal(STORAGE_KEY_MEETINGS),
+        activeMeetingId: localStorage.getItem(STORAGE_KEY_ACTIVE_MEETING) || null,
         papers: getLocal(STORAGE_KEY_PAPERS),
         labLogs: getLocal(STORAGE_KEY_LABLOGS)
       };
@@ -2000,22 +2005,37 @@
 
     function mergeRemotePayload(remote) {
       if (!remote) return;
-      const mergeList = (localKey, remoteItems = []) => {
+      const mergeList = (localKey, remoteItems = [], isMeeting = false) => {
         let local = [];
         try { local = JSON.parse(localStorage.getItem(localKey)) || []; } catch {}
         const map = new Map();
         local.forEach(item => map.set(item.id, item));
         remoteItems.forEach(item => {
-          if (!map.has(item.id)) map.set(item.id, item);
+          if (!map.has(item.id)) {
+            map.set(item.id, item);
+          } else {
+            const existing = map.get(item.id);
+            const remoteTime = new Date(item.updatedAt || item.createdAt || (isMeeting ? remote.timestamp : 0) || 0).getTime();
+            const localTime = new Date(existing.updatedAt || existing.createdAt || 0).getTime();
+            
+            // 若遠端修改時間較新，或會議目標時間/標題有差異且遠端時間不落後，進行覆寫更新
+            if (remoteTime > localTime || (isMeeting && (item.targetTime !== existing.targetTime || item.title !== existing.title || item.repeatWeekly !== existing.repeatWeekly))) {
+              map.set(item.id, { ...existing, ...item });
+            }
+          }
         });
         const result = Array.from(map.values());
         localStorage.setItem(localKey, JSON.stringify(result));
       };
 
       mergeList(STORAGE_KEY_LOGS, remote.logs);
-      mergeList(STORAGE_KEY_MEETINGS, remote.meetings);
+      mergeList(STORAGE_KEY_MEETINGS, remote.meetings, true);
       mergeList(STORAGE_KEY_PAPERS, remote.papers);
       mergeList(STORAGE_KEY_LABLOGS, remote.labLogs);
+
+      if (remote.activeMeetingId) {
+        localStorage.setItem(STORAGE_KEY_ACTIVE_MEETING, remote.activeMeetingId);
+      }
     }
 
     // ==========================================

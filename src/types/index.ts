@@ -33,6 +33,7 @@ export interface MeetingItem {
   title: string;          // 例如：指導教授個別咪挺、實驗室大咪、CVPR 投稿截稿
   targetTime: string;     // ISO 8601 或 'YYYY-MM-DDTHH:mm'
   repeatWeekly: boolean;  // 是否每週自動循環
+  updatedAt?: string;     // 最後更新時間戳記 (ISO 8601)
   description?: string;
   color?: string;         // 標籤顏色
 }
