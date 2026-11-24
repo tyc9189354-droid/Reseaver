@@ -1,5 +1,5 @@
 // Reseaver Service Worker with Over-The-Air (OTA) Live Sync
-const CACHE_VERSION = 'reseaver-v1.1.4';
+const CACHE_VERSION = 'reseaver-v1.1.5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

@@ -84,7 +84,7 @@
     <div class="flex items-center gap-2 max-w-7xl mx-auto w-full justify-between">
       <div class="flex items-center gap-2">
         <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>
-        <span class="font-medium">檢測到最新雲端版本！手機端與網頁端已可同步。</span>
+        <span class="font-medium">檢測到最新雲端版本！跨裝置資料已可即時同步。</span>
       </div>
       <button onclick="applyOtaUpdate()" class="px-3 py-1 bg-white text-indigo-700 font-bold rounded-lg text-xs shadow hover:bg-slate-100 active:scale-95 transition">
         立即同步
@@ -124,6 +124,10 @@
             <i data-lucide="file-text" class="w-4 h-4"></i>
             <span>咪挺週報 (Meeting Report)</span>
           </button>
+          <button onclick="navigateTab('minutes')" id="side-minutes" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition">
+            <i data-lucide="mic" class="w-4 h-4"></i>
+            <span>咪挺摘要 (Meeting Minutes)</span>
+          </button>
           <button onclick="navigateTab('papers')" id="side-papers" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition">
             <i data-lucide="book-open" class="w-4 h-4"></i>
             <span>論文膠囊 (PaperCapsule)</span>
@@ -150,7 +154,7 @@
         </button>
 
         <div class="flex items-center justify-between text-[11px] text-slate-500 px-1">
-          <span id="sidebarDeviceRoleText">裝置識別：💻 網頁桌面端</span>
+          <span class="text-slate-500 text-[11px]">Reseaver 研究救星</span>
           <button onclick="clearCurrentModuleData()" class="hover:text-rose-400">清空</button>
         </div>
       </div>
@@ -172,15 +176,9 @@
             <h1 class="text-sm lg:text-base font-bold tracking-tight text-white flex items-center gap-1.5">
               <span id="headerViewTitle">Reseaver 研究救星</span>
               <span id="headerModuleBadge" class="text-[10px] bg-sky-500/20 text-sky-400 font-semibold px-2 py-0.5 rounded-full border border-sky-500/30">LabPulse</span>
-              <!-- 電腦端/手機端 即時環境標章 (打開瞬間判定) -->
-              <span id="headerDeviceBadge" class="text-[9px] bg-slate-800 text-slate-300 font-semibold px-2 py-0.5 rounded-full border border-slate-700 hidden sm:inline-flex items-center gap-1">
-                <i data-lucide="monitor" class="w-2.5 h-2.5 text-sky-400"></i>
-                <span id="headerDeviceBadgeText">電腦網頁端</span>
-              </span>
             </h1>
-            <p class="text-[11px] text-slate-400 flex items-center gap-1.5" id="headerSubtext">
-              <span>研究生日常速記 · 自動週報</span>
-              <span id="headerMobileDeviceBadge" class="sm:hidden text-[9px] text-sky-400 font-bold bg-sky-500/10 px-1.5 py-0.2 rounded border border-sky-500/20">📱 手機端</span>
+            <p class="text-[11px] text-slate-400" id="headerSubtext">
+              研究生日常速記 · 自動週報
             </p>
           </div>
         </div>
@@ -192,7 +190,7 @@
             <div id="authGuestView" class="flex items-center gap-1.5">
               <span class="hidden md:inline-flex items-center gap-1 text-[11px] text-slate-400 bg-slate-800/80 border border-slate-700/80 px-2.5 py-1 rounded-xl">
                 <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                <span id="guestStorageDeviceLabel">本地儲存 (電腦網頁)</span>
+                <span id="guestStorageDeviceLabel">本地安全儲存</span>
               </span>
               <button onclick="openLoginModal()" class="py-1 px-3 sm:py-1.5 sm:px-3.5 bg-gradient-to-r from-indigo-600 via-indigo-500 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-1.5 transition active:scale-95">
                 <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
@@ -244,10 +242,16 @@
                 <div class="flex-1 pr-2">
                   <div class="flex items-center justify-between">
                     <span id="activeMeetingTitle" class="text-[11px] font-bold uppercase tracking-wider text-indigo-400 truncate max-w-[260px]">指導教授咪挺</span>
-                    <button onclick="openMeetingModal()" class="text-[10px] font-semibold text-indigo-300 hover:text-white bg-indigo-950/80 hover:bg-indigo-900/80 px-2 py-0.5 rounded-lg border border-indigo-500/30 flex items-center gap-1 transition">
-                      <i data-lucide="calendar" class="w-3 h-3"></i>
-                      <span>自訂/新增會議</span>
-                    </button>
+                    <div class="flex items-center gap-1.5">
+                      <button onclick="navigateTab('minutes')" class="text-[10px] font-semibold text-rose-300 hover:text-white bg-rose-950/80 hover:bg-rose-900/80 px-2 py-0.5 rounded-lg border border-rose-500/30 flex items-center gap-1 transition">
+                        <i data-lucide="mic" class="w-3 h-3"></i>
+                        <span>速記摘要</span>
+                      </button>
+                      <button onclick="openMeetingModal()" class="text-[10px] font-semibold text-indigo-300 hover:text-white bg-indigo-950/80 hover:bg-indigo-900/80 px-2 py-0.5 rounded-lg border border-indigo-500/30 flex items-center gap-1 transition">
+                        <i data-lucide="calendar" class="w-3 h-3"></i>
+                        <span>自訂會議</span>
+                      </button>
+                    </div>
                   </div>
                   <div class="flex items-baseline gap-2 mt-1">
                     <span id="countdownDays" class="text-3xl font-extrabold text-white tracking-tight">--</span>
@@ -475,6 +479,261 @@
         </div>
 
         <!-- ========================================== -->
+        <!-- TAB: 咪挺摘要 (Meeting Minutes & Summary) -->
+        <!-- ========================================== -->
+        <div id="tabContent-minutes" class="tab-pane flex flex-col flex-1 p-4 lg:p-6 space-y-4 hidden max-w-5xl mx-auto w-full">
+          
+          <!-- 頂部會議資訊與歷史切換卡片 -->
+          <div class="bg-gradient-to-br from-indigo-950/70 via-slate-850 to-slate-800/90 border border-indigo-500/30 rounded-2xl p-4 lg:p-5 shadow-lg space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-rose-500/20">
+                  <i data-lucide="mic" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
+                    <span>咪挺速記與 AI 重點摘要</span>
+                    <span id="recordingStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">待命中</span>
+                  </h3>
+                  <p class="text-[11px] text-slate-400">支援錄音背景運行 · 打字速記 · 一鍵 AI 萃取決策與教授回饋</p>
+                </div>
+              </div>
+
+              <!-- 歷史咪挺切換與新開按鈕 -->
+              <div class="flex items-center gap-2">
+                <select id="minutesHistorySelect" onchange="handleSelectMeetingMinute(this.value)" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-indigo-500/50 max-w-[180px] sm:max-w-[220px] truncate">
+                  <option value="">➕ 開啟新咪挺速記...</option>
+                </select>
+                <button type="button" onclick="resetNewMeetingMinuteForm()" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition shadow-sm">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                  <span>新咪挺</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 會議主題、時間、人員資訊欄 -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 pt-1 text-xs">
+              <div class="sm:col-span-5">
+                <label class="block text-[11px] font-semibold text-slate-400 mb-1">會議主題 / 討論方向</label>
+                <input type="text" id="minutesTitleInput" placeholder="例如：指導教授第 12 次進度咪挺" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+              </div>
+              <div class="sm:col-span-4">
+                <label class="block text-[11px] font-semibold text-slate-400 mb-1">會議日期與時間</label>
+                <input type="datetime-local" id="minutesDateTimeInput" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-100 focus:outline-none focus:border-indigo-500">
+              </div>
+              <div class="sm:col-span-3">
+                <label class="block text-[11px] font-semibold text-slate-400 mb-1">與會者 / 教授</label>
+                <input type="text" id="minutesAttendeesInput" placeholder="指導教授、我、學長" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- 錄音控制卡片 (支援背景運作) -->
+          <div class="bg-slate-850 bg-slate-800/80 border border-slate-750 rounded-2xl p-4 shadow-md space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-slate-600 transition-colors" id="recordLedIndicator"></span>
+                <span class="text-xs font-bold text-slate-200">語音錄製控制</span>
+                <span class="text-[10px] text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <i data-lucide="shield-check" class="w-3 h-3"></i>
+                  <span>背景運行保活中</span>
+                </span>
+              </div>
+              
+              <!-- 語音轉文字即時開關 -->
+              <button type="button" id="speechRecognitionToggleBtn" onclick="toggleSpeechRecognition()" class="text-xs px-2.5 py-1 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 hover:text-white flex items-center gap-1.5 transition">
+                <i data-lucide="languages" class="w-3.5 h-3.5 text-sky-400"></i>
+                <span id="speechRecognitionStatusText">語音轉文字 (STT)：已關閉</span>
+              </button>
+            </div>
+
+            <!-- 錄音計時與控制列 -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/90 p-3.5 rounded-xl border border-slate-750">
+              <div class="flex items-center gap-4">
+                <div class="font-mono text-2xl sm:text-3xl font-extrabold tracking-wider text-rose-400 flex items-center gap-2">
+                  <span id="recordingTimerDisplay">00:00:00</span>
+                </div>
+                <!-- 音量波形動態反饋 -->
+                <div id="audioWaveVisualizer" class="flex items-center gap-1 h-6">
+                  <div class="w-1 bg-slate-700 h-2 rounded-full transition-all duration-75 wave-bar"></div>
+                  <div class="w-1 bg-slate-700 h-3 rounded-full transition-all duration-75 wave-bar"></div>
+                  <div class="w-1 bg-slate-700 h-5 rounded-full transition-all duration-75 wave-bar"></div>
+                  <div class="w-1 bg-slate-700 h-2 rounded-full transition-all duration-75 wave-bar"></div>
+                  <div class="w-1 bg-slate-700 h-4 rounded-full transition-all duration-75 wave-bar"></div>
+                </div>
+              </div>
+
+              <!-- 錄音動作按鈕組 -->
+              <div class="flex items-center gap-2">
+                <button type="button" id="startRecordBtn" onclick="startMeetingRecording()" class="px-3.5 py-2 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-600/30 flex items-center gap-1.5 transition active:scale-95">
+                  <i data-lucide="mic" class="w-4 h-4"></i>
+                  <span>開始錄音</span>
+                </button>
+                <button type="button" id="pauseRecordBtn" onclick="pauseMeetingRecording()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition hidden">
+                  <i data-lucide="pause" class="w-4 h-4"></i>
+                  <span>暫停</span>
+                </button>
+                <button type="button" id="resumeRecordBtn" onclick="resumeMeetingRecording()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-emerald-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition hidden">
+                  <i data-lucide="play" class="w-4 h-4"></i>
+                  <span>繼續</span>
+                </button>
+                <button type="button" id="stopRecordBtn" onclick="stopMeetingRecording()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95 hidden">
+                  <i data-lucide="check" class="w-4 h-4"></i>
+                  <span>結束錄音</span>
+                </button>
+                <button type="button" id="cancelRecordBtn" onclick="cancelMeetingRecording()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg text-xs transition hidden" title="捨棄錄音">
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 音訊播放器與下載連結 (錄音完成後顯示) -->
+            <div id="audioPlaybackContainer" class="hidden bg-slate-900/60 p-3 rounded-xl border border-slate-800 space-y-2">
+              <div class="flex items-center justify-between text-xs text-slate-300">
+                <span class="flex items-center gap-1.5 font-medium text-indigo-300">
+                  <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+                  <span>會議錄音檔播放</span>
+                </span>
+                <a id="downloadAudioLink" href="#" download="meeting-recording.webm" class="text-sky-400 hover:underline flex items-center gap-1 font-semibold text-[11px]">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  <span>下載音檔</span>
+                </a>
+              </div>
+              <audio id="minutesAudioPlayer" controls class="w-full h-9 rounded-lg"></audio>
+            </div>
+
+            <div class="text-[11px] text-slate-500 flex items-center gap-1.5">
+              <i data-lucide="info" class="w-3 h-3 text-sky-400"></i>
+              <span>提示：背景運行已啟用系統防休眠鎖 (Wake Lock) 與音訊保持，手機螢幕關閉或跳轉其他 App 依然能持續錄音。</span>
+            </div>
+            <!-- 背景保活無聲循環音軌 (保持瀏覽器後台進程不被凍結) -->
+            <audio id="silentKeepAliveAudio" loop preload="auto" playsinline class="hidden"></audio>
+          </div>
+
+          <!-- 主筆記打字速記區 -->
+          <div class="bg-slate-850 bg-slate-800/80 border border-slate-750 rounded-2xl p-4 shadow-md space-y-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <i data-lucide="edit-3" class="w-4 h-4 text-sky-400"></i>
+                <span class="text-xs font-bold text-slate-200">現場筆記速記</span>
+                <span id="noteCharCount" class="text-[10px] text-slate-500">0 字</span>
+              </div>
+              <!-- 快捷插入時間戳記 -->
+              <button type="button" onclick="insertMinutesTimestamp()" class="text-xs text-sky-400 hover:text-sky-300 bg-sky-950/60 border border-sky-500/30 px-2.5 py-1 rounded-lg flex items-center gap-1 transition">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                <span id="quickTimestampBtnText">插入當前時間戳記</span>
+              </button>
+            </div>
+
+            <!-- 快捷標籤列 (點擊直接插入) -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] no-scrollbar">
+              <button type="button" onclick="insertNoteTag('📌 教授指導：')" class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-indigo-300 hover:border-indigo-400 transition flex-shrink-0">📌 教授指導</button>
+              <button type="button" onclick="insertNoteTag('⚡ 實驗修改：')" class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-rose-300 hover:border-rose-400 transition flex-shrink-0">⚡ 實驗修改</button>
+              <button type="button" onclick="insertNoteTag('❓ 提問研討：')" class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-amber-300 hover:border-amber-400 transition flex-shrink-0">❓ 提問研討</button>
+              <button type="button" onclick="insertNoteTag('🎯 論文方向：')" class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-sky-300 hover:border-sky-400 transition flex-shrink-0">🎯 論文方向</button>
+              <button type="button" onclick="insertNoteTag('📋 待辦事項：')" class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-emerald-300 hover:border-emerald-400 transition flex-shrink-0">📋 待辦事項</button>
+            </div>
+
+            <!-- 筆記文字框 -->
+            <textarea id="minutesNotesInput" oninput="handleMinutesNoteInput()" rows="7" placeholder="打字紀錄或語音轉文字將即時出現在此...&#10;例：&#10;[05:20] 📌 教授指導：目前 Baseline 的比對方法缺乏最新 SOTA，需要補上 2024 年發表的論文做對比。&#10;[12:45] ⚡ 實驗修改：學習率由 1e-4 調整至 3e-4，Batch Size 改為 64 重新測試。" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl p-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 leading-relaxed font-sans"></textarea>
+          </div>
+
+          <!-- AI 智能重點整理區 (AI Meeting Summarizer) -->
+          <div class="bg-gradient-to-br from-indigo-950/40 via-slate-850 to-slate-800/80 border border-indigo-500/30 rounded-2xl p-4 lg:p-5 shadow-lg space-y-4">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center text-white">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h4 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5">
+                    <span>AI 智能重點整理</span>
+                    <span class="text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.2 rounded font-normal">Gemini / 離線高階雙引擎</span>
+                  </h4>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="openGeminiApiKeyModal()" class="text-[11px] text-slate-400 hover:text-white bg-slate-900 px-2 py-1 rounded-lg border border-slate-700 flex items-center gap-1 transition">
+                  <i data-lucide="settings" class="w-3 h-3"></i>
+                  <span>API 設定</span>
+                </button>
+                <button type="button" id="triggerAiSummaryBtn" onclick="runAiMeetingSummarize()" class="px-3.5 py-2 bg-gradient-to-r from-indigo-600 via-sky-600 to-indigo-500 hover:from-indigo-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-1.5 transition active:scale-95">
+                  <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>
+                  <span id="triggerAiSummaryBtnText">一鍵 AI 智能重點整理</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- AI 整理結果展示區 -->
+            <div id="aiSummaryResultContainer" class="space-y-3 pt-1">
+              <!-- 四大結構化重點維度 -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- 1. 會議核心決策與主軸 -->
+                <div class="bg-slate-900/80 border border-slate-750 rounded-xl p-3.5 space-y-1.5">
+                  <div class="flex items-center gap-1.5 text-xs font-bold text-sky-400">
+                    <i data-lucide="compass" class="w-4 h-4"></i>
+                    <span>📌 核心決策與研究主軸</span>
+                  </div>
+                  <div id="aiSummaryDecisions" class="text-xs text-slate-300 leading-relaxed min-h-[50px] whitespace-pre-wrap">尚未萃取（點擊上方「一鍵 AI 智能重點整理」自動分析速記內容）</div>
+                </div>
+
+                <!-- 2. 指導教授關鍵回饋 -->
+                <div class="bg-slate-900/80 border border-slate-750 rounded-xl p-3.5 space-y-1.5">
+                  <div class="flex items-center gap-1.5 text-xs font-bold text-rose-400">
+                    <i data-lucide="message-square" class="w-4 h-4"></i>
+                    <span>👨‍🏫 指導教授關鍵點評與建議</span>
+                  </div>
+                  <div id="aiSummaryAdvisorFeedback" class="text-xs text-slate-300 leading-relaxed min-h-[50px] whitespace-pre-wrap">尚未萃取</div>
+                </div>
+
+                <!-- 3. 指派待辦 Action Items -->
+                <div class="bg-slate-900/80 border border-slate-750 rounded-xl p-3.5 space-y-1.5">
+                  <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
+                    <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                    <span>📋 指派待辦 Action Items 清單</span>
+                  </div>
+                  <div id="aiSummaryActionItems" class="text-xs text-slate-300 leading-relaxed min-h-[50px] whitespace-pre-wrap">尚未萃取</div>
+                </div>
+
+                <!-- 4. 下次 Meeting 目標與時間 -->
+                <div class="bg-slate-900/80 border border-slate-750 rounded-xl p-3.5 space-y-1.5">
+                  <div class="flex items-center gap-1.5 text-xs font-bold text-amber-400">
+                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                    <span>📅 下次 Meeting 目標與里程碑</span>
+                  </div>
+                  <div id="aiSummaryNextMilestone" class="text-xs text-slate-300 leading-relaxed min-h-[50px] whitespace-pre-wrap">尚未萃取</div>
+                </div>
+              </div>
+
+              <!-- 操作按鈕列 -->
+              <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800">
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="copyAiMinutesSummary()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                    <span>複製完整摘要</span>
+                  </button>
+                  <button type="button" onclick="importMinutesToWeeklyReport()" class="px-3 py-1.5 bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-500/40 text-indigo-300 hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+                    <i data-lucide="file-input" class="w-3.5 h-3.5"></i>
+                    <span>匯入咪挺週報</span>
+                  </button>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="saveMeetingMinuteRecord()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow-md shadow-emerald-600/20">
+                    <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                    <span>儲存並歸檔本場咪挺</span>
+                  </button>
+                  <button type="button" onclick="deleteCurrentMeetingMinute()" class="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-slate-800 rounded-lg text-xs transition" title="刪除此場紀錄">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ========================================== -->
         <!-- TAB 3: 論文膠囊 (PaperCapsule) -->
         <!-- ========================================== -->
         <div id="tabContent-papers" class="tab-pane flex flex-col flex-1 p-4 lg:p-6 space-y-4 hidden">
@@ -555,28 +814,33 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 手機端專屬底部 4-Tab 導覽列 (只有手機螢幕顯示) -->
+  <!-- 手機端專屬底部 5-Tab 導覽列 (只有手機螢幕顯示) -->
   <!-- ========================================== -->
-  <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 py-2 px-3 z-40 flex justify-around items-center">
+  <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 py-1.5 px-2 z-40 flex justify-around items-center">
     <!-- Tab 1: 今日動態 -->
-    <button onclick="navigateTab('today')" id="nav-today" class="nav-tab-btn flex flex-col items-center gap-1 py-1 px-3 text-sky-400 transition">
-      <i data-lucide="check-square" class="w-5 h-5"></i>
-      <span class="text-[10px] font-semibold">今日動態</span>
+    <button onclick="navigateTab('today')" id="nav-today" class="nav-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-sky-400 transition">
+      <i data-lucide="check-square" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+      <span class="text-[9px] sm:text-[10px] font-semibold">今日動態</span>
     </button>
     <!-- Tab 2: 咪挺週報 -->
-    <button onclick="navigateTab('report')" id="nav-report" class="nav-tab-btn flex flex-col items-center gap-1 py-1 px-3 text-slate-400 hover:text-slate-200 transition">
-      <i data-lucide="file-text" class="w-5 h-5"></i>
-      <span class="text-[10px] font-semibold">咪挺週報</span>
+    <button onclick="navigateTab('report')" id="nav-report" class="nav-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-slate-400 hover:text-slate-200 transition">
+      <i data-lucide="file-text" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+      <span class="text-[9px] sm:text-[10px] font-semibold">咪挺週報</span>
     </button>
-    <!-- Tab 3: 論文膠囊 -->
-    <button onclick="navigateTab('papers')" id="nav-papers" class="nav-tab-btn flex flex-col items-center gap-1 py-1 px-3 text-slate-400 hover:text-slate-200 transition">
-      <i data-lucide="book-open" class="w-5 h-5"></i>
-      <span class="text-[10px] font-semibold">論文膠囊</span>
+    <!-- Tab 3: 咪挺摘要 -->
+    <button onclick="navigateTab('minutes')" id="nav-minutes" class="nav-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-slate-400 hover:text-slate-200 transition">
+      <i data-lucide="mic" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+      <span class="text-[9px] sm:text-[10px] font-semibold">咪挺摘要</span>
     </button>
-    <!-- Tab 4: 實驗踩坑 -->
-    <button onclick="navigateTab('lablog')" id="nav-lablog" class="nav-tab-btn flex flex-col items-center gap-1 py-1 px-3 text-slate-400 hover:text-slate-200 transition">
-      <i data-lucide="flask-conical" class="w-5 h-5"></i>
-      <span class="text-[10px] font-semibold">實驗踩坑</span>
+    <!-- Tab 4: 論文膠囊 -->
+    <button onclick="navigateTab('papers')" id="nav-papers" class="nav-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-slate-400 hover:text-slate-200 transition">
+      <i data-lucide="book-open" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+      <span class="text-[9px] sm:text-[10px] font-semibold">論文膠囊</span>
+    </button>
+    <!-- Tab 5: 實驗踩坑 -->
+    <button onclick="navigateTab('lablog')" id="nav-lablog" class="nav-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-slate-400 hover:text-slate-200 transition">
+      <i data-lucide="flask-conical" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+      <span class="text-[9px] sm:text-[10px] font-semibold">實驗踩坑</span>
     </button>
   </nav>
 
@@ -782,6 +1046,51 @@
   </div>
 
   <!-- ========================================== -->
+  <!-- MODAL: Google Gemini API Key 設定視窗 -->
+  <!-- ========================================== -->
+  <div id="geminiApiKeyModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-sm sm:max-w-md p-6 shadow-2xl space-y-4 relative">
+      <button onclick="closeGeminiApiKeyModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center text-white shadow-md">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-extrabold text-white">Google Gemini API 設定</h3>
+          <p class="text-xs text-slate-400">啟用最先進的 Gemini 1.5 Flash 智能摘要</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-3.5 space-y-2 text-xs text-slate-300">
+        <p>如需使用雲端最新 Gemini 深度語義模型萃取會議摘要，請貼上您的 Google AI Studio API Key：</p>
+        <p class="text-[11px] text-slate-400">若未設定或處於離線狀態，系統會自動無縫切換為本地內建的高階學術語義規則引擎，隨時可用。</p>
+      </div>
+
+      <form onsubmit="handleSaveGeminiApiKey(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Gemini API Key</label>
+          <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 font-mono">
+        </div>
+        <div class="flex items-center justify-between text-xs pt-1">
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-sky-400 hover:underline flex items-center gap-1 font-medium">
+            <span>前往 Google AI Studio 免費領取</span>
+            <i data-lucide="external-link" class="w-3 h-3"></i>
+          </a>
+          <button type="button" onclick="clearGeminiApiKey()" class="text-slate-400 hover:text-rose-400">清除 Key</button>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeGeminiApiKeyModal()" class="px-3.5 py-2 rounded-xl text-xs text-slate-400 hover:text-white">取消</button>
+          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30">儲存設定</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
   <!-- MODAL: 使用者帳號與個人雲端中心 (User Profile & Cloud Hub Modal) -->
   <!-- ========================================== -->
   <div id="userProfileModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
@@ -809,29 +1118,15 @@
         </button>
       </div>
 
-      <!-- 當前裝置環境即時狀態卡片 (打開瞬間判斷) -->
-      <div class="bg-slate-800/60 border border-slate-700/70 rounded-2xl p-3.5 text-xs flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="text-slate-400">當前設備身分：</span>
-          <span id="profileDeviceEnvText" class="font-bold text-sky-300 bg-sky-950/60 border border-sky-500/30 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
-            <i data-lucide="monitor" class="w-3.5 h-3.5"></i> 電腦網頁端 (Web)
-          </span>
-        </div>
-        <div class="flex bg-slate-900 p-0.5 rounded-lg border border-slate-700 text-[10px]">
-          <button onclick="setDeviceRole('mob')" id="roleBtn-mob" class="px-2 py-0.5 rounded text-slate-400 hover:text-white transition">手機端</button>
-          <button onclick="setDeviceRole('pc')" id="roleBtn-pc" class="px-2 py-0.5 rounded text-white bg-indigo-600 font-bold transition">電腦端</button>
-        </div>
-      </div>
-
       <!-- 個人雲端即時同步操作 -->
       <div class="bg-gradient-to-br from-indigo-950/40 via-slate-850 to-slate-800/80 border border-indigo-500/30 rounded-2xl p-4 space-y-3 text-xs">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="font-bold text-white text-xs">跨裝置零延遲雙向互傳</span>
+            <span class="font-bold text-white text-xs">個人雲端雙向連線</span>
           </div>
-          <span id="profileTargetDeviceBadge" class="text-[10px] text-sky-300 font-semibold bg-sky-900/40 px-2 py-0.5 rounded-md border border-sky-500/30">
-            對象：手機端
+          <span id="profileTargetDeviceBadge" class="text-[10px] text-emerald-400 font-semibold bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-500/30">
+            自動即時同步中
           </span>
         </div>
 
@@ -841,12 +1136,12 @@
 
         <button onclick="triggerProfileDirectSync()" id="profileSyncBtn" class="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-sky-600 hover:from-emerald-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5 transition active:scale-95">
           <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i>
-          <span id="profileSyncBtnText">⚡ 立即與另一端裝置同步</span>
+          <span id="profileSyncBtnText">⚡ 立即跨裝置同步</span>
         </button>
 
         <label class="flex items-center gap-2 cursor-pointer pt-1 text-[11px] text-slate-300 select-none">
           <input type="checkbox" id="profileAutoSyncCheck" onchange="toggleAutoSyncSetting(this.checked)" class="rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-0">
-          <span>開啟自動即時同步（手機與電腦同時在線時背景自動互通）</span>
+          <span>開啟自動即時同步（多端同時在線時背景自動互通）</span>
         </label>
       </div>
 
@@ -1135,6 +1430,8 @@
     const STORAGE_KEY_AUTO_SYNC = 'reseaver_auto_sync_enabled';
     const STORAGE_KEY_GD_TOKEN = 'reseaver_google_drive_token';
     const STORAGE_KEY_GD_CLIENT_ID = 'reseaver_google_client_id';
+    const STORAGE_KEY_MINUTES = 'reseaver_meeting_minutes';
+    const STORAGE_KEY_GEMINI_KEY = 'reseaver_gemini_api_key';
     const DEFAULT_GOOGLE_CLIENT_ID = '813108073239-9e878lansrj2jqf1slrl5jnjdh2743do.apps.googleusercontent.com';
     const CLEAN_INIT_FLAG = 'reseaver_clean_slate_applied_v1';
 
@@ -1146,6 +1443,22 @@
     let currentCategory = 'progress';
     let selectedTags = [];
     let currentFilter = 'all';
+
+    // 咪挺速記、錄音與 AI 狀態
+    let activeMinuteId = null;
+    let meetingAudioRecorder = null;
+    let recordedAudioChunks = [];
+    let audioStream = null;
+    let recordingStartTime = null;
+    let recordingElapsedOffset = 0;
+    let recordingTimerInterval = null;
+    let recordingState = 'idle'; // 'idle' | 'recording' | 'paused'
+    let wakeLockSentinel = null;
+    let audioContext = null;
+    let analyserNode = null;
+    let visualizerAnimationId = null;
+    let speechRecognitionInstance = null;
+    let isSpeechRecognitionActive = false;
 
     // 論文翻卡狀態
     let flashcardIndex = 0;
@@ -1192,6 +1505,7 @@
       renderLogs();
       updateDashboard();
       generateReportFromLogs();
+      renderMinutesHistorySelect();
       renderPapers();
       renderLabLogs();
       updateSidebarBadges();
@@ -1200,10 +1514,11 @@
     // --- 導覽列與側邊欄切換 ---
     function navigateTab(tab) {
       currentTab = tab;
-      const tabs = ['today', 'report', 'papers', 'lablog'];
+      const tabs = ['today', 'report', 'minutes', 'papers', 'lablog'];
       const badges = {
         today: { title: '今日動態', name: 'LabPulse', sub: '研究生日常速記 · 自動週報' },
         report: { title: '咪挺週報', name: 'Meeting 週報', sub: '四大標準區塊 · AI 潤飾匯出' },
+        minutes: { title: '咪挺摘要', name: 'MeetingMinutes', sub: '錄音與打字速記 · 背景持續錄音 · AI 重點整理' },
         papers: { title: '論文膠囊', name: 'PaperCapsule', sub: '四維度文獻卡 · 間隔記憶複習' },
         lablog: { title: '實驗踩坑', name: 'LabLog', sub: '實驗 Run 快照 · 避坑知識庫' }
       };
@@ -1214,22 +1529,25 @@
         const sideBtn = document.getElementById(`side-${t}`);
 
         if (t === tab) {
-          pane.classList.remove('hidden');
-          if (mobBtn) mobBtn.className = 'nav-tab-btn flex flex-col items-center gap-1 py-1 px-3 text-sky-400 transition';
+          if (pane) pane.classList.remove('hidden');
+          if (mobBtn) mobBtn.className = 'nav-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-sky-400 transition';
           if (sideBtn) sideBtn.className = 'sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sky-400 bg-sky-500/10 border border-sky-500/20 transition';
         } else {
-          pane.classList.add('hidden');
-          if (mobBtn) mobBtn.className = 'nav-tab-btn flex flex-col items-center gap-1 py-1 px-3 text-slate-400 hover:text-slate-200 transition';
+          if (pane) pane.classList.add('hidden');
+          if (mobBtn) mobBtn.className = 'nav-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-slate-400 hover:text-slate-200 transition';
           if (sideBtn) sideBtn.className = 'sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition';
         }
       });
 
-      document.getElementById('headerViewTitle').textContent = badges[tab].title;
-      document.getElementById('headerModuleBadge').textContent = badges[tab].name;
-      document.getElementById('headerSubtext').textContent = badges[tab].sub;
+      if (badges[tab]) {
+        document.getElementById('headerViewTitle').textContent = badges[tab].title;
+        document.getElementById('headerModuleBadge').textContent = badges[tab].name;
+        document.getElementById('headerSubtext').textContent = badges[tab].sub;
+      }
 
       if (tab === 'report') generateReportFromLogs();
-      lucide.createIcons();
+      if (tab === 'minutes') initMinutesTab();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     function updateSidebarBadges() {
@@ -1498,6 +1816,872 @@
       document.getElementById('saveMeetingBtnText').textContent = '儲存會議';
       document.getElementById('cancelEditMeetingBtn').classList.add('hidden');
       lucide.createIcons();
+    }
+
+    // ==========================================
+    // 模組一之二：咪挺速記、背景錄音與 AI 智能重點摘要 (Meeting Minutes & AI Summary)
+    // ==========================================
+
+    function getStoredMeetingMinutes() {
+      try {
+        const data = localStorage.getItem(STORAGE_KEY_MINUTES);
+        if (data) return JSON.parse(data);
+      } catch (e) {}
+      return [];
+    }
+
+    function saveStoredMeetingMinutes(minutes) {
+      localStorage.setItem(STORAGE_KEY_MINUTES, JSON.stringify(minutes));
+      renderMinutesHistorySelect();
+      triggerPersonalCloudSync();
+    }
+
+    // 初始化無聲音軌保活機制 (Silent Audio Keep-Alive)
+    // 這是讓手機端 (iOS Safari, Android Chrome) 鎖屏或切換到背景時錄音不中斷的關鍵技術
+    function ensureSilentKeepAliveAudio() {
+      const audio = document.getElementById('silentKeepAliveAudio');
+      if (!audio) return;
+      if (!audio.src) {
+        audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAP8A';
+      }
+      audio.play().catch(() => {});
+    }
+
+    function stopSilentKeepAliveAudio() {
+      const audio = document.getElementById('silentKeepAliveAudio');
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    }
+
+    // 螢幕防休眠鎖 (Screen Wake Lock API)
+    async function acquireRecordingWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockSentinel = await navigator.wakeLock.request('screen');
+          wakeLockSentinel.addEventListener('release', () => {
+            if (recordingState === 'recording') {
+              acquireRecordingWakeLock();
+            }
+          });
+        }
+      } catch (e) {
+        console.log('WakeLock not supported or denied', e);
+      }
+    }
+
+    function releaseRecordingWakeLock() {
+      if (wakeLockSentinel) {
+        try { wakeLockSentinel.release(); } catch {}
+        wakeLockSentinel = null;
+      }
+    }
+
+    // 系統多媒體控制中心 (Media Session API)
+    function setupMediaSessionRecording(title) {
+      if ('mediaSession' in navigator) {
+        try {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: title ? `${title} (咪挺錄音中)` : '咪挺錄音中',
+            artist: 'Reseaver 研究救星',
+            album: '背景持續錄音保護中'
+          });
+          navigator.mediaSession.playbackState = 'playing';
+          navigator.mediaSession.setActionHandler('pause', () => pauseMeetingRecording());
+          navigator.mediaSession.setActionHandler('play', () => resumeMeetingRecording());
+          navigator.mediaSession.setActionHandler('stop', () => stopMeetingRecording());
+        } catch (e) {}
+      }
+    }
+
+    // 音量動態波形動畫
+    function startAudioWaveVisualizer(stream) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        audioContext = new AudioCtx();
+        const source = audioContext.createMediaStreamSource(stream);
+        analyserNode = audioContext.createAnalyser();
+        analyserNode.fftSize = 32;
+        source.connect(analyserNode);
+
+        const bars = document.querySelectorAll('.wave-bar');
+        const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
+
+        function updateVisualizer() {
+          if (recordingState !== 'recording') return;
+          analyserNode.getByteFrequencyData(dataArray);
+          bars.forEach((bar, idx) => {
+            const val = dataArray[idx % dataArray.length] || 0;
+            const h = Math.max(4, Math.min(24, Math.floor((val / 255) * 24)));
+            bar.style.height = `${h}px`;
+            bar.className = (val > 25) 
+              ? 'w-1 bg-rose-500 rounded-full transition-all duration-75 wave-bar' 
+              : 'w-1 bg-slate-700 rounded-full transition-all duration-75 wave-bar';
+          });
+          visualizerAnimationId = requestAnimationFrame(updateVisualizer);
+        }
+        updateVisualizer();
+      } catch (e) {
+        console.warn('Audio Visualizer not started', e);
+      }
+    }
+
+    function stopAudioWaveVisualizer() {
+      if (visualizerAnimationId) {
+        cancelAnimationFrame(visualizerAnimationId);
+        visualizerAnimationId = null;
+      }
+      if (audioContext && audioContext.state !== 'closed') {
+        try { audioContext.close(); } catch {}
+        audioContext = null;
+      }
+      document.querySelectorAll('.wave-bar').forEach(b => {
+        b.style.height = '6px';
+        b.className = 'w-1 bg-slate-700 rounded-full transition-all duration-75 wave-bar';
+      });
+    }
+
+    function formatTimeMS(ms) {
+      const totalSec = Math.floor(ms / 1000);
+      const h = Math.floor(totalSec / 3600).toString().padStart(2, '0');
+      const m = Math.floor((totalSec % 3600) / 60).toString().padStart(2, '0');
+      const s = (totalSec % 60).toString().padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function getMinutesCurrentTimestampStr() {
+      if (recordingState === 'recording' || recordingState === 'paused') {
+        const elapsed = (recordingStartTime ? (Date.now() - recordingStartTime) : 0) + recordingElapsedOffset;
+        const totalSec = Math.floor(elapsed / 1000);
+        const m = Math.floor(totalSec / 60).toString().padStart(2, '0');
+        const s = (totalSec % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+      }
+      const now = new Date();
+      return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    }
+
+    async function startMeetingRecording() {
+      if (recordingState === 'recording') return;
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('您的瀏覽器不支援麥克風語音錄製功能，請使用最新版 Chrome、Safari 或 Edge。');
+        return;
+      }
+
+      try {
+        audioStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          }
+        });
+
+        recordedAudioChunks = [];
+
+        let mimeType = '';
+        if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+          mimeType = 'audio/webm;codecs=opus';
+        } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+          mimeType = 'audio/webm';
+        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          mimeType = 'audio/mp4';
+        }
+
+        meetingAudioRecorder = mimeType ? new MediaRecorder(audioStream, { mimeType }) : new MediaRecorder(audioStream);
+
+        meetingAudioRecorder.ondataavailable = (event) => {
+          if (event.data && event.data.size > 0) {
+            recordedAudioChunks.push(event.data);
+          }
+        };
+
+        meetingAudioRecorder.onstop = () => {
+          handleRecordingFinished();
+        };
+
+        meetingAudioRecorder.start(1000);
+        recordingState = 'recording';
+        recordingStartTime = Date.now();
+        recordingElapsedOffset = 0;
+
+        ensureSilentKeepAliveAudio();
+        acquireRecordingWakeLock();
+        const meetingTitle = document.getElementById('minutesTitleInput')?.value || '咪挺速記';
+        setupMediaSessionRecording(meetingTitle);
+        startAudioWaveVisualizer(audioStream);
+
+        const timerDisplay = document.getElementById('recordingTimerDisplay');
+        if (recordingTimerInterval) clearInterval(recordingTimerInterval);
+        recordingTimerInterval = setInterval(() => {
+          if (recordingState === 'recording') {
+            const currentElapsed = (Date.now() - recordingStartTime) + recordingElapsedOffset;
+            if (timerDisplay) timerDisplay.textContent = formatTimeMS(currentElapsed);
+          }
+        }, 200);
+
+        updateRecordingUIState('recording');
+        showToast('🎙️ 錄音已啟動（背景運行保護中）');
+      } catch (err) {
+        console.error('麥克風存取失敗：', err);
+        alert('無法存取麥克風，請檢查瀏覽器麥克風權限設定！\n' + err.message);
+      }
+    }
+
+    function pauseMeetingRecording() {
+      if (meetingAudioRecorder && recordingState === 'recording') {
+        try {
+          meetingAudioRecorder.pause();
+          recordingElapsedOffset += (Date.now() - recordingStartTime);
+          recordingStartTime = null;
+          recordingState = 'paused';
+          updateRecordingUIState('paused');
+          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+          showToast('⏸️ 錄音已暫停');
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
+    function resumeMeetingRecording() {
+      if (meetingAudioRecorder && recordingState === 'paused') {
+        try {
+          meetingAudioRecorder.resume();
+          recordingStartTime = Date.now();
+          recordingState = 'recording';
+          ensureSilentKeepAliveAudio();
+          acquireRecordingWakeLock();
+          if (audioStream) startAudioWaveVisualizer(audioStream);
+          updateRecordingUIState('recording');
+          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+          showToast('▶️ 錄音繼續進行');
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
+    function stopMeetingRecording() {
+      if (meetingAudioRecorder && (recordingState === 'recording' || recordingState === 'paused')) {
+        try {
+          meetingAudioRecorder.stop();
+          if (audioStream) {
+            audioStream.getTracks().forEach(track => track.stop());
+            audioStream = null;
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      recordingState = 'idle';
+      if (recordingTimerInterval) {
+        clearInterval(recordingTimerInterval);
+        recordingTimerInterval = null;
+      }
+      stopSilentKeepAliveAudio();
+      releaseRecordingWakeLock();
+      stopAudioWaveVisualizer();
+      updateRecordingUIState('idle');
+      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none';
+    }
+
+    function cancelMeetingRecording() {
+      if (confirm('確定要捨棄當前錄音嗎？錄音內容將不會儲存。')) {
+        recordedAudioChunks = [];
+        stopMeetingRecording();
+        document.getElementById('recordingTimerDisplay').textContent = '00:00:00';
+        document.getElementById('audioPlaybackContainer').classList.add('hidden');
+        showToast('已捨棄當前錄音');
+      }
+    }
+
+    function handleRecordingFinished() {
+      if (!recordedAudioChunks || recordedAudioChunks.length === 0) return;
+      const mime = (meetingAudioRecorder && meetingAudioRecorder.mimeType) ? meetingAudioRecorder.mimeType : 'audio/webm';
+      const audioBlob = new Blob(recordedAudioChunks, { type: mime });
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      const player = document.getElementById('minutesAudioPlayer');
+      const downloadLink = document.getElementById('downloadAudioLink');
+      const container = document.getElementById('audioPlaybackContainer');
+
+      if (player) player.src = audioUrl;
+      if (downloadLink) {
+        downloadLink.href = audioUrl;
+        const ext = mime.includes('mp4') ? 'mp4' : (mime.includes('wav') ? 'wav' : 'webm');
+        const title = (document.getElementById('minutesTitleInput')?.value || 'meeting').replace(/[^\w\u4e00-\u9fa5]/g, '_');
+        downloadLink.download = `${title}_${new Date().toISOString().slice(0, 10)}.${ext}`;
+      }
+      if (container) container.classList.remove('hidden');
+
+      const notes = document.getElementById('minutesNotesInput');
+      if (notes && !notes.value.trim()) {
+        const timerText = document.getElementById('recordingTimerDisplay')?.textContent || '00:00:00';
+        notes.value = `[00:00] 咪挺會議語音錄製完成（時長：${timerText}）。\n`;
+        handleMinutesNoteInput();
+      }
+
+      showToast('🎉 錄音完成！可直接播放或下載音檔');
+    }
+
+    function updateRecordingUIState(state) {
+      const led = document.getElementById('recordLedIndicator');
+      const badge = document.getElementById('recordingStatusBadge');
+      const startBtn = document.getElementById('startRecordBtn');
+      const pauseBtn = document.getElementById('pauseRecordBtn');
+      const resumeBtn = document.getElementById('resumeRecordBtn');
+      const stopBtn = document.getElementById('stopRecordBtn');
+      const cancelBtn = document.getElementById('cancelRecordBtn');
+
+      if (state === 'recording') {
+        if (led) led.className = 'w-3 h-3 rounded-full bg-rose-500 animate-pulse';
+        if (badge) {
+          badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40';
+          badge.textContent = '背景錄音中';
+        }
+        if (startBtn) startBtn.classList.add('hidden');
+        if (pauseBtn) pauseBtn.classList.remove('hidden');
+        if (resumeBtn) resumeBtn.classList.add('hidden');
+        if (stopBtn) stopBtn.classList.remove('hidden');
+        if (cancelBtn) cancelBtn.classList.remove('hidden');
+      } else if (state === 'paused') {
+        if (led) led.className = 'w-3 h-3 rounded-full bg-amber-400';
+        if (badge) {
+          badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40';
+          badge.textContent = '已暫停';
+        }
+        if (startBtn) startBtn.classList.add('hidden');
+        if (pauseBtn) pauseBtn.classList.add('hidden');
+        if (resumeBtn) resumeBtn.classList.remove('hidden');
+        if (stopBtn) stopBtn.classList.remove('hidden');
+        if (cancelBtn) cancelBtn.classList.remove('hidden');
+      } else {
+        if (led) led.className = 'w-3 h-3 rounded-full bg-slate-600';
+        if (badge) {
+          badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
+          badge.textContent = '待命中';
+        }
+        if (startBtn) startBtn.classList.remove('hidden');
+        if (pauseBtn) pauseBtn.classList.add('hidden');
+        if (resumeBtn) resumeBtn.classList.add('hidden');
+        if (stopBtn) stopBtn.classList.add('hidden');
+        if (cancelBtn) cancelBtn.classList.add('hidden');
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // 語音辨識轉文字 (Web Speech API)
+    function toggleSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast('⚠️ 當前瀏覽器環境不支援 Web Speech API，建議使用 Chrome 或 Edge');
+        return;
+      }
+      if (isSpeechRecognitionActive) {
+        stopSpeechRecognition();
+      } else {
+        startSpeechRecognition();
+      }
+    }
+
+    function startSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
+      try {
+        speechRecognitionInstance = new SpeechRecognition();
+        speechRecognitionInstance.continuous = true;
+        speechRecognitionInstance.interimResults = false;
+        speechRecognitionInstance.lang = 'zh-TW';
+
+        speechRecognitionInstance.onresult = (event) => {
+          let str = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              str += event.results[i][0].transcript;
+            }
+          }
+          if (str.trim()) {
+            const textarea = document.getElementById('minutesNotesInput');
+            if (textarea) {
+              const ts = getMinutesCurrentTimestampStr();
+              const prefix = textarea.value && !textarea.value.endsWith('\n') ? '\n' : '';
+              textarea.value += `${prefix}[${ts}] 🗣️ ${str.trim()}\n`;
+              handleMinutesNoteInput();
+            }
+          }
+        };
+
+        speechRecognitionInstance.onerror = (e) => {
+          console.warn('SpeechRecognition error:', e);
+        };
+
+        speechRecognitionInstance.onend = () => {
+          if (isSpeechRecognitionActive) {
+            try { speechRecognitionInstance.start(); } catch {}
+          }
+        };
+
+        speechRecognitionInstance.start();
+        isSpeechRecognitionActive = true;
+        const textSpan = document.getElementById('speechRecognitionStatusText');
+        const btn = document.getElementById('speechRecognitionToggleBtn');
+        if (textSpan) textSpan.textContent = '語音轉文字 (STT)：即時聆聽中';
+        if (btn) btn.className = 'text-xs px-2.5 py-1 rounded-xl border border-emerald-500/50 bg-emerald-950/60 text-emerald-300 flex items-center gap-1.5 transition';
+        showToast('🎙️ 即時語音辨識已啟動，發言將即時鍵入速記框');
+      } catch (err) {
+        console.error(err);
+        showToast('無法啟動語音辨識：' + err.message);
+      }
+    }
+
+    function stopSpeechRecognition() {
+      isSpeechRecognitionActive = false;
+      if (speechRecognitionInstance) {
+        try { speechRecognitionInstance.stop(); } catch {}
+        speechRecognitionInstance = null;
+      }
+      const textSpan = document.getElementById('speechRecognitionStatusText');
+      const btn = document.getElementById('speechRecognitionToggleBtn');
+      if (textSpan) textSpan.textContent = '語音轉文字 (STT)：已關閉';
+      if (btn) btn.className = 'text-xs px-2.5 py-1 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 hover:text-white flex items-center gap-1.5 transition';
+      showToast('語音辨識已關閉');
+    }
+
+    function handleMinutesNoteInput() {
+      const textarea = document.getElementById('minutesNotesInput');
+      const countEl = document.getElementById('noteCharCount');
+      if (textarea && countEl) {
+        countEl.textContent = `${textarea.value.length} 字`;
+      }
+    }
+
+    function insertMinutesTimestamp() {
+      const textarea = document.getElementById('minutesNotesInput');
+      if (!textarea) return;
+      const ts = getMinutesCurrentTimestampStr();
+      const insertStr = `\n[${ts}] `;
+      const start = textarea.selectionStart || textarea.value.length;
+      const end = textarea.selectionEnd || textarea.value.length;
+      textarea.value = textarea.value.substring(0, start) + insertStr + textarea.value.substring(end);
+      textarea.selectionStart = textarea.selectionEnd = start + insertStr.length;
+      textarea.focus();
+      handleMinutesNoteInput();
+    }
+
+    function insertNoteTag(tag) {
+      const textarea = document.getElementById('minutesNotesInput');
+      if (!textarea) return;
+      const ts = getMinutesCurrentTimestampStr();
+      const prefix = textarea.value && !textarea.value.endsWith('\n') ? '\n' : '';
+      const insertStr = `${prefix}[${ts}] ${tag} `;
+      const start = textarea.selectionStart || textarea.value.length;
+      const end = textarea.selectionEnd || textarea.value.length;
+      textarea.value = textarea.value.substring(0, start) + insertStr + textarea.value.substring(end);
+      textarea.selectionStart = textarea.selectionEnd = start + insertStr.length;
+      textarea.focus();
+      handleMinutesNoteInput();
+    }
+
+    // ==========================================
+    // AI 智能重點整理雙引擎 (Google Gemini + 離線學術語義萃取)
+    // ==========================================
+
+    async function runAiMeetingSummarize() {
+      const title = document.getElementById('minutesTitleInput')?.value.trim() || '指導教授咪挺討論';
+      const attendees = document.getElementById('minutesAttendeesInput')?.value.trim() || '指導教授、研究團隊';
+      const notes = document.getElementById('minutesNotesInput')?.value.trim() || '';
+
+      if (!notes) {
+        alert('請先在速記區輸入會議筆記或開啟錄音/語音辨識，方可進行 AI 智能萃取！');
+        return;
+      }
+
+      const btnText = document.getElementById('triggerAiSummaryBtnText');
+      if (btnText) btnText.textContent = '⚡ AI 分析整理中...';
+
+      const apiKey = localStorage.getItem(STORAGE_KEY_GEMINI_KEY);
+
+      if (apiKey && apiKey.trim()) {
+        try {
+          const success = await callGeminiApiMeetingSummarize(apiKey.trim(), title, attendees, notes);
+          if (success) {
+            if (btnText) btnText.textContent = '一鍵 AI 智能重點整理';
+            showToast('✨ Gemini AI 智能重點整理完成！');
+            return;
+          }
+        } catch (e) {
+          console.warn('Gemini API 呼叫異常，自動回退為離線學術語義萃取引擎：', e);
+        }
+      }
+
+      runOfflineAcademicSemanticSummarize(title, attendees, notes);
+      if (btnText) btnText.textContent = '一鍵 AI 智能重點整理';
+      showToast('⚡ 已透過內建學術語義引擎完成結構化重點整理！');
+    }
+
+    async function callGeminiApiMeetingSummarize(apiKey, title, attendees, notes) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const prompt = `你是一位專業且嚴謹的高等研究所研究秘書。請針對這場研究 Meeting 速記，精準萃取出四個結構化區塊：
+會議主題：${title}
+與會人員：${attendees}
+現場速記內容：
+${notes}
+
+請嚴格按照以下四個標題格式輸出，不要有任何多餘的引言或結語：
+### 核心決策與研究主軸
+(條列 2-4 項會議中拍板定案的論點、實驗方向、論文修訂架構)
+
+### 指導教授關鍵點評與建議
+(條列指導教授提出最核心的犀利問題、批評、改進建議與防禦思路)
+
+### 指派待辦 Action Items 清單
+(條列指派給學生/研究員具體要完成的工作，標註優先順序，例如 [高優先] 補做對比實驗)
+
+### 下次 Meeting 目標與里程碑
+(明確列出下次咪挺前必須產出的成果、投影片內容或論文 Draft 進度)`;
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 1200
+          }
+        })
+      });
+
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.error?.message || `HTTP ${response.status}`);
+      }
+
+      const resData = await response.json();
+      const text = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) throw new Error('API 沒有回傳文字內容');
+
+      parseAndRenderSummaryText(text);
+      return true;
+    }
+
+    function runOfflineAcademicSemanticSummarize(title, attendees, notes) {
+      const lines = notes.split('\n').map(l => l.trim()).filter(Boolean);
+
+      const decisions = [];
+      const feedbacks = [];
+      const actionItems = [];
+      const milestones = [];
+
+      lines.forEach(line => {
+        const clean = line.replace(/^\[\d+:\d+(?::\d+)?\]\s*/, '').trim();
+        if (!clean) return;
+
+        if (/📌|教授|老師|指導|顧問|點評|建議/.test(clean)) {
+          feedbacks.push(clean.replace(/^(?:📌\s*教授指導[：:]?|👨‍🏫\s*指導建議[：:]?)/, '').trim());
+        } else if (/⚡|實驗|修改|調整|參數|bug|跑|模型|訓練|loss|batch|epoch/i.test(clean)) {
+          actionItems.push(`[高優先] ${clean.replace(/^(?:⚡\s*實驗修改[：:]?)/, '').trim()}`);
+        } else if (/📋|待辦|todo|下週|完成|整理|繳交|提交/i.test(clean)) {
+          actionItems.push(clean.replace(/^(?:📋\s*待辦事項[：:]?)/, '').trim());
+        } else if (/🎯|決定|採用|拍板|方向|論文|架構|主軸|題目|結論/i.test(clean)) {
+          decisions.push(clean.replace(/^(?:🎯\s*論文方向[：:]?)/, '').trim());
+        } else if (/📅|下次|里程碑|截止|deadline|目標|預計/i.test(clean)) {
+          milestones.push(clean.replace(/^(?:📅\s*下次目標[：:]?)/, '').trim());
+        } else if (/❓|提問|質疑|問題|疑慮/i.test(clean)) {
+          feedbacks.push(`探討問題：${clean.replace(/^(?:❓\s*提問研討[：:]?)/, '').trim()}`);
+        } else {
+          if (/寫|修改|圖表|實驗|測|跑/.test(clean)) {
+            actionItems.push(clean);
+          } else {
+            decisions.push(clean);
+          }
+        }
+      });
+
+      if (decisions.length === 0) {
+        decisions.push(`確認以《${title}》作為核心推展主軸，持續優化主要評測指標。`);
+      }
+      if (feedbacks.length === 0) {
+        feedbacks.push('指導教授指示：實驗結果需補足最新的相關 SOTA Baseline 做顯著性比對，增強論文防禦力。');
+      }
+      if (actionItems.length === 0) {
+        actionItems.push('1. 完成目前模組的超參數調優與消融實驗 (Ablation Study)。');
+        actionItems.push('2. 整理實驗折線圖與表格，準備匯入下次會議投影片。');
+      }
+      if (milestones.length === 0) {
+        milestones.push('下次 Meeting 前提交完整的實驗對比數據與論文第二章 Draft。');
+      }
+
+      renderSummarySections(
+        decisions.map(d => `• ${d}`).join('\n'),
+        feedbacks.map(f => `• ${f}`).join('\n'),
+        actionItems.map(a => `• ${a}`).join('\n'),
+        milestones.map(m => `• ${m}`).join('\n')
+      );
+    }
+
+    function parseAndRenderSummaryText(fullText) {
+      const secDecisions = extractSectionText(fullText, '核心決策與研究主軸', '指導教授關鍵點評與建議');
+      const secFeedback = extractSectionText(fullText, '指導教授關鍵點評與建議', '指派待辦 Action Items 清單');
+      const secAction = extractSectionText(fullText, '指派待辦 Action Items 清單', '下次 Meeting 目標與里程碑');
+      const secMilestone = extractSectionText(fullText, '下次 Meeting 目標與里程碑', null);
+
+      renderSummarySections(
+        secDecisions || fullText.slice(0, 200),
+        secFeedback || '已收錄指導教授重點建議。',
+        secAction || '已收錄指派待辦任務。',
+        secMilestone || '下次咪挺持續推進。'
+      );
+    }
+
+    function extractSectionText(text, currentTitle, nextTitle) {
+      const idx = text.indexOf(currentTitle);
+      if (idx === -1) return '';
+      const start = idx + currentTitle.length;
+      let end = text.length;
+      if (nextTitle) {
+        const nextIdx = text.indexOf(nextTitle, start);
+        if (nextIdx !== -1) end = nextIdx;
+      }
+      let content = text.substring(start, end).replace(/^[#:\s\-*]+/, '').trim();
+      return content;
+    }
+
+    function renderSummarySections(decisions, feedback, actionItems, milestone) {
+      const dEl = document.getElementById('aiSummaryDecisions');
+      const fEl = document.getElementById('aiSummaryAdvisorFeedback');
+      const aEl = document.getElementById('aiSummaryActionItems');
+      const mEl = document.getElementById('aiSummaryNextMilestone');
+      if (dEl) dEl.textContent = decisions;
+      if (fEl) fEl.textContent = feedback;
+      if (aEl) aEl.textContent = actionItems;
+      if (mEl) mEl.textContent = milestone;
+    }
+
+    function copyAiMinutesSummary() {
+      const title = document.getElementById('minutesTitleInput')?.value || '指導教授咪挺速記';
+      const date = document.getElementById('minutesDateTimeInput')?.value || new Date().toLocaleString();
+      const attendees = document.getElementById('minutesAttendeesInput')?.value || '指導教授、研究團隊';
+
+      const d = document.getElementById('aiSummaryDecisions')?.textContent || '';
+      const f = document.getElementById('aiSummaryAdvisorFeedback')?.textContent || '';
+      const a = document.getElementById('aiSummaryActionItems')?.textContent || '';
+      const m = document.getElementById('aiSummaryNextMilestone')?.textContent || '';
+
+      const fullSummary = `📝 【${title}】咪挺重點摘要
+📅 時間：${date}
+👥 與會者：${attendees}
+
+📌 核心決策與研究主軸：
+${d}
+
+👨‍🏫 指導教授關鍵點評與建議：
+${f}
+
+📋 指派待辦 Action Items 清單：
+${a}
+
+📅 下次 Meeting 目標與里程碑：
+${m}
+
+（由 Reseaver 研究救星 AI 智能萃取產出）`;
+
+      navigator.clipboard.writeText(fullSummary).then(() => {
+        showToast('📋 已將完整咪挺摘要複製到剪貼簿！');
+      }).catch(() => {
+        showToast('複製失敗，請手動選取文字');
+      });
+    }
+
+    function importMinutesToWeeklyReport() {
+      const a = document.getElementById('aiSummaryActionItems')?.textContent || '';
+      const f = document.getElementById('aiSummaryAdvisorFeedback')?.textContent || '';
+      const d = document.getElementById('aiSummaryDecisions')?.textContent || '';
+
+      if (!a && !f && !d) {
+        alert('請先點擊「一鍵 AI 智能重點整理」產生摘要後再匯入週報！');
+        return;
+      }
+
+      const nextStepsEl = document.getElementById('sectionNextSteps');
+      if (nextStepsEl) {
+        const existing = nextStepsEl.innerText.trim();
+        const injection = `【咪挺決策指派待辦】\n${a}`;
+        nextStepsEl.innerText = existing ? `${existing}\n\n${injection}` : injection;
+      }
+
+      const issuesEl = document.getElementById('sectionIssues');
+      if (issuesEl) {
+        const existingIssues = issuesEl.innerText.trim();
+        const feedbackInjection = `【指導教授關鍵回饋】\n${f}`;
+        issuesEl.innerText = existingIssues ? `${existingIssues}\n\n${feedbackInjection}` : feedbackInjection;
+      }
+
+      navigateTab('report');
+      showToast('📥 已將重點摘要成功匯入咪挺週報！');
+    }
+
+    function saveMeetingMinuteRecord() {
+      const title = document.getElementById('minutesTitleInput')?.value.trim() || '指導教授進度咪挺';
+      const dateTime = document.getElementById('minutesDateTimeInput')?.value || new Date().toISOString();
+      const attendees = document.getElementById('minutesAttendeesInput')?.value.trim() || '';
+      const notes = document.getElementById('minutesNotesInput')?.value || '';
+      const timerDisplay = document.getElementById('recordingTimerDisplay')?.textContent || '00:00:00';
+
+      const summary = {
+        decisions: document.getElementById('aiSummaryDecisions')?.textContent || '',
+        feedback: document.getElementById('aiSummaryAdvisorFeedback')?.textContent || '',
+        actionItems: document.getElementById('aiSummaryActionItems')?.textContent || '',
+        nextMilestone: document.getElementById('aiSummaryNextMilestone')?.textContent || ''
+      };
+
+      const minutes = getStoredMeetingMinutes();
+      const recordId = activeMinuteId || `minute-${Date.now()}`;
+
+      const existingIndex = minutes.findIndex(m => m.id === recordId);
+      const newRecord = {
+        id: recordId,
+        title,
+        dateTime,
+        attendees,
+        notes,
+        durationText: timerDisplay,
+        summary,
+        updatedAt: new Date().toISOString(),
+        createdAt: existingIndex >= 0 ? minutes[existingIndex].createdAt : new Date().toISOString()
+      };
+
+      if (existingIndex >= 0) {
+        minutes[existingIndex] = newRecord;
+      } else {
+        minutes.unshift(newRecord);
+      }
+
+      activeMinuteId = recordId;
+      saveStoredMeetingMinutes(minutes);
+      showToast('💾 咪挺速記與 AI 摘要已成功儲存歸檔！');
+    }
+
+    function deleteCurrentMeetingMinute() {
+      if (!activeMinuteId) {
+        resetNewMeetingMinuteForm();
+        return;
+      }
+      if (confirm('確定要刪除這筆咪挺記錄嗎？')) {
+        const minutes = getStoredMeetingMinutes().filter(m => m.id !== activeMinuteId);
+        saveStoredMeetingMinutes(minutes);
+        resetNewMeetingMinuteForm();
+        showToast('已刪除該場咪挺速記');
+      }
+    }
+
+    function renderMinutesHistorySelect() {
+      const select = document.getElementById('minutesHistorySelect');
+      if (!select) return;
+      const minutes = getStoredMeetingMinutes();
+      select.innerHTML = '<option value="">➕ 開啟新咪挺速記...</option>';
+      minutes.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        const dStr = m.dateTime ? m.dateTime.replace('T', ' ') : '未知日期';
+        opt.textContent = `📅 ${dStr} - ${m.title || '咪挺'}`;
+        if (m.id === activeMinuteId) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    function handleSelectMeetingMinute(id) {
+      if (!id) {
+        resetNewMeetingMinuteForm();
+        return;
+      }
+      const minutes = getStoredMeetingMinutes();
+      const target = minutes.find(m => m.id === id);
+      if (!target) return;
+
+      activeMinuteId = target.id;
+      document.getElementById('minutesTitleInput').value = target.title || '';
+      document.getElementById('minutesDateTimeInput').value = target.dateTime || '';
+      document.getElementById('minutesAttendeesInput').value = target.attendees || '';
+      document.getElementById('minutesNotesInput').value = target.notes || '';
+      handleMinutesNoteInput();
+
+      if (target.summary) {
+        renderSummarySections(
+          target.summary.decisions || '尚未萃取',
+          target.summary.feedback || '尚未萃取',
+          target.summary.actionItems || '尚未萃取',
+          target.summary.nextMilestone || '尚未萃取'
+        );
+      }
+      if (target.durationText) {
+        document.getElementById('recordingTimerDisplay').textContent = target.durationText;
+      }
+      showToast(`已載入：${target.title}`);
+    }
+
+    function resetNewMeetingMinuteForm() {
+      activeMinuteId = null;
+      document.getElementById('minutesTitleInput').value = '指導教授咪挺討論';
+      const now = new Date();
+      const pad = n => n.toString().padStart(2, '0');
+      document.getElementById('minutesDateTimeInput').value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      document.getElementById('minutesAttendeesInput').value = '指導教授、我';
+      document.getElementById('minutesNotesInput').value = '';
+      document.getElementById('recordingTimerDisplay').textContent = '00:00:00';
+      document.getElementById('audioPlaybackContainer').classList.add('hidden');
+      renderSummarySections(
+        '尚未萃取（點擊上方「一鍵 AI 智能重點整理」自動分析速記內容）',
+        '尚未萃取',
+        '尚未萃取',
+        '尚未萃取'
+      );
+      handleMinutesNoteInput();
+      renderMinutesHistorySelect();
+    }
+
+    function initMinutesTab() {
+      renderMinutesHistorySelect();
+      if (!activeMinuteId) {
+        const minutes = getStoredMeetingMinutes();
+        if (minutes.length > 0) {
+          handleSelectMeetingMinute(minutes[0].id);
+        } else {
+          resetNewMeetingMinuteForm();
+        }
+      }
+    }
+
+    function openGeminiApiKeyModal() {
+      const input = document.getElementById('geminiApiKeyInput');
+      if (input) input.value = localStorage.getItem(STORAGE_KEY_GEMINI_KEY) || '';
+      document.getElementById('geminiApiKeyModal').classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    function closeGeminiApiKeyModal() {
+      document.getElementById('geminiApiKeyModal').classList.add('hidden');
+    }
+    function handleSaveGeminiApiKey(e) {
+      e.preventDefault();
+      const key = document.getElementById('geminiApiKeyInput')?.value.trim() || '';
+      if (key) {
+        localStorage.setItem(STORAGE_KEY_GEMINI_KEY, key);
+        showToast('🔑 Gemini API Key 已成功儲存');
+      } else {
+        localStorage.removeItem(STORAGE_KEY_GEMINI_KEY);
+        showToast('已清除 API Key，將使用內建離線學術語義引擎');
+      }
+      closeGeminiApiKeyModal();
+    }
+    function clearGeminiApiKey() {
+      localStorage.removeItem(STORAGE_KEY_GEMINI_KEY);
+      const input = document.getElementById('geminiApiKeyInput');
+      if (input) input.value = '';
+      showToast('已清除 Gemini API Key');
     }
 
     // ==========================================
@@ -2002,45 +3186,9 @@
       window.__DEVICE_ENV__ = role;
       window.__DEVICE_NAME__ = (role === 'mob') ? '手機端' : '電腦網頁端';
 
-      // 1. 更新頁面根節點類別
+      // 1. 更新頁面根節點類別 (供響應式排版使用，不在介面顯示文字標籤)
       document.documentElement.classList.remove('env-mobile', 'env-desktop');
       document.documentElement.classList.add(role === 'mob' ? 'env-mobile' : 'env-desktop');
-
-      // 2. 更新 Header 裝置環境標章
-      const badge = document.getElementById('headerDeviceBadge');
-      const badgeText = document.getElementById('headerDeviceBadgeText');
-      const mobBadge = document.getElementById('headerMobileDeviceBadge');
-      if (badge && badgeText) {
-        badgeText.textContent = (role === 'mob') ? '手機端' : '電腦網頁端';
-        badge.innerHTML = (role === 'mob')
-          ? '<i data-lucide="smartphone" class="w-2.5 h-2.5 text-sky-400"></i><span>手機端</span>'
-          : '<i data-lucide="monitor" class="w-2.5 h-2.5 text-sky-400"></i><span>電腦網頁端</span>';
-      }
-      if (mobBadge) {
-        mobBadge.textContent = (role === 'mob') ? '📱 手機端' : '💻 網頁端';
-      }
-
-      // 3. 更新側邊欄裝置標籤
-      const sidebarRole = document.getElementById('sidebarDeviceRoleText');
-      if (sidebarRole) {
-        sidebarRole.textContent = (role === 'mob') ? '裝置身分：📱 手機端' : '裝置身分：💻 電腦網頁端';
-      }
-
-      // 4. 更新 User Profile Modal 中的裝置環境資訊
-      const profileDeviceText = document.getElementById('profileDeviceEnvText');
-      if (profileDeviceText) {
-        profileDeviceText.innerHTML = (role === 'mob')
-          ? '<i data-lucide="smartphone" class="w-3.5 h-3.5"></i> 手機端 (Mobile)'
-          : '<i data-lucide="monitor" class="w-3.5 h-3.5"></i> 電腦網頁端 (Web)';
-      }
-      const profileTargetBadge = document.getElementById('profileTargetDeviceBadge');
-      if (profileTargetBadge) {
-        profileTargetBadge.textContent = (role === 'mob') ? '對象：💻 電腦端' : '對象：📱 手機端';
-      }
-      const syncBtnText = document.getElementById('profileSyncBtnText');
-      if (syncBtnText && !syncBtnText.textContent.includes('中...')) {
-        syncBtnText.textContent = (role === 'mob') ? '⚡ 立即與電腦端同步' : '⚡ 立即與手機端同步';
-      }
 
       updateDeviceRoleButtons();
       updateHeaderAccountUI();
@@ -2176,9 +3324,7 @@
     // 仿造常見主流應用的帳號狀態更新 (未登入訪客模式 vs 已登入個人雲端)
     function updateHeaderAccountUI() {
       const email = localStorage.getItem(STORAGE_KEY_GMAIL);
-      const role = getCurrentDeviceRole();
-      const isMob = (role === 'mob');
-      const guestLabel = isMob ? '本地儲存 (手機端)' : '本地儲存 (電腦網頁)';
+      const guestLabel = '本地安全儲存';
 
       const authGuestView = document.getElementById('authGuestView');
       const authUserView = document.getElementById('authUserView');
@@ -2230,7 +3376,7 @@
         const sidebarDot = document.getElementById('sidebarSyncDot');
         const sidebarDesc = document.getElementById('sidebarSyncStatusText');
         if (sidebarDot) sidebarDot.className = 'w-2 h-2 rounded-full bg-slate-400';
-        if (sidebarDesc) sidebarDesc.textContent = isMob ? '📱 手機本地儲存' : '💻 電腦網頁儲存';
+        if (sidebarDesc) sidebarDesc.textContent = '本地安全儲存 · 點擊可連動雲端';
       }
 
       updatePersonalCloudStats();
@@ -2637,17 +3783,16 @@
 
       const role = getCurrentDeviceRole();
       const targetRole = role === 'mob' ? 'pc' : 'mob';
-      const targetRoleName = targetRole === 'mob' ? '手機端' : '電腦端';
       const hash = await getGmailChannelHash(email);
       const targetId = `res-gm-${hash}-${targetRole}`;
 
       const btn = document.getElementById('profileSyncBtn');
       const btnText = document.getElementById('profileSyncBtnText');
-      const origText = (role === 'mob') ? '⚡ 立即與電腦端同步' : '⚡ 立即與手機端同步';
-      if (btnText) btnText.textContent = `連線【${targetRoleName}】中...`;
+      const origText = '⚡ 立即跨裝置同步';
+      if (btnText) btnText.textContent = '跨裝置連線同步中...';
       if (btn) btn.disabled = true;
 
-      showToast(`正在連線到您的【${targetRoleName}】...`);
+      showToast('正在建立雙向即時跨裝置連線...');
 
       if (!peerInstance || peerInstance.destroyed) {
         await initGmailPeer(email);
@@ -2663,7 +3808,7 @@
           resolved = true;
           if (btnText) btnText.textContent = origText;
           if (btn) btn.disabled = false;
-          showToast(`🎉 成功連線【${targetRoleName}】，已完成雙向即時同步！`);
+          showToast('🎉 成功連線另一端裝置，已完成雙向即時同步！');
           updatePersonalCloudStats();
         });
 
@@ -2671,7 +3816,7 @@
           if (!resolved) {
             if (btnText) btnText.textContent = origText;
             if (btn) btn.disabled = false;
-            showToast(`未連上對端。請確認您的【${targetRoleName}】也同時打開了 Reseaver！`);
+            showToast('未連上對端。請確認您的另一端裝置也同時打開了 Reseaver！');
           }
         }, 5000);
       } catch (err) {
@@ -2813,16 +3958,15 @@
 
       const role = getCurrentDeviceRole();
       const targetRole = role === 'mob' ? 'pc' : 'mob';
-      const targetRoleName = targetRole === 'mob' ? '手機端' : '電腦端';
       const hash = await getGmailChannelHash(currentGmail);
       const targetId = `res-gm-${hash}-${targetRole}`;
 
-      showToast(`正在連線到關聯 ${currentGmail} 的【${targetRoleName}】...`);
+      showToast(`正在連線到關聯 ${currentGmail} 的跨裝置連線...`);
 
       const btn = document.getElementById('gmailSyncActionBtn');
       const actionText = document.getElementById('gmailSyncActionText');
       const originalText = actionText ? actionText.textContent : '';
-      if (actionText) actionText.textContent = `連線【${targetRoleName}】中...`;
+      if (actionText) actionText.textContent = '跨裝置連線中...';
       if (btn) btn.disabled = true;
 
       if (!peerInstance || peerInstance.destroyed) {
@@ -2845,7 +3989,7 @@
           if (!resolved) {
             if (actionText) actionText.textContent = originalText;
             if (btn) btn.disabled = false;
-            showToast(`未連上對端。請確認【${targetRoleName}】也打開了 Reseaver！`);
+            showToast('未連上對端。請確認另一端裝置也同時打開了 Reseaver！');
           }
         }, 5000);
       } catch (err) {
@@ -3075,7 +4219,8 @@
         meetings: getLocal(STORAGE_KEY_MEETINGS),
         activeMeetingId: localStorage.getItem(STORAGE_KEY_ACTIVE_MEETING) || null,
         papers: getLocal(STORAGE_KEY_PAPERS),
-        labLogs: getLocal(STORAGE_KEY_LABLOGS)
+        labLogs: getLocal(STORAGE_KEY_LABLOGS),
+        minutes: getLocal(STORAGE_KEY_MINUTES)
       };
     }
 
@@ -3108,6 +4253,7 @@
       mergeList(STORAGE_KEY_MEETINGS, remote.meetings, true);
       mergeList(STORAGE_KEY_PAPERS, remote.papers);
       mergeList(STORAGE_KEY_LABLOGS, remote.labLogs);
+      if (remote.minutes) mergeList(STORAGE_KEY_MINUTES, remote.minutes);
 
       if (remote.activeMeetingId) {
         localStorage.setItem(STORAGE_KEY_ACTIVE_MEETING, remote.activeMeetingId);
@@ -3127,6 +4273,7 @@
     function clearCurrentModuleData() {
       if (confirm(`確定要清空當前【${currentTab}】的資料嗎？`)) {
         if (currentTab === 'today' || currentTab === 'report') localStorage.removeItem(STORAGE_KEY_LOGS);
+        else if (currentTab === 'minutes') localStorage.removeItem(STORAGE_KEY_MINUTES);
         else if (currentTab === 'papers') localStorage.removeItem(STORAGE_KEY_PAPERS);
         else if (currentTab === 'lablog') localStorage.removeItem(STORAGE_KEY_LABLOGS);
         renderAll();
