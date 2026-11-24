@@ -26,6 +26,22 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <script>
+    // ==========================================
+    // 第一時間即時判斷裝置類型（手機端 vs 電腦網頁端）
+    // ==========================================
+    (function detectDeviceImmediately() {
+      const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
+      const isMobileScreen = window.innerWidth < 1024;
+      const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+      const isMobile = isMobileUA || (isMobileScreen && hasTouch) || window.matchMedia('(max-width: 1023px)').matches;
+      
+      window.__DEVICE_ENV__ = isMobile ? 'mob' : 'pc';
+      window.__DEVICE_NAME__ = isMobile ? '手機端' : '電腦網頁端';
+      document.documentElement.classList.add(isMobile ? 'env-mobile' : 'env-desktop');
+    })();
+  </script>
+
+  <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
@@ -155,25 +171,50 @@
             <h1 class="text-sm lg:text-base font-bold tracking-tight text-white flex items-center gap-1.5">
               <span id="headerViewTitle">Reseaver 研究救星</span>
               <span id="headerModuleBadge" class="text-[10px] bg-sky-500/20 text-sky-400 font-semibold px-2 py-0.5 rounded-full border border-sky-500/30">LabPulse</span>
+              <!-- 電腦端/手機端 即時環境標章 (打開瞬間判定) -->
+              <span id="headerDeviceBadge" class="text-[9px] bg-slate-800 text-slate-300 font-semibold px-2 py-0.5 rounded-full border border-slate-700 hidden sm:inline-flex items-center gap-1">
+                <i data-lucide="monitor" class="w-2.5 h-2.5 text-sky-400"></i>
+                <span id="headerDeviceBadgeText">電腦網頁端</span>
+              </span>
             </h1>
-            <p class="text-[11px] text-slate-400" id="headerSubtext">研究生日常速記 · 自動週報</p>
+            <p class="text-[11px] text-slate-400 flex items-center gap-1.5" id="headerSubtext">
+              <span>研究生日常速記 · 自動週報</span>
+              <span id="headerMobileDeviceBadge" class="sm:hidden text-[9px] text-sky-400 font-bold bg-sky-500/10 px-1.5 py-0.2 rounded border border-sky-500/20">📱 手機端</span>
+            </p>
           </div>
         </div>
         
         <div class="flex items-center gap-2">
-          <!-- 個人雲端與 Gmail 狀態按鈕 -->
-          <button onclick="openSyncModal()" id="headerUserAccountBtn" class="py-1 px-2.5 sm:py-1.5 sm:px-3 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 hover:border-slate-600 rounded-xl text-xs font-medium text-slate-200 flex items-center gap-2 transition group shadow-sm">
-            <div id="headerUserAvatar" class="w-5 h-5 rounded-full bg-gradient-to-tr from-rose-500 to-indigo-600 flex items-center justify-center text-[10px] text-white font-bold">
-              G
-            </div>
-            <div class="flex flex-col text-left">
-              <span id="headerUserEmailDisplay" class="text-[11px] font-semibold text-white max-w-[100px] sm:max-w-[150px] truncate">關聯 Gmail 帳號</span>
-              <span id="headerUserCloudStatus" class="text-[9px] text-amber-400 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                <span>未連線個人雲端</span>
+          <!-- 仿造主流登入體驗：訪客模式顯示「登入/註冊」，已登入顯示「用戶頭像與雲端選單」 -->
+          <div id="headerAuthSection" class="flex items-center gap-1.5">
+            <!-- 訪客/未登入視圖 -->
+            <div id="authGuestView" class="flex items-center gap-1.5">
+              <span class="hidden md:inline-flex items-center gap-1 text-[11px] text-slate-400 bg-slate-800/80 border border-slate-700/80 px-2.5 py-1 rounded-xl">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                <span id="guestStorageDeviceLabel">本地儲存 (電腦網頁)</span>
               </span>
+              <button onclick="openLoginModal()" class="py-1 px-3 sm:py-1.5 sm:px-3.5 bg-gradient-to-r from-indigo-600 via-indigo-500 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-1.5 transition active:scale-95">
+                <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+                <span>登入 / 註冊</span>
+              </button>
             </div>
-          </button>
+
+            <!-- 已登入使用者視圖 -->
+            <div id="authUserView" class="hidden">
+              <button onclick="openUserProfileModal()" class="py-1 px-2.5 sm:py-1.5 sm:px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 rounded-xl text-xs font-medium text-slate-200 flex items-center gap-2 transition shadow-sm">
+                <div id="authUserAvatarBadge" class="w-6 h-6 rounded-full bg-gradient-to-tr from-rose-500 via-indigo-600 to-sky-500 flex items-center justify-center text-[11px] text-white font-black shadow-sm">
+                  U
+                </div>
+                <div class="hidden sm:flex flex-col text-left">
+                  <span id="authUserNameDisplay" class="text-[11px] font-bold text-white max-w-[120px] truncate">user@gmail.com</span>
+                  <span class="text-[9px] text-emerald-400 font-medium flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    個人雲端已連線
+                  </span>
+                </div>
+              </button>
+            </div>
+          </div>
 
           <!-- 重新清空所有資料按鈕 -->
           <button onclick="clearCurrentModuleData()" title="清空本頁資料" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg text-xs flex items-center gap-1 transition">
@@ -539,280 +580,165 @@
   </nav>
 
   <!-- ========================================== -->
-  <!-- MODAL: Gmail 帳號跨裝置同步中心 (Gmail Sync Hub) -->
+  <!-- MODAL: 現代化常見登入與註冊視窗 (Modern Login Modal) -->
   <!-- ========================================== -->
-  <div id="syncModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-lg p-5 lg:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+  <div id="loginModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-sm sm:max-w-md p-6 sm:p-7 shadow-2xl space-y-5 relative">
       
-      <!-- 標題與關閉按鈕 -->
-      <div class="flex justify-between items-center pb-3 border-b border-slate-800">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-rose-500 via-indigo-600 to-sky-500 flex items-center justify-center text-white font-bold shadow-lg shadow-rose-500/20">
-            <i data-lucide="cloud" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
-              <span>Gmail 帳號與個人雲端中心</span>
-              <span id="modalGmailBadge" class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.2 rounded-full border border-emerald-500/30">100% 用戶自主</span>
-            </h3>
-            <p class="text-[11px] text-slate-400">所有筆記儲存於您個人的 Google 雲端與設備中，安全零洩密</p>
-          </div>
+      <!-- 關閉按鈕 -->
+      <button onclick="closeLoginModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- 品牌 Logo 與標題 -->
+      <div class="text-center space-y-2 pt-1">
+        <div class="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 text-white font-black text-2xl">
+          R
         </div>
-        <button onclick="closeSyncModal()" class="text-slate-400 hover:text-white p-1">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
+        <h3 class="text-lg font-extrabold text-white tracking-tight">登入 Reseaver 研究救星</h3>
+        <p class="text-xs text-slate-400">專為碩博士生打造的研究打卡、週報與文獻卡片</p>
       </div>
 
-      <!-- 同步模式分頁標籤 -->
-      <div class="flex bg-slate-800/90 p-1 rounded-xl border border-slate-700/60 text-xs font-semibold">
-        <button onclick="switchSyncTab('gmail')" id="syncTabBtn-gmail" class="flex-1 py-1.5 rounded-lg text-white bg-indigo-600 shadow-sm transition flex items-center justify-center gap-1.5">
-          <i data-lucide="mail" class="w-3.5 h-3.5 text-rose-300"></i>
-          <span>Gmail 個人雲端互通</span>
+      <!-- 官方 Google 一鍵登入按鈕 (Sign in with Google) -->
+      <div class="space-y-3">
+        <button onclick="loginWithGoogleSSO()" class="w-full py-2.5 px-4 bg-white hover:bg-slate-100 text-slate-800 rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-2.5 transition active:scale-95 border border-slate-200">
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>使用 Google 帳號繼續</span>
         </button>
-        <button onclick="switchSyncTab('file')" id="syncTabBtn-file" class="flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5">
-          <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-emerald-400"></i>
-          <span>檔案備份/還原</span>
-        </button>
-        <button onclick="switchSyncTab('gist')" id="syncTabBtn-gist" class="flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5">
-          <i data-lucide="github" class="w-3.5 h-3.5 text-sky-400"></i>
-          <span>GitHub 雲端</span>
-        </button>
-      </div>
 
-      <!-- TAB 1: 📧 Gmail 帳號與個人雲端直接互通 -->
-      <div id="syncPane-gmail" class="space-y-4 pt-1">
-        
-        <!-- 免綁定自由模式提示 -->
-        <div class="bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-3 text-[11px] text-slate-300 leading-relaxed flex items-start gap-2.5">
-          <i data-lucide="info" class="w-4 h-4 text-sky-400 flex-shrink-0 mt-0.5"></i>
+        <!-- 分隔線 (Divider) -->
+        <div class="relative flex items-center justify-center my-2">
+          <div class="border-t border-slate-700/80 w-full"></div>
+          <span class="bg-slate-900 px-3 text-[10px] text-slate-500 uppercase font-semibold">或輸入常用 Gmail 信箱</span>
+          <div class="border-t border-slate-700/80 w-full"></div>
+        </div>
+
+        <!-- Gmail 電子郵件表單 -->
+        <form onsubmit="handleEmailLoginSubmit(event)" class="space-y-3">
           <div>
-            <span class="font-bold text-white block mb-0.5">免綁定即用保證：</span>
-            若不綁定 Gmail，手機端資料會安全保存在手機儲存中，電腦端保存在網頁本機資料庫。只有當您需要「手機與電腦雙向互傳」或「備份至個人 Google 雲端」時，才需要在此關聯 Gmail！
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">電子信箱 (Gmail)</label>
+            <input id="loginEmailInput" type="email" required placeholder="例：student@gmail.com" 
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
           </div>
-        </div>
-
-        <!-- Gmail 綁定與裝置角色設定 -->
-        <div class="bg-slate-800/60 border border-slate-700/70 rounded-2xl p-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-              <i data-lucide="at-sign" class="w-3.5 h-3.5 text-rose-400"></i>
-              關聯的 Gmail 帳號（手機與電腦請輸入同一個）
-            </span>
-            <span id="gmailBoundStatus" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-700 text-slate-400">未設定</span>
-          </div>
-
-          <div class="flex gap-2">
-            <input id="gmailInput" type="email" placeholder="例：student@gmail.com" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-            <button onclick="bindGmailAccount()" id="bindGmailBtn" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow-md shadow-indigo-600/30 transition">
-              <i data-lucide="link-2" class="w-3.5 h-3.5"></i>
-              <span>綁定</span>
-            </button>
-          </div>
-
-          <div class="flex items-center justify-between pt-2 border-t border-slate-700/50 text-[11px]">
-            <span class="text-slate-400">當前裝置角色：</span>
-            <div class="flex bg-slate-900 p-0.5 rounded-lg border border-slate-700">
-              <button onclick="setDeviceRole('mob')" id="roleBtn-mob" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition flex items-center gap-1">
-                <i data-lucide="smartphone" class="w-3 h-3"></i> 📱 手機端
-              </button>
-              <button onclick="setDeviceRole('pc')" id="roleBtn-pc" class="px-2.5 py-1 rounded-md text-white bg-indigo-600 font-bold transition flex items-center gap-1">
-                <i data-lucide="monitor" class="w-3 h-3"></i> 💻 電腦端
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 個人雲端儲存狀態總覽 -->
-        <div class="bg-gradient-to-br from-indigo-950/40 via-slate-850 to-slate-800/80 border border-indigo-500/30 rounded-2xl p-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span id="gmailP2PIndicator" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span class="text-xs font-bold text-white">個人專屬雲端儲存 (User-Owned Cloud)</span>
-            </div>
-            <span class="text-[10px] text-emerald-300 font-semibold bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-500/30">
-              🟢 自動儲存中
-            </span>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2 text-[11px] bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60">
-            <div>
-              <span class="text-slate-400 block text-[10px]">雲端資料庫檔案</span>
-              <span class="font-mono text-indigo-300 font-semibold">reseaver_database.json</span>
-            </div>
-            <div>
-              <span class="text-slate-400 block text-[10px]">目前已儲存記錄</span>
-              <span id="personalCloudStats" class="text-slate-200 font-semibold">載入中...</span>
-            </div>
-          </div>
-
-          <p class="text-[11px] text-slate-300 leading-relaxed" id="gmailSyncDesc">
-            只要在另一台手機或電腦上也關聯同一個 Gmail，兩台設備就會自動在專屬安全通道中彼此識別，點擊按鈕直接雙向互傳！
-          </p>
-
-          <button onclick="syncViaGmailPeer()" id="gmailSyncActionBtn" class="w-full py-3 bg-gradient-to-r from-emerald-600 via-teal-600 to-sky-600 hover:from-emerald-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition active:scale-95">
-            <i data-lucide="zap" class="w-4 h-4 text-amber-300"></i>
-            <span id="gmailSyncActionText">⚡ 立即與另一端 Gmail 裝置同步</span>
+          <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center justify-center gap-1.5 transition active:scale-95">
+            <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+            <span>以該 Gmail 登入 / 建立關聯</span>
           </button>
-
-          <!-- 自動即時同步勾選 -->
-          <label class="flex items-center gap-2 cursor-pointer pt-1 text-[11px] text-slate-300 select-none">
-            <input type="checkbox" id="autoSyncCheck" onchange="toggleAutoSyncSetting(this.checked)" class="rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-0">
-            <span>開啟自動即時同步（任何新增與修改自動同步至個人雲端與對端設備）</span>
-          </label>
-        </div>
-
-        <!-- Google Drive 雲端硬碟官方授權連動 (可選) -->
-        <div class="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-3.5 space-y-2.5 text-xs">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-              <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-sky-400"></i>
-              Google 雲端硬碟 (Google Drive) 授權連動 (可選)
-            </span>
-            <span id="googleDriveBadge" class="text-[10px] text-slate-400 bg-slate-700 px-2 py-0.5 rounded-full">未連動</span>
-          </div>
-          <p class="text-[10px] text-slate-400 leading-relaxed">
-            授權後，Reseaver 會直接在您的 Google 雲端硬碟建立 <code class="text-sky-300">reseaver_database.json</code> 檔案，實現真正的個人雲端即時備份。
-          </p>
-          <div class="flex gap-2 pt-1">
-            <button onclick="connectGoogleDriveAuth()" id="connectGoogleDriveBtn" class="flex-1 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 border border-slate-600 transition">
-              <i data-lucide="cloud-upload" class="w-3.5 h-3.5 text-sky-300"></i>
-              <span>授權並備份至 Drive</span>
-            </button>
-            <button onclick="syncFromGoogleDrive()" id="pullGoogleDriveBtn" class="flex-1 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 border border-slate-600 transition">
-              <i data-lucide="cloud-download" class="w-3.5 h-3.5 text-emerald-300"></i>
-              <span>從 Drive 下載最新</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- 離線備用：Gmail 郵件互傳 -->
-        <div class="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-3.5 space-y-2 text-xs">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-300 text-[11px] flex items-center gap-1.5">
-              <i data-lucide="send" class="w-3.5 h-3.5 text-sky-400"></i>
-              非同時在線備用：寄送個人雲端備份至 Gmail
-            </span>
-            <button onclick="toggleGmailPasteBox()" class="text-[10px] text-sky-400 hover:underline">貼上封包</button>
-          </div>
-          <p class="text-[10px] text-slate-400">
-            如果手機與電腦不同時開著，可以將個人雲端筆記直接寄給自己的 Gmail，另一端貼上即可還原。
-          </p>
-          <div class="flex gap-2 pt-1">
-            <button onclick="sendSyncMailToSelf()" class="flex-1 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 border border-slate-600 transition">
-              <i data-lucide="mail-plus" class="w-3.5 h-3.5 text-rose-300"></i>
-              寄送備份到我的 Gmail
-            </button>
-            <button onclick="toggleGmailPasteBox()" class="flex-1 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 border border-slate-600 transition">
-              <i data-lucide="clipboard-paste" class="w-3.5 h-3.5 text-emerald-300"></i>
-              貼上郵件封包還原
-            </button>
-          </div>
-          <div id="gmailPasteContainer" class="hidden pt-2 space-y-2">
-            <textarea id="gmailPasteTextarea" rows="3" placeholder="請將 Gmail 郵件中的資料貼在此處..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-[10px] text-slate-200 font-mono focus:outline-none focus:border-indigo-500"></textarea>
-            <button onclick="importGmailPastedData()" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-bold">
-              確認還原
-            </button>
-          </div>
-        </div>
-
+        </form>
       </div>
 
-      <!-- TAB 2: 📦 檔案匯出與還原 (JSON Backup) -->
-      <div id="syncPane-file" class="space-y-3 pt-1 hidden">
-        <div class="bg-slate-800/60 border border-slate-700/70 rounded-2xl p-4 space-y-3 text-xs">
-          <div class="text-slate-300 font-bold flex items-center gap-1.5">
-            <i data-lucide="hard-drive-download" class="w-4 h-4 text-emerald-400"></i>
-            <span>個人雲端離線 JSON 檔案備份與還原</span>
-          </div>
-          <p class="text-[11px] text-slate-400 leading-relaxed">
-            點擊匯出下載 <code class="text-emerald-400">reseaver_database.json</code> 備份檔，在另一台設備上傳即可瞬間完整恢復所有打卡、會議、論文與實驗日誌。
-          </p>
-
-          <div class="flex flex-col sm:flex-row gap-2 pt-2">
-            <button onclick="exportFullJsonBackup()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 transition">
-              <i data-lucide="download" class="w-4 h-4"></i>
-              <span>下載個人雲端備份 (JSON)</span>
-            </button>
-            <label class="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer border border-slate-600 transition">
-              <i data-lucide="upload" class="w-4 h-4 text-sky-400"></i>
-              <span>匯入還原 (JSON)</span>
-              <input type="file" id="jsonFileInput" accept=".json" onchange="importFullJsonBackup(event)" class="hidden">
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 3: ☁️ GitHub 雲端備用 (Gist Sync) -->
-      <div id="syncPane-gist" class="space-y-3 pt-1 hidden">
-        <div class="bg-slate-800/60 border border-slate-700/70 rounded-2xl p-4 space-y-3 text-xs">
-          <div class="flex items-center gap-2 text-sky-400 font-bold">
-            <i data-lucide="github" class="w-4 h-4"></i>
-            <span>GitHub 雲端加密無感同步</span>
-          </div>
-          <p class="text-[11px] text-slate-400 leading-relaxed">
-            若習慣使用 GitHub Gist，可在此填寫 Token，手機與電腦隨時從雲端拉取與推送。
-          </p>
-
-          <div>
-            <label class="block text-slate-400 mb-1 text-[11px]">GitHub Personal Access Token (PAT)</label>
-            <input id="githubTokenInput" type="password" placeholder="ghp_xxxxxxxxxxxx" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono">
-            <span class="text-[10px] text-slate-500 mt-1 block">需具備 <code class="text-indigo-400">gist</code> 權限</span>
-          </div>
-
-          <div class="flex gap-2 pt-2">
-            <button onclick="pushToGitHubGist()" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold flex items-center justify-center gap-1 shadow-md shadow-indigo-600/30 transition">
-              <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
-              <span>上傳至 GitHub</span>
-            </button>
-            <button onclick="pullFromGitHubGist()" class="flex-1 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold flex items-center justify-center gap-1 transition border border-slate-600">
-              <i data-lucide="download-cloud" class="w-3.5 h-3.5"></i>
-              <span>從雲端拉取</span>
-            </button>
-          </div>
-        </div>
+      <!-- 底部訪客提示與隱私政策說明 -->
+      <div class="pt-2 border-t border-slate-800 text-center space-y-2">
+        <button onclick="closeLoginModal()" class="text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-1 mx-auto">
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-sky-400"></i>
+          <span>不想登入？繼續以訪客模式使用</span>
+        </button>
+        <p class="text-[10px] text-slate-500 leading-relaxed">
+          🔒 100% 用戶數據自主：登入後筆記存放於您的個人 Google 雲端與設備中，完全無中心伺服器，安全零洩密。
+        </p>
       </div>
 
     </div>
   </div>
 
   <!-- ========================================== -->
-  <!-- MODAL: 初次啟動 Gmail 註冊/關聯引導 (Onboarding Modal) -->
+  <!-- MODAL: 使用者帳號與個人雲端中心 (User Profile & Cloud Hub Modal) -->
   <!-- ========================================== -->
-  <div id="onboardingModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4">
-      <div class="text-center space-y-2">
-        <div class="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-tr from-rose-500 via-indigo-600 to-sky-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-rose-500/25">
-          R
+  <div id="userProfileModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-lg p-5 lg:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+      
+      <!-- 頂部與關閉按鈕 -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div id="profileBigAvatar" class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 via-indigo-600 to-sky-500 flex items-center justify-center text-white font-black text-base shadow-md">
+            U
+          </div>
+          <div>
+            <h4 class="text-sm font-bold text-white flex items-center gap-1.5">
+              <span id="profileEmailDisplay">user@gmail.com</span>
+              <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-semibold px-2 py-0.2 rounded-full border border-emerald-500/30">已驗證</span>
+            </h4>
+            <span class="text-[10px] text-emerald-400 flex items-center gap-1 font-medium">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Google 個人雲端連線中 · 100% 數據自主
+            </span>
+          </div>
         </div>
-        <h3 class="text-base font-bold text-white">歡迎使用 Reseaver 研究救星</h3>
-        <p class="text-xs text-slate-400">研究生日常打卡速記 · 自動週報 · 論文膠囊</p>
+        <button onclick="closeUserProfileModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
       </div>
 
-      <div class="bg-slate-800/80 border border-emerald-500/30 rounded-2xl p-4 text-xs space-y-2 text-slate-300">
-        <div class="flex items-center gap-2 text-emerald-400 font-bold">
-          <i data-lucide="shield-check" class="w-4 h-4"></i>
-          <span>100% 用戶數據自主與隱私保證</span>
+      <!-- 當前裝置環境即時狀態卡片 (打開瞬間判斷) -->
+      <div class="bg-slate-800/60 border border-slate-700/70 rounded-2xl p-3.5 text-xs flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-slate-400">當前設備身分：</span>
+          <span id="profileDeviceEnvText" class="font-bold text-sky-300 bg-sky-950/60 border border-sky-500/30 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+            <i data-lucide="monitor" class="w-3.5 h-3.5"></i> 電腦網頁端 (Web)
+          </span>
         </div>
-        <p class="text-[11px] text-slate-400 leading-relaxed">
-          為了保護您的學術研究機密、產學合作合約與實驗踩坑數據，Reseaver 不設立中心化伺服器。您的所有資料將存放於您個人的 Google 雲端與設備中！
+        <div class="flex bg-slate-900 p-0.5 rounded-lg border border-slate-700 text-[10px]">
+          <button onclick="setDeviceRole('mob')" id="roleBtn-mob" class="px-2 py-0.5 rounded text-slate-400 hover:text-white transition">手機端</button>
+          <button onclick="setDeviceRole('pc')" id="roleBtn-pc" class="px-2 py-0.5 rounded text-white bg-indigo-600 font-bold transition">電腦端</button>
+        </div>
+      </div>
+
+      <!-- 個人雲端即時同步操作 -->
+      <div class="bg-gradient-to-br from-indigo-950/40 via-slate-850 to-slate-800/80 border border-indigo-500/30 rounded-2xl p-4 space-y-3 text-xs">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="font-bold text-white text-xs">跨裝置零延遲雙向互傳</span>
+          </div>
+          <span id="profileTargetDeviceBadge" class="text-[10px] text-sky-300 font-semibold bg-sky-900/40 px-2 py-0.5 rounded-md border border-sky-500/30">
+            對象：手機端
+          </span>
+        </div>
+
+        <p class="text-[11px] text-slate-300" id="profileCloudStats">
+          已記錄 0 則打卡 · 1 個會議 · 0 篇論文
         </p>
+
+        <button onclick="triggerProfileDirectSync()" id="profileSyncBtn" class="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-sky-600 hover:from-emerald-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5 transition active:scale-95">
+          <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-300"></i>
+          <span id="profileSyncBtnText">⚡ 立即與另一端裝置同步</span>
+        </button>
+
+        <label class="flex items-center gap-2 cursor-pointer pt-1 text-[11px] text-slate-300 select-none">
+          <input type="checkbox" id="profileAutoSyncCheck" onchange="toggleAutoSyncSetting(this.checked)" class="rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-0">
+          <span>開啟自動即時同步（手機與電腦同時在線時背景自動互通）</span>
+        </label>
       </div>
 
-      <div class="space-y-3 pt-1">
-        <label class="block text-xs font-semibold text-slate-300">請輸入您的 Gmail 帳號開始使用：</label>
-        <div class="relative">
-          <input id="onboardingGmailInput" type="email" placeholder="example@gmail.com" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+      <!-- Google Drive 與備份選項 -->
+      <div class="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-3.5 space-y-2.5 text-xs">
+        <span class="font-bold text-slate-200 block text-[11px]">個人雲端資料備份與還原</span>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="exportFullJsonBackup()" class="py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-[11px] font-semibold border border-slate-600 flex items-center justify-center gap-1 transition">
+            <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>下載備份 (.json)</span>
+          </button>
+          <label class="py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-[11px] font-semibold border border-slate-600 flex items-center justify-center gap-1 transition cursor-pointer">
+            <i data-lucide="upload" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span>匯入還原 (.json)</span>
+            <input type="file" accept=".json" onchange="importFullJsonBackup(event)" class="hidden">
+          </label>
         </div>
-        
-        <button onclick="submitOnboardingGmail()" class="w-full py-2.5 bg-gradient-to-r from-rose-600 via-indigo-600 to-sky-600 hover:from-rose-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-1.5 transition">
-          <i data-lucide="check" class="w-4 h-4"></i>
-          <span>關聯 Gmail 帳號並啟用個人雲端儲存</span>
-        </button>
-        
-        <button onclick="skipOnboarding()" class="w-full text-center text-[11px] text-slate-500 hover:text-slate-400 py-1">
-          稍後再設定，先進入系統試用
+      </div>
+
+      <!-- 登出/切換帳號 -->
+      <div class="pt-2 flex justify-end">
+        <button onclick="handleUserLogout()" class="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 rounded-xl text-xs font-semibold border border-rose-500/30 flex items-center gap-1.5 transition">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          <span>登出帳號（切換為訪客模式）</span>
         </button>
       </div>
+
     </div>
   </div>
 
@@ -1092,13 +1018,14 @@
 
     // 初始化
     document.addEventListener('DOMContentLoaded', () => {
+      applyDeviceEnvironment();
       lucide.createIcons();
       initCleanData();
       renderAll();
       initGmailSyncOnStartup();
       updateHeaderAccountUI();
       updatePersonalCloudStats();
-      checkFirstTimeOnboarding();
+      window.addEventListener('resize', applyDeviceEnvironment);
 
       document.getElementById('noteInput').addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -1919,8 +1846,66 @@
     let currentDeviceRole = '';
     let activeSyncConn = null;
 
+    // 即時偵測當前環境是手機還是電腦網頁端 (打開瞬間執行)
+    function applyDeviceEnvironment() {
+      const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
+      const isMobileScreen = window.innerWidth < 1024;
+      const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+      const isDetectedMobile = isMobileUA || (isMobileScreen && hasTouch) || (window.matchMedia && window.matchMedia('(max-width: 1023px)').matches);
+
+      const savedRole = localStorage.getItem(STORAGE_KEY_DEVICE_ROLE);
+      const role = savedRole || (isDetectedMobile ? 'mob' : 'pc');
+      currentDeviceRole = role;
+      window.__DEVICE_ENV__ = role;
+      window.__DEVICE_NAME__ = (role === 'mob') ? '手機端' : '電腦網頁端';
+
+      // 1. 更新頁面根節點類別
+      document.documentElement.classList.remove('env-mobile', 'env-desktop');
+      document.documentElement.classList.add(role === 'mob' ? 'env-mobile' : 'env-desktop');
+
+      // 2. 更新 Header 裝置環境標章
+      const badge = document.getElementById('headerDeviceBadge');
+      const badgeText = document.getElementById('headerDeviceBadgeText');
+      const mobBadge = document.getElementById('headerMobileDeviceBadge');
+      if (badge && badgeText) {
+        badgeText.textContent = (role === 'mob') ? '手機端' : '電腦網頁端';
+        badge.innerHTML = (role === 'mob')
+          ? '<i data-lucide="smartphone" class="w-2.5 h-2.5 text-sky-400"></i><span>手機端</span>'
+          : '<i data-lucide="monitor" class="w-2.5 h-2.5 text-sky-400"></i><span>電腦網頁端</span>';
+      }
+      if (mobBadge) {
+        mobBadge.textContent = (role === 'mob') ? '📱 手機端' : '💻 網頁端';
+      }
+
+      // 3. 更新側邊欄裝置標籤
+      const sidebarRole = document.getElementById('sidebarDeviceRoleText');
+      if (sidebarRole) {
+        sidebarRole.textContent = (role === 'mob') ? '裝置身分：📱 手機端' : '裝置身分：💻 電腦網頁端';
+      }
+
+      // 4. 更新 User Profile Modal 中的裝置環境資訊
+      const profileDeviceText = document.getElementById('profileDeviceEnvText');
+      if (profileDeviceText) {
+        profileDeviceText.innerHTML = (role === 'mob')
+          ? '<i data-lucide="smartphone" class="w-3.5 h-3.5"></i> 手機端 (Mobile)'
+          : '<i data-lucide="monitor" class="w-3.5 h-3.5"></i> 電腦網頁端 (Web)';
+      }
+      const profileTargetBadge = document.getElementById('profileTargetDeviceBadge');
+      if (profileTargetBadge) {
+        profileTargetBadge.textContent = (role === 'mob') ? '對象：💻 電腦端' : '對象：📱 手機端';
+      }
+      const syncBtnText = document.getElementById('profileSyncBtnText');
+      if (syncBtnText && !syncBtnText.textContent.includes('中...')) {
+        syncBtnText.textContent = (role === 'mob') ? '⚡ 立即與電腦端同步' : '⚡ 立即與手機端同步';
+      }
+
+      updateDeviceRoleButtons();
+      updateHeaderAccountUI();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
     function getAutoDeviceRole() {
-      const isMob = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 1024;
+      const isMob = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent) || window.innerWidth < 1024;
       return isMob ? 'mob' : 'pc';
     }
 
@@ -1934,37 +1919,30 @@
     function setDeviceRole(role) {
       currentDeviceRole = role;
       localStorage.setItem(STORAGE_KEY_DEVICE_ROLE, role);
-      updateDeviceRoleUI();
+      applyDeviceEnvironment();
       if (currentGmail) {
         initGmailPeer(currentGmail);
       }
+      showToast(`已切換目前裝置身分為：${role === 'mob' ? '📱 手機端' : '💻 電腦端'}`);
     }
 
-    function updateDeviceRoleUI() {
+    function updateDeviceRoleButtons() {
       const role = getCurrentDeviceRole();
       const mobBtn = document.getElementById('roleBtn-mob');
       const pcBtn = document.getElementById('roleBtn-pc');
       if (mobBtn && pcBtn) {
         if (role === 'mob') {
-          mobBtn.className = 'px-2.5 py-1 rounded-md text-white bg-indigo-600 font-bold transition flex items-center gap-1';
-          pcBtn.className = 'px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition flex items-center gap-1';
+          mobBtn.className = 'px-2 py-0.5 rounded text-white bg-indigo-600 font-bold transition';
+          pcBtn.className = 'px-2 py-0.5 rounded text-slate-400 hover:text-white transition';
         } else {
-          pcBtn.className = 'px-2.5 py-1 rounded-md text-white bg-indigo-600 font-bold transition flex items-center gap-1';
-          mobBtn.className = 'px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition flex items-center gap-1';
+          pcBtn.className = 'px-2 py-0.5 rounded text-white bg-indigo-600 font-bold transition';
+          mobBtn.className = 'px-2 py-0.5 rounded text-slate-400 hover:text-white transition';
         }
       }
-      const targetBadge = document.getElementById('gmailTargetDeviceBadge');
-      if (targetBadge) {
-        targetBadge.textContent = role === 'mob' ? '對端：💻 電腦端' : '對端：📱 手機端';
-      }
-      const actionText = document.getElementById('gmailSyncActionText');
-      if (actionText) {
-        actionText.textContent = role === 'mob' ? '⚡ 立即與電腦端同步' : '⚡ 立即與手機端同步';
-      }
-      const sidebarRole = document.getElementById('sidebarDeviceRoleText');
-      if (sidebarRole) {
-        sidebarRole.textContent = role === 'mob' ? '裝置識別：📱 手機端' : '裝置識別：💻 網頁桌面端';
-      }
+    }
+
+    function updateDeviceRoleUI() {
+      applyDeviceEnvironment();
     }
 
     async function getGmailChannelHash(email) {
@@ -1992,7 +1970,7 @@
         initGmailPeer(savedGmail);
         updateGmailStatusUI(true);
       }
-      updateDeviceRoleUI();
+      applyDeviceEnvironment();
     }
 
     async function initGmailPeer(email) {
@@ -2001,8 +1979,6 @@
       const hash = await getGmailChannelHash(currentGmail);
       const role = getCurrentDeviceRole();
       const myId = `res-gm-${hash}-${role}`;
-      const targetRole = role === 'mob' ? 'pc' : 'mob';
-      const targetId = `res-gm-${hash}-${targetRole}`;
 
       if (peerInstance) {
         try { peerInstance.destroy(); } catch {}
@@ -2041,8 +2017,6 @@
           mergeRemotePayload(data.payload);
           renderAll();
           showToast('🎉 已與您的 Gmail 設備完成雙向同步！');
-          const indicator = document.getElementById('gmailP2PIndicator');
-          if (indicator) indicator.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
         }
       });
 
@@ -2052,115 +2026,234 @@
     }
 
     function updateGmailStatusUI(isReady) {
-      const boundBadge = document.getElementById('gmailBoundStatus');
-      const channelTitle = document.getElementById('gmailChannelTitle');
-      const modalBadge = document.getElementById('modalGmailBadge');
-      const sidebarDot = document.getElementById('sidebarSyncDot');
-      const sidebarDesc = document.getElementById('sidebarSyncStatusText');
-
-      if (currentGmail) {
-        if (boundBadge) {
-          boundBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
-          boundBadge.textContent = '已關聯個人雲端';
-        }
-        if (channelTitle) {
-          channelTitle.textContent = `個人雲端通道：${currentGmail}`;
-        }
-        if (modalBadge) {
-          modalBadge.classList.remove('hidden');
-        }
-        if (sidebarDot) {
-          sidebarDot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
-        }
-        if (sidebarDesc) {
-          sidebarDesc.textContent = `🟢 個人雲端：${currentGmail}`;
-        }
-      }
       updateHeaderAccountUI();
       updatePersonalCloudStats();
     }
 
+    // 仿造常見主流應用的帳號狀態更新 (未登入訪客模式 vs 已登入個人雲端)
     function updateHeaderAccountUI() {
       const email = localStorage.getItem(STORAGE_KEY_GMAIL);
-      const emailDisplay = document.getElementById('headerUserEmailDisplay');
-      const cloudStatus = document.getElementById('headerUserCloudStatus');
-      const avatar = document.getElementById('headerUserAvatar');
       const role = getCurrentDeviceRole();
       const isMob = (role === 'mob');
+      const guestLabel = isMob ? '本地儲存 (手機端)' : '本地儲存 (電腦網頁)';
+
+      const authGuestView = document.getElementById('authGuestView');
+      const authUserView = document.getElementById('authUserView');
+      const guestStorageDeviceLabel = document.getElementById('guestStorageDeviceLabel');
+
+      if (guestStorageDeviceLabel) {
+        guestStorageDeviceLabel.textContent = guestLabel;
+      }
 
       if (email && email.includes('@')) {
-        if (emailDisplay) emailDisplay.textContent = email;
-        if (avatar) avatar.textContent = email.charAt(0).toUpperCase();
-        if (cloudStatus) {
-          cloudStatus.innerHTML = `
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="text-emerald-400 font-medium">個人雲端已連線</span>
-          `;
-        }
+        // 已登入狀態
+        if (authGuestView) authGuestView.classList.add('hidden');
+        if (authUserView) authUserView.classList.remove('hidden');
+
+        const nameDisplay = document.getElementById('authUserNameDisplay');
+        const avatarBadge = document.getElementById('authUserAvatarBadge');
+        if (nameDisplay) nameDisplay.textContent = email;
+        if (avatarBadge) avatarBadge.textContent = email.charAt(0).toUpperCase();
+
+        const profEmail = document.getElementById('profileEmailDisplay');
+        const profAvatar = document.getElementById('profileBigAvatar');
+        if (profEmail) profEmail.textContent = email;
+        if (profAvatar) profAvatar.textContent = email.charAt(0).toUpperCase();
+
+        const sidebarDot = document.getElementById('sidebarSyncDot');
+        const sidebarDesc = document.getElementById('sidebarSyncStatusText');
+        if (sidebarDot) sidebarDot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+        if (sidebarDesc) sidebarDesc.textContent = `🟢 個人雲端：${email}`;
       } else {
-        if (emailDisplay) {
-          emailDisplay.textContent = isMob ? '📱 手機本地儲存' : '💻 網頁本地儲存';
-        }
-        if (avatar) {
-          avatar.innerHTML = isMob ? '<i data-lucide="smartphone" class="w-3 h-3 text-sky-200"></i>' : '<i data-lucide="monitor" class="w-3 h-3 text-sky-200"></i>';
-        }
-        if (cloudStatus) {
-          cloudStatus.innerHTML = `
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            <span class="text-slate-300 font-medium">已安全保存在本機</span>
-          `;
-        }
+        // 訪客模式 (未綁定 Gmail，資料存本機/手機)
+        if (authGuestView) authGuestView.classList.remove('hidden');
+        if (authUserView) authUserView.classList.add('hidden');
+
+        const sidebarDot = document.getElementById('sidebarSyncDot');
+        const sidebarDesc = document.getElementById('sidebarSyncStatusText');
+        if (sidebarDot) sidebarDot.className = 'w-2 h-2 rounded-full bg-slate-400';
+        if (sidebarDesc) sidebarDesc.textContent = isMob ? '📱 手機本地儲存' : '💻 電腦網頁儲存';
       }
-      lucide.createIcons();
+
+      updatePersonalCloudStats();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     function updatePersonalCloudStats() {
-      const statsEl = document.getElementById('personalCloudStats');
-      if (!statsEl) return;
       const logs = getStoredLogs().length;
       const meets = getStoredMeetings().length;
       const papers = getStoredPapers().length;
       const labs = getStoredLabLogs().length;
-      statsEl.textContent = `${logs} 則打卡 · ${meets} 個會議 · ${papers} 篇論文 · ${labs} 條實驗`;
+      const statsStr = `已記錄 ${logs} 則打卡 · ${meets} 個會議 · ${papers} 篇論文 · ${labs} 條實驗`;
+
+      const statsEl = document.getElementById('personalCloudStats');
+      if (statsEl) statsEl.textContent = statsStr;
+
+      const profStats = document.getElementById('profileCloudStats');
+      if (profStats) profStats.textContent = statsStr;
     }
 
-    function checkFirstTimeOnboarding() {
-      // 依用戶需求：進入時不強硬彈窗要求綁定 Gmail，完全不打擾使用
-      // 用戶若未綁定，手機端資料直接存在手機上，電腦端保存在網頁本機
-      // 用戶想同步時隨時點擊右上角關聯即可
+    // ==========================================
+    // 現代化登入視窗控制 (Login Modal)
+    // ==========================================
+    function openLoginModal() {
+      const modal = document.getElementById('loginModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        const input = document.getElementById('loginEmailInput');
+        if (input) {
+          input.value = localStorage.getItem(STORAGE_KEY_GMAIL) || '';
+          setTimeout(() => input.focus(), 50);
+        }
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    function submitOnboardingGmail() {
-      const input = document.getElementById('onboardingGmailInput');
+    function closeLoginModal() {
+      document.getElementById('loginModal')?.classList.add('hidden');
+    }
+
+    function handleEmailLoginSubmit(event) {
+      if (event) event.preventDefault();
+      const input = document.getElementById('loginEmailInput');
       const email = input ? input.value.trim().toLowerCase() : '';
       if (!email || !email.includes('@')) {
-        return showToast('請輸入有效的 Gmail 帳號（需含 @）！');
+        return showToast('請輸入有效的電子信箱或 Gmail 帳號！');
       }
+
       localStorage.setItem(STORAGE_KEY_GMAIL, email);
       currentGmail = email;
       initGmailPeer(email);
-      updateGmailStatusUI(true);
-      document.getElementById('onboardingModal')?.classList.add('hidden');
-      showToast(`🎉 歡迎！已成功關聯 ${email}，個人雲端已就緒`);
+      updateHeaderAccountUI();
+      closeLoginModal();
+      showToast(`🎉 登入成功！已連線至 ${email} 個人雲端`);
     }
 
-    function skipOnboarding() {
-      sessionStorage.setItem('reseaver_onboarding_skipped', 'true');
-      document.getElementById('onboardingModal')?.classList.add('hidden');
-      showToast('您可隨時點擊右上角關聯 Gmail 帳號');
+    function loginWithGoogleSSO() {
+      // 現代主流 Google Sign-In 流程
+      if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+        const clientId = localStorage.getItem(STORAGE_KEY_GD_CLIENT_ID);
+        if (clientId) {
+          connectGoogleDriveAuth();
+          closeLoginModal();
+          return;
+        }
+      }
+      
+      const email = prompt('請輸入您的 Google 帳號 (Gmail) 進行登入：', localStorage.getItem(STORAGE_KEY_GMAIL) || '');
+      if (email && email.trim() && email.includes('@')) {
+        const cleanEmail = email.trim().toLowerCase();
+        localStorage.setItem(STORAGE_KEY_GMAIL, cleanEmail);
+        currentGmail = cleanEmail;
+        initGmailPeer(cleanEmail);
+        updateHeaderAccountUI();
+        closeLoginModal();
+        showToast(`🎉 Google 帳號登入成功！已連線：${cleanEmail}`);
+      } else if (email !== null) {
+        showToast('請輸入正確的 Google / Gmail 信箱格式！');
+      }
+    }
+
+    // ==========================================
+    // 使用者帳號與個人雲端中心控制 (User Profile Modal)
+    // ==========================================
+    function openUserProfileModal() {
+      const modal = document.getElementById('userProfileModal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+
+      const email = localStorage.getItem(STORAGE_KEY_GMAIL) || '';
+      const profEmail = document.getElementById('profileEmailDisplay');
+      const profAvatar = document.getElementById('profileBigAvatar');
+      if (profEmail) profEmail.textContent = email || '未登入訪客';
+      if (profAvatar) profAvatar.textContent = email ? email.charAt(0).toUpperCase() : 'G';
+
+      const autoSyncSaved = localStorage.getItem(STORAGE_KEY_AUTO_SYNC);
+      const autoSyncCheck = document.getElementById('profileAutoSyncCheck');
+      if (autoSyncCheck) autoSyncCheck.checked = (autoSyncSaved !== 'false');
+
+      applyDeviceEnvironment();
+      updatePersonalCloudStats();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeUserProfileModal() {
+      document.getElementById('userProfileModal')?.classList.add('hidden');
+    }
+
+    function handleUserLogout() {
+      if (confirm('確定要登出帳號並切換為訪客模式嗎？\n您的本地研究資料仍會安全保存在本機中，不會被刪除。')) {
+        localStorage.removeItem(STORAGE_KEY_GMAIL);
+        currentGmail = '';
+        if (peerInstance) {
+          try { peerInstance.destroy(); } catch {}
+          peerInstance = null;
+        }
+        closeUserProfileModal();
+        updateHeaderAccountUI();
+        showToast('已登出帳號，目前處於訪客本地儲存模式');
+      }
+    }
+
+    async function triggerProfileDirectSync() {
+      const email = localStorage.getItem(STORAGE_KEY_GMAIL);
+      if (!email) {
+        closeUserProfileModal();
+        openLoginModal();
+        return showToast('請先登入 Gmail 帳號以啟用跨裝置同步！');
+      }
+
+      const role = getCurrentDeviceRole();
+      const targetRole = role === 'mob' ? 'pc' : 'mob';
+      const targetRoleName = targetRole === 'mob' ? '手機端' : '電腦端';
+      const hash = await getGmailChannelHash(email);
+      const targetId = `res-gm-${hash}-${targetRole}`;
+
+      const btn = document.getElementById('profileSyncBtn');
+      const btnText = document.getElementById('profileSyncBtnText');
+      const origText = (role === 'mob') ? '⚡ 立即與電腦端同步' : '⚡ 立即與手機端同步';
+      if (btnText) btnText.textContent = `連線【${targetRoleName}】中...`;
+      if (btn) btn.disabled = true;
+
+      showToast(`正在連線到您的【${targetRoleName}】...`);
+
+      if (!peerInstance || peerInstance.destroyed) {
+        await initGmailPeer(email);
+      }
+
+      try {
+        const conn = peerInstance.connect(targetId);
+        activeSyncConn = conn;
+        setupPeerEvents(conn);
+
+        let resolved = false;
+        conn.on('open', () => {
+          resolved = true;
+          if (btnText) btnText.textContent = origText;
+          if (btn) btn.disabled = false;
+          showToast(`🎉 成功連線【${targetRoleName}】，已完成雙向即時同步！`);
+          updatePersonalCloudStats();
+        });
+
+        setTimeout(() => {
+          if (!resolved) {
+            if (btnText) btnText.textContent = origText;
+            if (btn) btn.disabled = false;
+            showToast(`未連上對端。請確認您的【${targetRoleName}】也同時打開了 Reseaver！`);
+          }
+        }, 5000);
+      } catch (err) {
+        if (btnText) btnText.textContent = origText;
+        if (btn) btn.disabled = false;
+        showToast('連線失敗：' + err.message);
+      }
     }
 
     function bindGmailAccount() {
-      const input = document.getElementById('gmailInput');
-      const email = input ? input.value.trim().toLowerCase() : '';
-      if (!email || !email.includes('@')) {
-        return showToast('請輸入有效的 Gmail 帳號（需含 @）！');
+      const email = localStorage.getItem(STORAGE_KEY_GMAIL);
+      if (email) {
+        initGmailPeer(email);
       }
-      localStorage.setItem(STORAGE_KEY_GMAIL, email);
-      currentGmail = email;
-      initGmailPeer(email);
-      updateGmailStatusUI(true);
-      showToast(`已成功關聯個人雲端：${email}`);
     }
 
     function triggerPersonalCloudSync() {
@@ -2395,30 +2488,17 @@
     }
 
     function openSyncModal() {
-      document.getElementById('syncModal').classList.remove('hidden');
       const savedGmail = localStorage.getItem(STORAGE_KEY_GMAIL);
-      if (savedGmail) {
-        currentGmail = savedGmail;
-        const input = document.getElementById('gmailInput');
-        if (input) input.value = savedGmail;
-        updateGmailStatusUI(true);
-        if (!peerInstance) initGmailPeer(savedGmail);
+      if (savedGmail && savedGmail.includes('@')) {
+        openUserProfileModal();
+      } else {
+        openLoginModal();
       }
-      const autoSyncSaved = localStorage.getItem(STORAGE_KEY_AUTO_SYNC);
-      const autoSyncCheck = document.getElementById('autoSyncCheck');
-      if (autoSyncCheck) autoSyncCheck.checked = (autoSyncSaved !== 'false'); // 預設開啟自動同步
-      updateDeviceRoleUI();
-      updatePersonalCloudStats();
-
-      const savedToken = localStorage.getItem(STORAGE_KEY_GH_TOKEN);
-      if (savedToken && document.getElementById('githubTokenInput')) {
-        document.getElementById('githubTokenInput').value = savedToken;
-      }
-      lucide.createIcons();
     }
 
     function closeSyncModal() {
-      document.getElementById('syncModal').classList.add('hidden');
+      closeLoginModal();
+      closeUserProfileModal();
     }
 
     function switchSyncTab(tab) {
