@@ -22,6 +22,8 @@
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <!-- QRCode.js (Pairing QR Generator) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Google Identity Services (GIS for Google Drive & Sign-In) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <script>
     tailwind.config = {
@@ -159,11 +161,18 @@
         </div>
         
         <div class="flex items-center gap-2">
-          <!-- 跨裝置同步按鈕 (手機端與電腦端皆醒目顯示) -->
-          <button onclick="openSyncModal()" class="py-1.5 px-3 bg-gradient-to-r from-rose-600/90 via-indigo-600 to-sky-600 hover:from-rose-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-1.5 transition">
-            <i data-lucide="mail" class="w-3.5 h-3.5 text-rose-200"></i>
-            <span class="hidden sm:inline">Gmail 同步</span>
-            <span class="sm:hidden">Gmail</span>
+          <!-- 個人雲端與 Gmail 狀態按鈕 -->
+          <button onclick="openSyncModal()" id="headerUserAccountBtn" class="py-1 px-2.5 sm:py-1.5 sm:px-3 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 hover:border-slate-600 rounded-xl text-xs font-medium text-slate-200 flex items-center gap-2 transition group shadow-sm">
+            <div id="headerUserAvatar" class="w-5 h-5 rounded-full bg-gradient-to-tr from-rose-500 to-indigo-600 flex items-center justify-center text-[10px] text-white font-bold">
+              G
+            </div>
+            <div class="flex flex-col text-left">
+              <span id="headerUserEmailDisplay" class="text-[11px] font-semibold text-white max-w-[100px] sm:max-w-[150px] truncate">關聯 Gmail 帳號</span>
+              <span id="headerUserCloudStatus" class="text-[9px] text-amber-400 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                <span>未連線個人雲端</span>
+              </span>
+            </div>
           </button>
 
           <!-- 重新清空所有資料按鈕 -->
@@ -539,14 +548,14 @@
       <div class="flex justify-between items-center pb-3 border-b border-slate-800">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-rose-500 via-indigo-600 to-sky-500 flex items-center justify-center text-white font-bold shadow-lg shadow-rose-500/20">
-            <i data-lucide="mail" class="w-4 h-4"></i>
+            <i data-lucide="cloud" class="w-4 h-4"></i>
           </div>
           <div>
             <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
-              <span>Gmail 帳號專屬互通中心</span>
-              <span id="modalGmailBadge" class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.2 rounded-full border border-emerald-500/30 hidden">已連線</span>
+              <span>Gmail 帳號與個人雲端中心</span>
+              <span id="modalGmailBadge" class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.2 rounded-full border border-emerald-500/30">100% 用戶自主</span>
             </h3>
-            <p class="text-[11px] text-slate-400">使用同一個 Gmail 帳號，手機與電腦直接雙向互通</p>
+            <p class="text-[11px] text-slate-400">所有筆記儲存於您個人的 Google 雲端與設備中，安全零洩密</p>
           </div>
         </div>
         <button onclick="closeSyncModal()" class="text-slate-400 hover:text-white p-1">
@@ -558,7 +567,7 @@
       <div class="flex bg-slate-800/90 p-1 rounded-xl border border-slate-700/60 text-xs font-semibold">
         <button onclick="switchSyncTab('gmail')" id="syncTabBtn-gmail" class="flex-1 py-1.5 rounded-lg text-white bg-indigo-600 shadow-sm transition flex items-center justify-center gap-1.5">
           <i data-lucide="mail" class="w-3.5 h-3.5 text-rose-300"></i>
-          <span>Gmail 直接互通</span>
+          <span>Gmail 個人雲端互通</span>
         </button>
         <button onclick="switchSyncTab('file')" id="syncTabBtn-file" class="flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5">
           <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-emerald-400"></i>
@@ -570,7 +579,7 @@
         </button>
       </div>
 
-      <!-- TAB 1: 📧 Gmail 帳號直接互通 -->
+      <!-- TAB 1: 📧 Gmail 帳號與個人雲端直接互通 -->
       <div id="syncPane-gmail" class="space-y-4 pt-1">
         
         <!-- Gmail 綁定與裝置角色設定 -->
@@ -578,7 +587,7 @@
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
               <i data-lucide="at-sign" class="w-3.5 h-3.5 text-rose-400"></i>
-              輸入您的 Gmail 帳號（手機與電腦請輸入同一個）
+              關聯的 Gmail 帳號（手機與電腦請輸入同一個）
             </span>
             <span id="gmailBoundStatus" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-700 text-slate-400">未設定</span>
           </div>
@@ -604,32 +613,67 @@
           </div>
         </div>
 
-        <!-- 互通連線卡片 -->
-        <div class="bg-gradient-to-br from-indigo-950/40 via-slate-850 to-slate-800/80 border border-indigo-500/30 rounded-2xl p-4 space-y-3.5">
+        <!-- 個人雲端儲存狀態總覽 -->
+        <div class="bg-gradient-to-br from-indigo-950/40 via-slate-850 to-slate-800/80 border border-indigo-500/30 rounded-2xl p-4 space-y-3">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span id="gmailP2PIndicator" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
-              <span class="text-xs font-bold text-white" id="gmailChannelTitle">Gmail 專屬通道：等待綁定</span>
+              <span id="gmailP2PIndicator" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="text-xs font-bold text-white">個人專屬雲端儲存 (User-Owned Cloud)</span>
             </div>
-            <span id="gmailTargetDeviceBadge" class="text-[10px] text-sky-300 font-semibold bg-sky-900/40 px-2 py-0.5 rounded-md border border-sky-500/30">
-              對端：手機端
+            <span class="text-[10px] text-emerald-300 font-semibold bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-500/30">
+              🟢 自動儲存中
             </span>
           </div>
 
+          <div class="grid grid-cols-2 gap-2 text-[11px] bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/60">
+            <div>
+              <span class="text-slate-400 block text-[10px]">雲端資料庫檔案</span>
+              <span class="font-mono text-indigo-300 font-semibold">reseaver_database.json</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block text-[10px]">目前已儲存記錄</span>
+              <span id="personalCloudStats" class="text-slate-200 font-semibold">載入中...</span>
+            </div>
+          </div>
+
           <p class="text-[11px] text-slate-300 leading-relaxed" id="gmailSyncDesc">
-            只要在另一台手機或電腦上也輸入同一個 Gmail，兩台設備就會自動在專屬安全通道中彼此識別，點擊按鈕直接雙向互傳！
+            只要在另一台手機或電腦上也關聯同一個 Gmail，兩台設備就會自動在專屬安全通道中彼此識別，點擊按鈕直接雙向互傳！
           </p>
 
           <button onclick="syncViaGmailPeer()" id="gmailSyncActionBtn" class="w-full py-3 bg-gradient-to-r from-emerald-600 via-teal-600 to-sky-600 hover:from-emerald-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition active:scale-95">
             <i data-lucide="zap" class="w-4 h-4 text-amber-300"></i>
-            <span id="gmailSyncActionText">⚡ 立即與 Gmail 另一端裝置同步</span>
+            <span id="gmailSyncActionText">⚡ 立即與另一端 Gmail 裝置同步</span>
           </button>
 
           <!-- 自動即時同步勾選 -->
           <label class="flex items-center gap-2 cursor-pointer pt-1 text-[11px] text-slate-300 select-none">
             <input type="checkbox" id="autoSyncCheck" onchange="toggleAutoSyncSetting(this.checked)" class="rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-0">
-            <span>開啟自動即時同步（手機與電腦同時在線時，任何修改背景自動互傳）</span>
+            <span>開啟自動即時同步（任何新增與修改自動同步至個人雲端與對端設備）</span>
           </label>
+        </div>
+
+        <!-- Google Drive 雲端硬碟官方授權連動 (可選) -->
+        <div class="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-3.5 space-y-2.5 text-xs">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+              <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-sky-400"></i>
+              Google 雲端硬碟 (Google Drive) 授權連動 (可選)
+            </span>
+            <span id="googleDriveBadge" class="text-[10px] text-slate-400 bg-slate-700 px-2 py-0.5 rounded-full">未連動</span>
+          </div>
+          <p class="text-[10px] text-slate-400 leading-relaxed">
+            授權後，Reseaver 會直接在您的 Google 雲端硬碟建立 <code class="text-sky-300">reseaver_database.json</code> 檔案，實現真正的個人雲端即時備份。
+          </p>
+          <div class="flex gap-2 pt-1">
+            <button onclick="connectGoogleDriveAuth()" id="connectGoogleDriveBtn" class="flex-1 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 border border-slate-600 transition">
+              <i data-lucide="cloud-upload" class="w-3.5 h-3.5 text-sky-300"></i>
+              <span>授權並備份至 Drive</span>
+            </button>
+            <button onclick="syncFromGoogleDrive()" id="pullGoogleDriveBtn" class="flex-1 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 border border-slate-600 transition">
+              <i data-lucide="cloud-download" class="w-3.5 h-3.5 text-emerald-300"></i>
+              <span>從 Drive 下載最新</span>
+            </button>
+          </div>
         </div>
 
         <!-- 離線備用：Gmail 郵件互傳 -->
@@ -637,12 +681,12 @@
           <div class="flex items-center justify-between">
             <span class="font-bold text-slate-300 text-[11px] flex items-center gap-1.5">
               <i data-lucide="send" class="w-3.5 h-3.5 text-sky-400"></i>
-              非同時在線備用：透過 Gmail 郵件傳遞
+              非同時在線備用：寄送個人雲端備份至 Gmail
             </span>
             <button onclick="toggleGmailPasteBox()" class="text-[10px] text-sky-400 hover:underline">貼上封包</button>
           </div>
           <p class="text-[10px] text-slate-400">
-            如果手機與電腦不同時開著，可以將筆記直接寄給自己的 Gmail，另一端貼上即可還原。
+            如果手機與電腦不同時開著，可以將個人雲端筆記直接寄給自己的 Gmail，另一端貼上即可還原。
           </p>
           <div class="flex gap-2 pt-1">
             <button onclick="sendSyncMailToSelf()" class="flex-1 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 border border-slate-600 transition">
@@ -669,16 +713,16 @@
         <div class="bg-slate-800/60 border border-slate-700/70 rounded-2xl p-4 space-y-3 text-xs">
           <div class="text-slate-300 font-bold flex items-center gap-1.5">
             <i data-lucide="hard-drive-download" class="w-4 h-4 text-emerald-400"></i>
-            <span>離線 JSON 檔案備份與還原</span>
+            <span>個人雲端離線 JSON 檔案備份與還原</span>
           </div>
           <p class="text-[11px] text-slate-400 leading-relaxed">
-            點擊匯出下載 .json 備份檔，在另一台設備上傳即可瞬間完整恢復所有打卡、會議、論文與實驗日誌。
+            點擊匯出下載 <code class="text-emerald-400">reseaver_database.json</code> 備份檔，在另一台設備上傳即可瞬間完整恢復所有打卡、會議、論文與實驗日誌。
           </p>
 
           <div class="flex flex-col sm:flex-row gap-2 pt-2">
             <button onclick="exportFullJsonBackup()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 transition">
               <i data-lucide="download" class="w-4 h-4"></i>
-              <span>下載備份 (JSON)</span>
+              <span>下載個人雲端備份 (JSON)</span>
             </button>
             <label class="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer border border-slate-600 transition">
               <i data-lucide="upload" class="w-4 h-4 text-sky-400"></i>
@@ -722,6 +766,44 @@
     </div>
   </div>
 
+  <!-- ========================================== -->
+  <!-- MODAL: 初次啟動 Gmail 註冊/關聯引導 (Onboarding Modal) -->
+  <!-- ========================================== -->
+  <div id="onboardingModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4">
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-tr from-rose-500 via-indigo-600 to-sky-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-rose-500/25">
+          R
+        </div>
+        <h3 class="text-base font-bold text-white">歡迎使用 Reseaver 研究救星</h3>
+        <p class="text-xs text-slate-400">研究生日常打卡速記 · 自動週報 · 論文膠囊</p>
+      </div>
+
+      <div class="bg-slate-800/80 border border-emerald-500/30 rounded-2xl p-4 text-xs space-y-2 text-slate-300">
+        <div class="flex items-center gap-2 text-emerald-400 font-bold">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+          <span>100% 用戶數據自主與隱私保證</span>
+        </div>
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+          為了保護您的學術研究機密、產學合作合約與實驗踩坑數據，Reseaver 不設立中心化伺服器。您的所有資料將存放於您個人的 Google 雲端與設備中！
+        </p>
+      </div>
+
+      <div class="space-y-3 pt-1">
+        <label class="block text-xs font-semibold text-slate-300">請輸入您的 Gmail 帳號開始使用：</label>
+        <div class="relative">
+          <input id="onboardingGmailInput" type="email" placeholder="example@gmail.com" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+        </div>
+        
+        <button onclick="submitOnboardingGmail()" class="w-full py-2.5 bg-gradient-to-r from-rose-600 via-indigo-600 to-sky-600 hover:from-rose-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>關聯 Gmail 帳號並啟用個人雲端儲存</span>
+        </button>
+        
+        <button onclick="skipOnboarding()" class="w-full text-center text-[11px] text-slate-500 hover:text-slate-400 py-1">
+          稍後再設定，先進入系統試用
+        </button>
+      </div>
     </div>
   </div>
 
@@ -979,6 +1061,8 @@
     const STORAGE_KEY_GMAIL = 'reseaver_sync_gmail';
     const STORAGE_KEY_DEVICE_ROLE = 'reseaver_device_role';
     const STORAGE_KEY_AUTO_SYNC = 'reseaver_auto_sync_enabled';
+    const STORAGE_KEY_GD_TOKEN = 'reseaver_google_drive_token';
+    const STORAGE_KEY_GD_CLIENT_ID = 'reseaver_google_client_id';
     const CLEAN_INIT_FLAG = 'reseaver_clean_slate_applied_v1';
 
     let currentTab = 'today';
@@ -992,9 +1076,10 @@
     let activeLabLogType = 'run';
     let currentLabFilter = 'all';
 
-    // 跨裝置同步狀態
+    // 跨裝置同步與個人雲端狀態
     let peerInstance = null;
     let myPeerId = null;
+    let googleDriveAccessToken = localStorage.getItem(STORAGE_KEY_GD_TOKEN) || null;
 
     // 初始化
     document.addEventListener('DOMContentLoaded', () => {
@@ -1002,6 +1087,9 @@
       initCleanData();
       renderAll();
       initGmailSyncOnStartup();
+      updateHeaderAccountUI();
+      updatePersonalCloudStats();
+      checkFirstTimeOnboarding();
 
       document.getElementById('noteInput').addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -1103,7 +1191,7 @@
     function saveStoredMeetings(meetings) {
       localStorage.setItem(STORAGE_KEY_MEETINGS, JSON.stringify(meetings));
       renderMeetingsUI();
-      triggerAutoSyncPush();
+      triggerPersonalCloudSync();
     }
 
     function getActiveMeetingId() {
@@ -1344,7 +1432,7 @@
       renderLogs();
       updateDashboard();
       generateReportFromLogs();
-      triggerAutoSyncPush();
+      triggerPersonalCloudSync();
     }
 
     function selectCategory(cat) {
@@ -1563,7 +1651,7 @@
     function savePapers(papers) {
       localStorage.setItem(STORAGE_KEY_PAPERS, JSON.stringify(papers));
       renderPapers();
-      triggerAutoSyncPush();
+      triggerPersonalCloudSync();
     }
 
     function renderPapers() {
@@ -1701,7 +1789,7 @@
     function saveLabLogs(logs) {
       localStorage.setItem(STORAGE_KEY_LABLOGS, JSON.stringify(logs));
       renderLabLogs();
-      triggerAutoSyncPush();
+      triggerPersonalCloudSync();
     }
     function filterLabLogs(type) {
       currentLabFilter = type;
@@ -1964,10 +2052,10 @@
       if (currentGmail) {
         if (boundBadge) {
           boundBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
-          boundBadge.textContent = '已綁定';
+          boundBadge.textContent = '已關聯個人雲端';
         }
         if (channelTitle) {
-          channelTitle.textContent = `Gmail 通道：${currentGmail}`;
+          channelTitle.textContent = `個人雲端通道：${currentGmail}`;
         }
         if (modalBadge) {
           modalBadge.classList.remove('hidden');
@@ -1976,9 +2064,78 @@
           sidebarDot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
         }
         if (sidebarDesc) {
-          sidebarDesc.textContent = `🟢 已綁定 ${currentGmail}`;
+          sidebarDesc.textContent = `🟢 個人雲端：${currentGmail}`;
         }
       }
+      updateHeaderAccountUI();
+      updatePersonalCloudStats();
+    }
+
+    function updateHeaderAccountUI() {
+      const email = localStorage.getItem(STORAGE_KEY_GMAIL);
+      const emailDisplay = document.getElementById('headerUserEmailDisplay');
+      const cloudStatus = document.getElementById('headerUserCloudStatus');
+      const avatar = document.getElementById('headerUserAvatar');
+
+      if (email && email.includes('@')) {
+        if (emailDisplay) emailDisplay.textContent = email;
+        if (avatar) avatar.textContent = email.charAt(0).toUpperCase();
+        if (cloudStatus) {
+          cloudStatus.innerHTML = `
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-emerald-400 font-medium">個人雲端已連線</span>
+          `;
+        }
+      } else {
+        if (emailDisplay) emailDisplay.textContent = '關聯 Gmail 帳號';
+        if (avatar) avatar.textContent = 'G';
+        if (cloudStatus) {
+          cloudStatus.innerHTML = `
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+            <span class="text-amber-400 font-medium">未連線個人雲端</span>
+          `;
+        }
+      }
+    }
+
+    function updatePersonalCloudStats() {
+      const statsEl = document.getElementById('personalCloudStats');
+      if (!statsEl) return;
+      const logs = getStoredLogs().length;
+      const meets = getStoredMeetings().length;
+      const papers = getStoredPapers().length;
+      const labs = getStoredLabLogs().length;
+      statsEl.textContent = `${logs} 則打卡 · ${meets} 個會議 · ${papers} 篇論文 · ${labs} 條實驗`;
+    }
+
+    function checkFirstTimeOnboarding() {
+      const savedGmail = localStorage.getItem(STORAGE_KEY_GMAIL);
+      const skipped = sessionStorage.getItem('reseaver_onboarding_skipped');
+      const onboardingModal = document.getElementById('onboardingModal');
+      if (!savedGmail && !skipped && onboardingModal) {
+        onboardingModal.classList.remove('hidden');
+        lucide.createIcons();
+      }
+    }
+
+    function submitOnboardingGmail() {
+      const input = document.getElementById('onboardingGmailInput');
+      const email = input ? input.value.trim().toLowerCase() : '';
+      if (!email || !email.includes('@')) {
+        return showToast('請輸入有效的 Gmail 帳號（需含 @）！');
+      }
+      localStorage.setItem(STORAGE_KEY_GMAIL, email);
+      currentGmail = email;
+      initGmailPeer(email);
+      updateGmailStatusUI(true);
+      document.getElementById('onboardingModal')?.classList.add('hidden');
+      showToast(`🎉 歡迎！已成功關聯 ${email}，個人雲端已就緒`);
+    }
+
+    function skipOnboarding() {
+      sessionStorage.setItem('reseaver_onboarding_skipped', 'true');
+      document.getElementById('onboardingModal')?.classList.add('hidden');
+      showToast('您可隨時點擊右上角關聯 Gmail 帳號');
     }
 
     function bindGmailAccount() {
@@ -1991,7 +2148,126 @@
       currentGmail = email;
       initGmailPeer(email);
       updateGmailStatusUI(true);
-      showToast(`已成功綁定 Gmail 帳號：${email}`);
+      showToast(`已成功關聯個人雲端：${email}`);
+    }
+
+    function triggerPersonalCloudSync() {
+      // 1. 自動廣播給同一個 Gmail 帳號的另一台設備 (手機或電腦)
+      triggerAutoSyncPush();
+
+      // 2. 更新 Header 與個人雲端統計狀態
+      updatePersonalCloudStats();
+      updateHeaderAccountUI();
+
+      // 3. 若有連動 Google Drive OAuth，自動上傳至 Google Drive 檔案 reseaver_database.json
+      if (googleDriveAccessToken) {
+        uploadToGoogleDriveBackground(exportAllPayload());
+      }
+    }
+
+    function connectGoogleDriveAuth() {
+      let clientId = localStorage.getItem(STORAGE_KEY_GD_CLIENT_ID);
+      if (!clientId) {
+        clientId = prompt('請輸入您的 Google Cloud OAuth Client ID (若無請直接使用上方 Gmail 快速關聯個人雲端)：', '');
+        if (clientId && clientId.trim()) {
+          clientId = clientId.trim();
+          localStorage.setItem(STORAGE_KEY_GD_CLIENT_ID, clientId);
+        } else {
+          return showToast('已取消 Google Drive 連動設定');
+        }
+      }
+
+      if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+        return showToast('Google Identity 服務載入中，請稍候重試！');
+      }
+
+      try {
+        const tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email',
+          callback: async (resp) => {
+            if (resp && resp.access_token) {
+              googleDriveAccessToken = resp.access_token;
+              localStorage.setItem(STORAGE_KEY_GD_TOKEN, resp.access_token);
+              showToast('🎉 Google Drive 授權成功！正在上傳個人雲端備份...');
+              await uploadToGoogleDriveBackground(exportAllPayload());
+              const badge = document.getElementById('googleDriveBadge');
+              if (badge) {
+                badge.className = 'text-[10px] text-emerald-300 bg-emerald-950/60 border border-emerald-500/40 px-2 py-0.5 rounded-full';
+                badge.textContent = '🟢 已連動 Drive';
+              }
+            }
+          }
+        });
+        tokenClient.requestAccessToken();
+      } catch (err) {
+        showToast('Google Drive 授權失敗：' + err.message);
+      }
+    }
+
+    async function uploadToGoogleDriveBackground(payload) {
+      if (!googleDriveAccessToken) return;
+      try {
+        const metadata = {
+          name: 'reseaver_database.json',
+          mimeType: 'application/json',
+          description: 'Reseaver 研究救星 - 用戶自主個人雲端資料庫備份'
+        };
+
+        const searchRes = await fetch("https://www.googleapis.com/drive/v3/files?q=name='reseaver_database.json' and trashed=false", {
+          headers: { Authorization: `Bearer ${googleDriveAccessToken}` }
+        });
+        const searchData = await searchRes.json();
+        const existing = searchData.files && searchData.files[0];
+
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+        form.append('file', new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
+
+        if (existing) {
+          await fetch(`https://www.googleapis.com/upload/drive/v3/files/${existing.id}?uploadType=multipart`, {
+            method: 'PATCH',
+            headers: { Authorization: `Bearer ${googleDriveAccessToken}` },
+            body: form
+          });
+        } else {
+          await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${googleDriveAccessToken}` },
+            body: form
+          });
+        }
+      } catch (e) {
+        console.warn('[Google Drive Sync]', e);
+      }
+    }
+
+    async function syncFromGoogleDrive() {
+      if (!googleDriveAccessToken) {
+        return connectGoogleDriveAuth();
+      }
+      showToast('正在從 Google Drive 個人雲端拉取資料庫...');
+      try {
+        const searchRes = await fetch("https://www.googleapis.com/drive/v3/files?q=name='reseaver_database.json' and trashed=false", {
+          headers: { Authorization: `Bearer ${googleDriveAccessToken}` }
+        });
+        const searchData = await searchRes.json();
+        if (searchData.files && searchData.files.length > 0) {
+          const fileId = searchData.files[0].id;
+          const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+            headers: { Authorization: `Bearer ${googleDriveAccessToken}` }
+          });
+          const payload = await fileRes.json();
+          mergeRemotePayload(payload);
+          renderAll();
+          showToast('🎉 成功從 Google Drive 個人雲端還原所有資料！');
+          closeSyncModal();
+        } else {
+          showToast('Google Drive 中尚未建立 reseaver_database.json 檔案！');
+        }
+      } catch (err) {
+        showToast('從 Drive 拉取失敗：' + err.message);
+      }
     }
 
     async function syncViaGmailPeer() {
@@ -2010,7 +2286,7 @@
       const hash = await getGmailChannelHash(currentGmail);
       const targetId = `res-gm-${hash}-${targetRole}`;
 
-      showToast(`正在連線到綁定 ${currentGmail} 的【${targetRoleName}】...`);
+      showToast(`正在連線到關聯 ${currentGmail} 的【${targetRoleName}】...`);
 
       const btn = document.getElementById('gmailSyncActionBtn');
       const actionText = document.getElementById('gmailSyncActionText');
@@ -2069,7 +2345,7 @@
       const jsonStr = JSON.stringify(payload);
 
       navigator.clipboard.writeText(jsonStr).then(() => {
-        const subject = encodeURIComponent('【Reseaver 研究救星】資料同步封包');
+        const subject = encodeURIComponent('【Reseaver 研究救星】個人雲端資料備份');
         const body = encodeURIComponent(`您的 Reseaver 完整備份代碼如下（已同時複製至您的剪貼簿）：\n\n${jsonStr}\n\n在另一台設備打開 Reseaver -> 跨裝置同步 -> 點擊「貼上封包」即可完成還原！`);
         window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
         showToast('已複製封包並開啟 Gmail！寄出後可在另一端貼上還原');
@@ -2118,8 +2394,9 @@
       }
       const autoSyncSaved = localStorage.getItem(STORAGE_KEY_AUTO_SYNC);
       const autoSyncCheck = document.getElementById('autoSyncCheck');
-      if (autoSyncCheck) autoSyncCheck.checked = (autoSyncSaved === 'true');
+      if (autoSyncCheck) autoSyncCheck.checked = (autoSyncSaved !== 'false'); // 預設開啟自動同步
       updateDeviceRoleUI();
+      updatePersonalCloudStats();
 
       const savedToken = localStorage.getItem(STORAGE_KEY_GH_TOKEN);
       if (savedToken && document.getElementById('githubTokenInput')) {
