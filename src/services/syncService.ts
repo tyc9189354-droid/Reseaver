@@ -85,4 +85,30 @@ export const SyncService = {
       addedPapers: mergedPapers.added,
     };
   },
+
+  /**
+   * 根據 Gmail 帳號與角色計算專屬通道 Peer ID
+   */
+  async getGmailSyncPeerIds(gmail: string, role: 'mob' | 'pc'): Promise<{ myId: string; targetId: string }> {
+    const clean = gmail.trim().toLowerCase();
+    let hash = '';
+    try {
+      const enc = new TextEncoder().encode(clean);
+      const buf = await crypto.subtle.digest('SHA-256', enc);
+      const hashArr = Array.from(new Uint8Array(buf));
+      hash = hashArr.map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 12);
+    } catch {
+      let h = 0;
+      for (let i = 0; i < clean.length; i++) {
+        h = ((h << 5) - h) + clean.charCodeAt(i);
+        h |= 0;
+      }
+      hash = Math.abs(h).toString(36).padStart(8, '0').slice(0, 8);
+    }
+    const targetRole = role === 'mob' ? 'pc' : 'mob';
+    return {
+      myId: `res-gm-${hash}-${role}`,
+      targetId: `res-gm-${hash}-${targetRole}`,
+    };
+  },
 };

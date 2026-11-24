@@ -122,16 +122,16 @@
         <button onclick="openSyncModal()" class="w-full bg-gradient-to-r from-indigo-900/40 to-sky-900/40 border border-indigo-500/30 hover:border-indigo-500/60 rounded-2xl p-3 text-left transition group">
           <div class="flex items-center justify-between mb-1">
             <span class="text-[11px] font-bold text-sky-300 flex items-center gap-1.5">
-              <i data-lucide="cloud" class="w-3.5 h-3.5 text-sky-400"></i>
-              跨裝置即時同步
+              <i data-lucide="mail" class="w-3.5 h-3.5 text-rose-400"></i>
+              Gmail 帳號直接互通
             </span>
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="同步待命中"></span>
+            <span id="sidebarSyncDot" class="w-2 h-2 rounded-full bg-slate-500" title="同步狀態"></span>
           </div>
-          <p class="text-[10px] text-slate-400">手機 ⇆ 電腦資訊零延遲雙向互傳</p>
+          <p class="text-[10px] text-slate-400" id="sidebarSyncStatusText">綁定 Gmail，手機電腦直接同步</p>
         </button>
 
         <div class="flex items-center justify-between text-[11px] text-slate-500 px-1">
-          <span>裝置識別：💻 網頁桌面端</span>
+          <span id="sidebarDeviceRoleText">裝置識別：💻 網頁桌面端</span>
           <button onclick="clearCurrentModuleData()" class="hover:text-rose-400">清空</button>
         </div>
       </div>
@@ -160,10 +160,10 @@
         
         <div class="flex items-center gap-2">
           <!-- 跨裝置同步按鈕 (手機端與電腦端皆醒目顯示) -->
-          <button onclick="openSyncModal()" class="py-1.5 px-3 bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-1.5 transition">
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-            <span class="hidden sm:inline">跨裝置同步</span>
-            <span class="sm:hidden">同步</span>
+          <button onclick="openSyncModal()" class="py-1.5 px-3 bg-gradient-to-r from-rose-600/90 via-indigo-600 to-sky-600 hover:from-rose-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-1.5 transition">
+            <i data-lucide="mail" class="w-3.5 h-3.5 text-rose-200"></i>
+            <span class="hidden sm:inline">Gmail 同步</span>
+            <span class="sm:hidden">Gmail</span>
           </button>
 
           <!-- 重新清空所有資料按鈕 -->
@@ -530,20 +530,23 @@
   </nav>
 
   <!-- ========================================== -->
-  <!-- MODAL: 跨裝置即時同步中心 (Cross-Device Sync Hub) -->
+  <!-- MODAL: Gmail 帳號跨裝置同步中心 (Gmail Sync Hub) -->
   <!-- ========================================== -->
   <div id="syncModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-lg p-5 lg:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
       
       <!-- 標題與關閉按鈕 -->
       <div class="flex justify-between items-center pb-3 border-b border-slate-800">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white font-bold">
-            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-rose-500 via-indigo-600 to-sky-500 flex items-center justify-center text-white font-bold shadow-lg shadow-rose-500/20">
+            <i data-lucide="mail" class="w-4 h-4"></i>
           </div>
           <div>
-            <h3 class="text-sm font-bold text-white">跨裝置即時同步中心</h3>
-            <p class="text-[11px] text-slate-400">手機端 ⇆ 電腦端雙向無縫互通</p>
+            <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+              <span>Gmail 帳號專屬互通中心</span>
+              <span id="modalGmailBadge" class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.2 rounded-full border border-emerald-500/30 hidden">已連線</span>
+            </h3>
+            <p class="text-[11px] text-slate-400">使用同一個 Gmail 帳號，手機與電腦直接雙向互通</p>
           </div>
         </div>
         <button onclick="closeSyncModal()" class="text-slate-400 hover:text-white p-1">
@@ -553,58 +556,148 @@
 
       <!-- 同步模式分頁標籤 -->
       <div class="flex bg-slate-800/90 p-1 rounded-xl border border-slate-700/60 text-xs font-semibold">
-        <button onclick="switchSyncTab('p2p')" id="syncTabBtn-p2p" class="flex-1 py-1.5 rounded-lg text-white bg-indigo-600 shadow-sm transition">
-          ⚡ 掃碼/代碼即時互傳
+        <button onclick="switchSyncTab('gmail')" id="syncTabBtn-gmail" class="flex-1 py-1.5 rounded-lg text-white bg-indigo-600 shadow-sm transition flex items-center justify-center gap-1.5">
+          <i data-lucide="mail" class="w-3.5 h-3.5 text-rose-300"></i>
+          <span>Gmail 直接互通</span>
         </button>
-        <button onclick="switchSyncTab('gist')" id="syncTabBtn-gist" class="flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
-          ☁️ GitHub 雲端自動同步
+        <button onclick="switchSyncTab('file')" id="syncTabBtn-file" class="flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5">
+          <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span>檔案備份/還原</span>
         </button>
-        <button onclick="switchSyncTab('file')" id="syncTabBtn-file" class="flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
-          📦 檔案匯出/還原
+        <button onclick="switchSyncTab('gist')" id="syncTabBtn-gist" class="flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5">
+          <i data-lucide="github" class="w-3.5 h-3.5 text-sky-400"></i>
+          <span>GitHub 雲端</span>
         </button>
       </div>
 
-      <!-- TAB 1: ⚡ P2P 掃碼 / 6位數配對碼即時快傳 -->
-      <div id="syncPane-p2p" class="space-y-4 pt-1">
-        <div class="bg-slate-850 bg-slate-800/60 border border-slate-700/70 rounded-2xl p-4 text-center space-y-3">
-          <span class="text-[11px] font-bold text-indigo-400 uppercase tracking-wider block">本裝置專屬配對代碼 (Pairing Code)</span>
-          
-          <div class="flex items-center justify-center gap-2">
-            <span id="myPeerIdDisplay" class="text-2xl font-black text-white tracking-widest font-mono bg-slate-900 px-4 py-2 rounded-xl border border-indigo-500/30">載入中...</span>
-            <button onclick="copyMyPeerId()" class="p-2.5 bg-slate-700 hover:bg-slate-600 text-sky-400 rounded-xl" title="複製代碼">
-              <i data-lucide="copy" class="w-4 h-4"></i>
-            </button>
+      <!-- TAB 1: 📧 Gmail 帳號直接互通 -->
+      <div id="syncPane-gmail" class="space-y-4 pt-1">
+        
+        <!-- Gmail 綁定與裝置角色設定 -->
+        <div class="bg-slate-800/60 border border-slate-700/70 rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+              <i data-lucide="at-sign" class="w-3.5 h-3.5 text-rose-400"></i>
+              輸入您的 Gmail 帳號（手機與電腦請輸入同一個）
+            </span>
+            <span id="gmailBoundStatus" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-700 text-slate-400">未設定</span>
           </div>
 
-          <!-- QR Code 容器 -->
-          <div class="flex flex-col items-center justify-center py-2">
-            <div id="qrcodeBox" class="bg-white p-2.5 rounded-2xl shadow-md inline-block"></div>
-            <span class="text-[10px] text-slate-400 mt-2">在另一台裝置（手機或電腦）打開此彈窗即可掃描或輸入代碼</span>
-          </div>
-        </div>
-
-        <!-- 輸入對方代碼進行連線 -->
-        <div class="bg-slate-850 bg-slate-800/60 border border-slate-700/70 rounded-2xl p-4 space-y-2.5">
-          <span class="text-xs font-bold text-slate-300 block">輸入另一台裝置的配對碼</span>
           <div class="flex gap-2">
-            <input id="targetPeerInput" type="text" placeholder="例：R-8921 或貼上代碼" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white uppercase tracking-wider font-mono focus:outline-none focus:border-indigo-500">
-            <button onclick="connectAndSyncPeer()" id="connectPeerBtn" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-1 transition">
-              <i data-lucide="link" class="w-3.5 h-3.5"></i>
-              <span>連線同步</span>
+            <input id="gmailInput" type="email" placeholder="例：student@gmail.com" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+            <button onclick="bindGmailAccount()" id="bindGmailBtn" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow-md shadow-indigo-600/30 transition">
+              <i data-lucide="link-2" class="w-3.5 h-3.5"></i>
+              <span>綁定</span>
             </button>
+          </div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-slate-700/50 text-[11px]">
+            <span class="text-slate-400">當前裝置角色：</span>
+            <div class="flex bg-slate-900 p-0.5 rounded-lg border border-slate-700">
+              <button onclick="setDeviceRole('mob')" id="roleBtn-mob" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition flex items-center gap-1">
+                <i data-lucide="smartphone" class="w-3 h-3"></i> 📱 手機端
+              </button>
+              <button onclick="setDeviceRole('pc')" id="roleBtn-pc" class="px-2.5 py-1 rounded-md text-white bg-indigo-600 font-bold transition flex items-center gap-1">
+                <i data-lucide="monitor" class="w-3 h-3"></i> 💻 電腦端
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 互通連線卡片 -->
+        <div class="bg-gradient-to-br from-indigo-950/40 via-slate-850 to-slate-800/80 border border-indigo-500/30 rounded-2xl p-4 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span id="gmailP2PIndicator" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+              <span class="text-xs font-bold text-white" id="gmailChannelTitle">Gmail 專屬通道：等待綁定</span>
+            </div>
+            <span id="gmailTargetDeviceBadge" class="text-[10px] text-sky-300 font-semibold bg-sky-900/40 px-2 py-0.5 rounded-md border border-sky-500/30">
+              對端：手機端
+            </span>
+          </div>
+
+          <p class="text-[11px] text-slate-300 leading-relaxed" id="gmailSyncDesc">
+            只要在另一台手機或電腦上也輸入同一個 Gmail，兩台設備就會自動在專屬安全通道中彼此識別，點擊按鈕直接雙向互傳！
+          </p>
+
+          <button onclick="syncViaGmailPeer()" id="gmailSyncActionBtn" class="w-full py-3 bg-gradient-to-r from-emerald-600 via-teal-600 to-sky-600 hover:from-emerald-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition active:scale-95">
+            <i data-lucide="zap" class="w-4 h-4 text-amber-300"></i>
+            <span id="gmailSyncActionText">⚡ 立即與 Gmail 另一端裝置同步</span>
+          </button>
+
+          <!-- 自動即時同步勾選 -->
+          <label class="flex items-center gap-2 cursor-pointer pt-1 text-[11px] text-slate-300 select-none">
+            <input type="checkbox" id="autoSyncCheck" onchange="toggleAutoSyncSetting(this.checked)" class="rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-0">
+            <span>開啟自動即時同步（手機與電腦同時在線時，任何修改背景自動互傳）</span>
+          </label>
+        </div>
+
+        <!-- 離線備用：Gmail 郵件互傳 -->
+        <div class="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-3.5 space-y-2 text-xs">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-300 text-[11px] flex items-center gap-1.5">
+              <i data-lucide="send" class="w-3.5 h-3.5 text-sky-400"></i>
+              非同時在線備用：透過 Gmail 郵件傳遞
+            </span>
+            <button onclick="toggleGmailPasteBox()" class="text-[10px] text-sky-400 hover:underline">貼上封包</button>
+          </div>
+          <p class="text-[10px] text-slate-400">
+            如果手機與電腦不同時開著，可以將筆記直接寄給自己的 Gmail，另一端貼上即可還原。
+          </p>
+          <div class="flex gap-2 pt-1">
+            <button onclick="sendSyncMailToSelf()" class="flex-1 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 border border-slate-600 transition">
+              <i data-lucide="mail-plus" class="w-3.5 h-3.5 text-rose-300"></i>
+              寄送備份到我的 Gmail
+            </button>
+            <button onclick="toggleGmailPasteBox()" class="flex-1 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 border border-slate-600 transition">
+              <i data-lucide="clipboard-paste" class="w-3.5 h-3.5 text-emerald-300"></i>
+              貼上郵件封包還原
+            </button>
+          </div>
+          <div id="gmailPasteContainer" class="hidden pt-2 space-y-2">
+            <textarea id="gmailPasteTextarea" rows="3" placeholder="請將 Gmail 郵件中的資料貼在此處..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-[10px] text-slate-200 font-mono focus:outline-none focus:border-indigo-500"></textarea>
+            <button onclick="importGmailPastedData()" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-bold">
+              確認還原
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB 2: 📦 檔案匯出與還原 (JSON Backup) -->
+      <div id="syncPane-file" class="space-y-3 pt-1 hidden">
+        <div class="bg-slate-800/60 border border-slate-700/70 rounded-2xl p-4 space-y-3 text-xs">
+          <div class="text-slate-300 font-bold flex items-center gap-1.5">
+            <i data-lucide="hard-drive-download" class="w-4 h-4 text-emerald-400"></i>
+            <span>離線 JSON 檔案備份與還原</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            點擊匯出下載 .json 備份檔，在另一台設備上傳即可瞬間完整恢復所有打卡、會議、論文與實驗日誌。
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-2 pt-2">
+            <button onclick="exportFullJsonBackup()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 transition">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>下載備份 (JSON)</span>
+            </button>
+            <label class="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer border border-slate-600 transition">
+              <i data-lucide="upload" class="w-4 h-4 text-sky-400"></i>
+              <span>匯入還原 (JSON)</span>
+              <input type="file" id="jsonFileInput" accept=".json" onchange="importFullJsonBackup(event)" class="hidden">
+            </label>
           </div>
         </div>
       </div>
 
-      <!-- TAB 2: ☁️ GitHub 雲端自動同步 (Gist Sync) -->
+      <!-- TAB 3: ☁️ GitHub 雲端備用 (Gist Sync) -->
       <div id="syncPane-gist" class="space-y-3 pt-1 hidden">
-        <div class="bg-slate-850 bg-slate-800/60 border border-slate-700/70 rounded-2xl p-4 space-y-3 text-xs">
+        <div class="bg-slate-800/60 border border-slate-700/70 rounded-2xl p-4 space-y-3 text-xs">
           <div class="flex items-center gap-2 text-sky-400 font-bold">
             <i data-lucide="github" class="w-4 h-4"></i>
             <span>GitHub 雲端加密無感同步</span>
           </div>
           <p class="text-[11px] text-slate-400 leading-relaxed">
-            利用您自己的 GitHub 帳號建立私密 Gist。手機與電腦兩端只要輸入同一組 Token，無論何時打開網頁都會自動拉取雲端最新資料！
+            若習慣使用 GitHub Gist，可在此填寫 Token，手機與電腦隨時從雲端拉取與推送。
           </p>
 
           <div>
@@ -616,40 +709,18 @@
           <div class="flex gap-2 pt-2">
             <button onclick="pushToGitHubGist()" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold flex items-center justify-center gap-1 shadow-md shadow-indigo-600/30 transition">
               <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
-              <span>上傳至 GitHub 雲端</span>
+              <span>上傳至 GitHub</span>
             </button>
             <button onclick="pullFromGitHubGist()" class="flex-1 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold flex items-center justify-center gap-1 transition border border-slate-600">
               <i data-lucide="download-cloud" class="w-3.5 h-3.5"></i>
-              <span>從雲端拉取最新</span>
+              <span>從雲端拉取</span>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- TAB 3: 📦 檔案匯出與還原 (JSON Backup) -->
-      <div id="syncPane-file" class="space-y-3 pt-1 hidden">
-        <div class="bg-slate-850 bg-slate-800/60 border border-slate-700/70 rounded-2xl p-4 space-y-3 text-xs">
-          <div class="text-slate-300 font-bold flex items-center gap-1.5">
-            <i data-lucide="hard-drive-download" class="w-4 h-4 text-emerald-400"></i>
-            <span>離線 JSON 備份檔匯出與還原</span>
-          </div>
-          <p class="text-[11px] text-slate-400 leading-relaxed">
-            想要手動將資料在手機與電腦間搬移？點擊匯出下載備份檔，在另一台設備上傳即可瞬間完整恢復所有打卡、論文與實驗筆記。
-          </p>
-
-          <div class="flex flex-col sm:flex-row gap-2 pt-2">
-            <button onclick="exportFullJsonBackup()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 transition">
-              <i data-lucide="download" class="w-4 h-4"></i>
-              <span>下載完整備份 (JSON)</span>
-            </button>
-            <label class="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer border border-slate-600 transition">
-              <i data-lucide="upload" class="w-4 h-4 text-sky-400"></i>
-              <span>匯入還原 (JSON)</span>
-              <input type="file" id="jsonFileInput" accept=".json" onchange="importFullJsonBackup(event)" class="hidden">
-            </label>
-          </div>
-        </div>
-      </div>
+    </div>
+  </div>
 
     </div>
   </div>
@@ -905,6 +976,9 @@
     const STORAGE_KEY_ACTIVE_MEETING = 'reseaver_active_meeting_id';
     const STORAGE_KEY_GH_TOKEN = 'reseaver_github_token';
     const STORAGE_KEY_GH_GIST_ID = 'reseaver_github_gist_id';
+    const STORAGE_KEY_GMAIL = 'reseaver_sync_gmail';
+    const STORAGE_KEY_DEVICE_ROLE = 'reseaver_device_role';
+    const STORAGE_KEY_AUTO_SYNC = 'reseaver_auto_sync_enabled';
     const CLEAN_INIT_FLAG = 'reseaver_clean_slate_applied_v1';
 
     let currentTab = 'today';
@@ -927,6 +1001,7 @@
       lucide.createIcons();
       initCleanData();
       renderAll();
+      initGmailSyncOnStartup();
 
       document.getElementById('noteInput').addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -1028,6 +1103,7 @@
     function saveStoredMeetings(meetings) {
       localStorage.setItem(STORAGE_KEY_MEETINGS, JSON.stringify(meetings));
       renderMeetingsUI();
+      triggerAutoSyncPush();
     }
 
     function getActiveMeetingId() {
@@ -1268,6 +1344,7 @@
       renderLogs();
       updateDashboard();
       generateReportFromLogs();
+      triggerAutoSyncPush();
     }
 
     function selectCategory(cat) {
@@ -1486,6 +1563,7 @@
     function savePapers(papers) {
       localStorage.setItem(STORAGE_KEY_PAPERS, JSON.stringify(papers));
       renderPapers();
+      triggerAutoSyncPush();
     }
 
     function renderPapers() {
@@ -1623,6 +1701,7 @@
     function saveLabLogs(logs) {
       localStorage.setItem(STORAGE_KEY_LABLOGS, JSON.stringify(logs));
       renderLabLogs();
+      triggerAutoSyncPush();
     }
     function filterLabLogs(type) {
       currentLabFilter = type;
@@ -1737,134 +1816,336 @@
     }
 
     // ==========================================
-    // 模組五：跨裝置即時同步中心 (Cross-Device Sync Hub)
+    // 模組五：Gmail 帳號專屬跨裝置互通中心 (Gmail Account Sync)
     // ==========================================
+    let currentGmail = '';
+    let currentDeviceRole = '';
+    let activeSyncConn = null;
+
+    function getAutoDeviceRole() {
+      const isMob = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 1024;
+      return isMob ? 'mob' : 'pc';
+    }
+
+    function getCurrentDeviceRole() {
+      if (!currentDeviceRole) {
+        currentDeviceRole = localStorage.getItem(STORAGE_KEY_DEVICE_ROLE) || getAutoDeviceRole();
+      }
+      return currentDeviceRole;
+    }
+
+    function setDeviceRole(role) {
+      currentDeviceRole = role;
+      localStorage.setItem(STORAGE_KEY_DEVICE_ROLE, role);
+      updateDeviceRoleUI();
+      if (currentGmail) {
+        initGmailPeer(currentGmail);
+      }
+    }
+
+    function updateDeviceRoleUI() {
+      const role = getCurrentDeviceRole();
+      const mobBtn = document.getElementById('roleBtn-mob');
+      const pcBtn = document.getElementById('roleBtn-pc');
+      if (mobBtn && pcBtn) {
+        if (role === 'mob') {
+          mobBtn.className = 'px-2.5 py-1 rounded-md text-white bg-indigo-600 font-bold transition flex items-center gap-1';
+          pcBtn.className = 'px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition flex items-center gap-1';
+        } else {
+          pcBtn.className = 'px-2.5 py-1 rounded-md text-white bg-indigo-600 font-bold transition flex items-center gap-1';
+          mobBtn.className = 'px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition flex items-center gap-1';
+        }
+      }
+      const targetBadge = document.getElementById('gmailTargetDeviceBadge');
+      if (targetBadge) {
+        targetBadge.textContent = role === 'mob' ? '對端：💻 電腦端' : '對端：📱 手機端';
+      }
+      const actionText = document.getElementById('gmailSyncActionText');
+      if (actionText) {
+        actionText.textContent = role === 'mob' ? '⚡ 立即與電腦端同步' : '⚡ 立即與手機端同步';
+      }
+      const sidebarRole = document.getElementById('sidebarDeviceRoleText');
+      if (sidebarRole) {
+        sidebarRole.textContent = role === 'mob' ? '裝置識別：📱 手機端' : '裝置識別：💻 網頁桌面端';
+      }
+    }
+
+    async function getGmailChannelHash(email) {
+      if (!email) return '';
+      const clean = email.trim().toLowerCase();
+      try {
+        const enc = new TextEncoder().encode(clean);
+        const buf = await crypto.subtle.digest('SHA-256', enc);
+        const hashArr = Array.from(new Uint8Array(buf));
+        return hashArr.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 12);
+      } catch (e) {
+        let h = 0;
+        for (let i = 0; i < clean.length; i++) {
+          h = ((h << 5) - h) + clean.charCodeAt(i);
+          h |= 0;
+        }
+        return Math.abs(h).toString(36).padStart(8, '0').slice(0, 8);
+      }
+    }
+
+    function initGmailSyncOnStartup() {
+      const savedGmail = localStorage.getItem(STORAGE_KEY_GMAIL);
+      if (savedGmail) {
+        currentGmail = savedGmail;
+        initGmailPeer(savedGmail);
+        updateGmailStatusUI(true);
+      }
+      updateDeviceRoleUI();
+    }
+
+    async function initGmailPeer(email) {
+      if (!email || !email.includes('@')) return;
+      currentGmail = email.trim().toLowerCase();
+      const hash = await getGmailChannelHash(currentGmail);
+      const role = getCurrentDeviceRole();
+      const myId = `res-gm-${hash}-${role}`;
+      const targetRole = role === 'mob' ? 'pc' : 'mob';
+      const targetId = `res-gm-${hash}-${targetRole}`;
+
+      if (peerInstance) {
+        try { peerInstance.destroy(); } catch {}
+        peerInstance = null;
+      }
+
+      try {
+        peerInstance = new Peer(myId);
+
+        peerInstance.on('open', (id) => {
+          myPeerId = id;
+          updateGmailStatusUI(true);
+        });
+
+        peerInstance.on('connection', (conn) => {
+          activeSyncConn = conn;
+          setupPeerEvents(conn);
+        });
+
+        peerInstance.on('error', (err) => {
+          console.warn('[Gmail Peer]', err);
+        });
+      } catch (err) {
+        console.warn('PeerJS init failed:', err);
+      }
+    }
+
+    function setupPeerEvents(conn) {
+      conn.on('open', () => {
+        showToast('🔗 已連線至您的 Gmail 設備，雙向同步中...');
+        conn.send({ type: 'SYNC_DATA', payload: exportAllPayload() });
+      });
+
+      conn.on('data', (data) => {
+        if (data && data.type === 'SYNC_DATA') {
+          mergeRemotePayload(data.payload);
+          renderAll();
+          showToast('🎉 已與您的 Gmail 設備完成雙向同步！');
+          const indicator = document.getElementById('gmailP2PIndicator');
+          if (indicator) indicator.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
+        }
+      });
+
+      conn.on('close', () => {
+        if (activeSyncConn === conn) activeSyncConn = null;
+      });
+    }
+
+    function updateGmailStatusUI(isReady) {
+      const boundBadge = document.getElementById('gmailBoundStatus');
+      const channelTitle = document.getElementById('gmailChannelTitle');
+      const modalBadge = document.getElementById('modalGmailBadge');
+      const sidebarDot = document.getElementById('sidebarSyncDot');
+      const sidebarDesc = document.getElementById('sidebarSyncStatusText');
+
+      if (currentGmail) {
+        if (boundBadge) {
+          boundBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+          boundBadge.textContent = '已綁定';
+        }
+        if (channelTitle) {
+          channelTitle.textContent = `Gmail 通道：${currentGmail}`;
+        }
+        if (modalBadge) {
+          modalBadge.classList.remove('hidden');
+        }
+        if (sidebarDot) {
+          sidebarDot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+        }
+        if (sidebarDesc) {
+          sidebarDesc.textContent = `🟢 已綁定 ${currentGmail}`;
+        }
+      }
+    }
+
+    function bindGmailAccount() {
+      const input = document.getElementById('gmailInput');
+      const email = input ? input.value.trim().toLowerCase() : '';
+      if (!email || !email.includes('@')) {
+        return showToast('請輸入有效的 Gmail 帳號（需含 @）！');
+      }
+      localStorage.setItem(STORAGE_KEY_GMAIL, email);
+      currentGmail = email;
+      initGmailPeer(email);
+      updateGmailStatusUI(true);
+      showToast(`已成功綁定 Gmail 帳號：${email}`);
+    }
+
+    async function syncViaGmailPeer() {
+      if (!currentGmail) {
+        const input = document.getElementById('gmailInput');
+        if (input && input.value.trim().includes('@')) {
+          bindGmailAccount();
+        } else {
+          return showToast('請先輸入並綁定您的 Gmail 帳號！');
+        }
+      }
+
+      const role = getCurrentDeviceRole();
+      const targetRole = role === 'mob' ? 'pc' : 'mob';
+      const targetRoleName = targetRole === 'mob' ? '手機端' : '電腦端';
+      const hash = await getGmailChannelHash(currentGmail);
+      const targetId = `res-gm-${hash}-${targetRole}`;
+
+      showToast(`正在連線到綁定 ${currentGmail} 的【${targetRoleName}】...`);
+
+      const btn = document.getElementById('gmailSyncActionBtn');
+      const actionText = document.getElementById('gmailSyncActionText');
+      const originalText = actionText ? actionText.textContent : '';
+      if (actionText) actionText.textContent = `連線【${targetRoleName}】中...`;
+      if (btn) btn.disabled = true;
+
+      if (!peerInstance || peerInstance.destroyed) {
+        await initGmailPeer(currentGmail);
+      }
+
+      try {
+        const conn = peerInstance.connect(targetId);
+        activeSyncConn = conn;
+        setupPeerEvents(conn);
+
+        let resolved = false;
+        conn.on('open', () => {
+          resolved = true;
+          if (actionText) actionText.textContent = originalText;
+          if (btn) btn.disabled = false;
+        });
+
+        setTimeout(() => {
+          if (!resolved) {
+            if (actionText) actionText.textContent = originalText;
+            if (btn) btn.disabled = false;
+            showToast(`未連上對端。請確認【${targetRoleName}】也打開了 Reseaver！`);
+          }
+        }, 5000);
+      } catch (err) {
+        if (actionText) actionText.textContent = originalText;
+        if (btn) btn.disabled = false;
+        showToast('連線失敗：' + err.message);
+      }
+    }
+
+    function toggleAutoSyncSetting(enabled) {
+      localStorage.setItem(STORAGE_KEY_AUTO_SYNC, enabled ? 'true' : 'false');
+      showToast(enabled ? '已開啟自動即時同步！' : '已關閉自動即時同步');
+    }
+
+    function triggerAutoSyncPush() {
+      if (localStorage.getItem(STORAGE_KEY_AUTO_SYNC) !== 'true') return;
+      if (activeSyncConn && activeSyncConn.open) {
+        try {
+          activeSyncConn.send({ type: 'SYNC_DATA', payload: exportAllPayload() });
+        } catch {}
+      }
+    }
+
+    function sendSyncMailToSelf() {
+      const email = currentGmail || document.getElementById('gmailInput')?.value.trim();
+      if (!email) return showToast('請先輸入並綁定您的 Gmail 帳號！');
+      const payload = exportAllPayload();
+      const jsonStr = JSON.stringify(payload);
+
+      navigator.clipboard.writeText(jsonStr).then(() => {
+        const subject = encodeURIComponent('【Reseaver 研究救星】資料同步封包');
+        const body = encodeURIComponent(`您的 Reseaver 完整備份代碼如下（已同時複製至您的剪貼簿）：\n\n${jsonStr}\n\n在另一台設備打開 Reseaver -> 跨裝置同步 -> 點擊「貼上封包」即可完成還原！`);
+        window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
+        showToast('已複製封包並開啟 Gmail！寄出後可在另一端貼上還原');
+      }).catch(() => {
+        window.open(`mailto:${email}`, '_blank');
+        showToast('已開啟 Gmail 傳送視窗');
+      });
+    }
+
+    function toggleGmailPasteBox() {
+      const box = document.getElementById('gmailPasteContainer');
+      if (box) box.classList.toggle('hidden');
+    }
+
+    function importGmailPastedData() {
+      const text = document.getElementById('gmailPasteTextarea')?.value.trim();
+      if (!text) return showToast('請貼上資料內容！');
+      try {
+        let jsonStr = text;
+        const start = text.indexOf('{');
+        const end = text.lastIndexOf('}');
+        if (start !== -1 && end !== -1 && end > start) {
+          jsonStr = text.slice(start, end + 1);
+        }
+        const payload = JSON.parse(jsonStr);
+        mergeRemotePayload(payload);
+        renderAll();
+        showToast('🎉 成功從 Gmail 封包還原所有筆記與會議！');
+        document.getElementById('gmailPasteContainer')?.classList.add('hidden');
+        if (document.getElementById('gmailPasteTextarea')) document.getElementById('gmailPasteTextarea').value = '';
+        closeSyncModal();
+      } catch (err) {
+        showToast('封包格式無效，請確認貼上了完整的 JSON 資料！');
+      }
+    }
+
     function openSyncModal() {
       document.getElementById('syncModal').classList.remove('hidden');
-      initP2PSync();
+      const savedGmail = localStorage.getItem(STORAGE_KEY_GMAIL);
+      if (savedGmail) {
+        currentGmail = savedGmail;
+        const input = document.getElementById('gmailInput');
+        if (input) input.value = savedGmail;
+        updateGmailStatusUI(true);
+        if (!peerInstance) initGmailPeer(savedGmail);
+      }
+      const autoSyncSaved = localStorage.getItem(STORAGE_KEY_AUTO_SYNC);
+      const autoSyncCheck = document.getElementById('autoSyncCheck');
+      if (autoSyncCheck) autoSyncCheck.checked = (autoSyncSaved === 'true');
+      updateDeviceRoleUI();
+
       const savedToken = localStorage.getItem(STORAGE_KEY_GH_TOKEN);
-      if (savedToken) document.getElementById('githubTokenInput').value = savedToken;
+      if (savedToken && document.getElementById('githubTokenInput')) {
+        document.getElementById('githubTokenInput').value = savedToken;
+      }
       lucide.createIcons();
     }
+
     function closeSyncModal() {
       document.getElementById('syncModal').classList.add('hidden');
     }
 
     function switchSyncTab(tab) {
-      ['p2p', 'gist', 'file'].forEach(t => {
+      ['gmail', 'file', 'gist'].forEach(t => {
         const pane = document.getElementById(`syncPane-${t}`);
         const btn = document.getElementById(`syncTabBtn-${t}`);
+        if (!pane || !btn) return;
         if (t === tab) {
           pane.classList.remove('hidden');
-          btn.className = 'flex-1 py-1.5 rounded-lg text-white bg-indigo-600 shadow-sm transition';
+          btn.className = 'flex-1 py-1.5 rounded-lg text-white bg-indigo-600 shadow-sm transition flex items-center justify-center gap-1.5';
         } else {
           pane.classList.add('hidden');
-          btn.className = 'flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white transition';
+          btn.className = 'flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5';
         }
       });
       lucide.createIcons();
-    }
-
-    // --- P2P WebRTC PeerJS 同步邏輯 ---
-    function initP2PSync() {
-      if (peerInstance && myPeerId) return;
-
-      // 生成隨機簡短 4 碼數字配對碼
-      const randomCode = Math.floor(1000 + Math.random() * 9000);
-      const peerId = `res-${randomCode}`;
-
-      try {
-        peerInstance = new Peer(peerId);
-
-        peerInstance.on('open', (id) => {
-          myPeerId = id;
-          const shortCode = id.replace('res-', 'R-');
-          document.getElementById('myPeerIdDisplay').textContent = shortCode;
-
-          // 生成 QR Code
-          const qrBox = document.getElementById('qrcodeBox');
-          qrBox.innerHTML = '';
-          new QRCode(qrBox, {
-            text: `reseaver-sync:${id}`,
-            width: 128,
-            height: 128,
-            colorDark: "#0f172a",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.M
-          });
-        });
-
-        // 接收來自另一台設備的連線請求
-        peerInstance.on('connection', (conn) => {
-          conn.on('open', () => {
-            showToast('🔗 檢測到裝置連線，正在雙向同步...');
-            // 發送本地資料
-            const localPayload = exportAllPayload();
-            conn.send({ type: 'SYNC_DATA', payload: localPayload });
-          });
-
-          conn.on('data', (data) => {
-            if (data && data.type === 'SYNC_DATA') {
-              mergeRemotePayload(data.payload);
-              showToast('✅ 雙向同步完成！已合併最新資料');
-              renderAll();
-            }
-          });
-        });
-
-        peerInstance.on('error', (err) => {
-          console.warn('[P2P Sync]', err);
-        });
-      } catch (e) {
-        console.warn('PeerJS init failed:', e);
-      }
-    }
-
-    function copyMyPeerId() {
-      if (!myPeerId) return;
-      const shortCode = myPeerId.replace('res-', 'R-');
-      navigator.clipboard.writeText(shortCode).then(() => showToast('已複製配對碼：' + shortCode));
-    }
-
-    function connectAndSyncPeer() {
-      let targetInput = document.getElementById('targetPeerInput').value.trim();
-      if (!targetInput) return showToast('請輸入對方的配對代碼！');
-
-      // 正規化代碼 (R-1234 -> res-1234)
-      if (targetInput.startsWith('R-') || targetInput.startsWith('r-')) {
-        targetInput = 'res-' + targetInput.slice(2);
-      } else if (!targetInput.startsWith('res-')) {
-        targetInput = 'res-' + targetInput;
-      }
-
-      showToast('正在連線配對中...');
-      const btn = document.getElementById('connectPeerBtn');
-      btn.disabled = true;
-
-      try {
-        const conn = peerInstance.connect(targetInput);
-
-        conn.on('open', () => {
-          showToast('🔗 配對成功！傳輸資料中...');
-          // 發送自己的資料給對方
-          conn.send({ type: 'SYNC_DATA', payload: exportAllPayload() });
-        });
-
-        conn.on('data', (data) => {
-          if (data && data.type === 'SYNC_DATA') {
-            mergeRemotePayload(data.payload);
-            showToast('🎉 同步大成功！已合併手機與網頁端的所有筆記！');
-            renderAll();
-            closeSyncModal();
-            btn.disabled = false;
-          }
-        });
-
-        setTimeout(() => { btn.disabled = false; }, 4000);
-      } catch (e) {
-        showToast('連線失敗，請確認代碼是否正確且雙方皆在線上！');
-        btn.disabled = false;
-      }
     }
 
     // --- GitHub Gist 雲端同步邏輯 ---
