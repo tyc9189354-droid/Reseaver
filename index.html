@@ -124,12 +124,12 @@
         <button onclick="openSyncModal()" class="w-full bg-gradient-to-r from-indigo-900/40 to-sky-900/40 border border-indigo-500/30 hover:border-indigo-500/60 rounded-2xl p-3 text-left transition group">
           <div class="flex items-center justify-between mb-1">
             <span class="text-[11px] font-bold text-sky-300 flex items-center gap-1.5">
-              <i data-lucide="mail" class="w-3.5 h-3.5 text-rose-400"></i>
-              Gmail 帳號直接互通
+              <i data-lucide="cloud" class="w-3.5 h-3.5 text-sky-400"></i>
+              個人雲端與跨裝置同步
             </span>
-            <span id="sidebarSyncDot" class="w-2 h-2 rounded-full bg-slate-500" title="同步狀態"></span>
+            <span id="sidebarSyncDot" class="w-2 h-2 rounded-full bg-emerald-400" title="同步狀態"></span>
           </div>
-          <p class="text-[10px] text-slate-400" id="sidebarSyncStatusText">綁定 Gmail，手機電腦直接同步</p>
+          <p class="text-[10px] text-slate-400" id="sidebarSyncStatusText">未綁定時本地儲存 · 點擊可連動雲端</p>
         </button>
 
         <div class="flex items-center justify-between text-[11px] text-slate-500 px-1">
@@ -582,6 +582,15 @@
       <!-- TAB 1: 📧 Gmail 帳號與個人雲端直接互通 -->
       <div id="syncPane-gmail" class="space-y-4 pt-1">
         
+        <!-- 免綁定自由模式提示 -->
+        <div class="bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-3 text-[11px] text-slate-300 leading-relaxed flex items-start gap-2.5">
+          <i data-lucide="info" class="w-4 h-4 text-sky-400 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold text-white block mb-0.5">免綁定即用保證：</span>
+            若不綁定 Gmail，手機端資料會安全保存在手機儲存中，電腦端保存在網頁本機資料庫。只有當您需要「手機與電腦雙向互傳」或「備份至個人 Google 雲端」時，才需要在此關聯 Gmail！
+          </div>
+        </div>
+
         <!-- Gmail 綁定與裝置角色設定 -->
         <div class="bg-slate-800/60 border border-slate-700/70 rounded-2xl p-4 space-y-3">
           <div class="flex items-center justify-between">
@@ -2076,6 +2085,8 @@
       const emailDisplay = document.getElementById('headerUserEmailDisplay');
       const cloudStatus = document.getElementById('headerUserCloudStatus');
       const avatar = document.getElementById('headerUserAvatar');
+      const role = getCurrentDeviceRole();
+      const isMob = (role === 'mob');
 
       if (email && email.includes('@')) {
         if (emailDisplay) emailDisplay.textContent = email;
@@ -2087,15 +2098,20 @@
           `;
         }
       } else {
-        if (emailDisplay) emailDisplay.textContent = '關聯 Gmail 帳號';
-        if (avatar) avatar.textContent = 'G';
+        if (emailDisplay) {
+          emailDisplay.textContent = isMob ? '📱 手機本地儲存' : '💻 網頁本地儲存';
+        }
+        if (avatar) {
+          avatar.innerHTML = isMob ? '<i data-lucide="smartphone" class="w-3 h-3 text-sky-200"></i>' : '<i data-lucide="monitor" class="w-3 h-3 text-sky-200"></i>';
+        }
         if (cloudStatus) {
           cloudStatus.innerHTML = `
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-            <span class="text-amber-400 font-medium">未連線個人雲端</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span class="text-slate-300 font-medium">已安全保存在本機</span>
           `;
         }
       }
+      lucide.createIcons();
     }
 
     function updatePersonalCloudStats() {
@@ -2109,13 +2125,9 @@
     }
 
     function checkFirstTimeOnboarding() {
-      const savedGmail = localStorage.getItem(STORAGE_KEY_GMAIL);
-      const skipped = sessionStorage.getItem('reseaver_onboarding_skipped');
-      const onboardingModal = document.getElementById('onboardingModal');
-      if (!savedGmail && !skipped && onboardingModal) {
-        onboardingModal.classList.remove('hidden');
-        lucide.createIcons();
-      }
+      // 依用戶需求：進入時不強硬彈窗要求綁定 Gmail，完全不打擾使用
+      // 用戶若未綁定，手機端資料直接存在手機上，電腦端保存在網頁本機
+      // 用戶想同步時隨時點擊右上角關聯即可
     }
 
     function submitOnboardingGmail() {
