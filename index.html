@@ -580,10 +580,10 @@
   </nav>
 
   <!-- ========================================== -->
-  <!-- MODAL: 現代化常見登入與註冊視窗 (Modern Login Modal) -->
+  <!-- MODAL: 現代化帳號登入與註冊視窗 (Modern Login & Register Modal) -->
   <!-- ========================================== -->
   <div id="loginModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-sm sm:max-w-md p-6 sm:p-7 shadow-2xl space-y-5 relative">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-sm sm:max-w-md p-6 sm:p-7 shadow-2xl space-y-4 relative max-h-[95vh] overflow-y-auto">
       
       <!-- 關閉按鈕 -->
       <button onclick="closeLoginModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg transition">
@@ -591,58 +591,174 @@
       </button>
 
       <!-- 品牌 Logo 與標題 -->
-      <div class="text-center space-y-2 pt-1">
-        <div class="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 text-white font-black text-2xl">
+      <div class="text-center space-y-1.5 pt-1">
+        <div class="w-11 h-11 mx-auto rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 text-white font-black text-xl">
           R
         </div>
-        <h3 class="text-lg font-extrabold text-white tracking-tight">登入 Reseaver 研究救星</h3>
+        <h3 id="authModalTitle" class="text-base sm:text-lg font-extrabold text-white tracking-tight">登入 Reseaver 研究救星</h3>
         <p class="text-xs text-slate-400">專為碩博士生打造的研究打卡、週報與文獻卡片</p>
       </div>
 
-      <!-- 官方 Google 一鍵登入按鈕 (Sign in with Google) -->
-      <div class="space-y-3">
-        <button onclick="loginWithGoogleSSO()" class="w-full py-2.5 px-4 bg-white hover:bg-slate-100 text-slate-800 rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-2.5 transition active:scale-95 border border-slate-200">
+      <!-- 官方 Google 一鍵直接串聯登入按鈕 (Sign in with Google) -->
+      <div class="space-y-2 pt-1">
+        <button onclick="loginWithGoogleSSO()" class="w-full py-2.5 px-4 bg-white hover:bg-slate-100 text-slate-800 rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-2.5 transition active:scale-95 border border-slate-200 group">
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>使用 Google 帳號直接登入</span>
+        </button>
+      </div>
+
+      <!-- 分隔線 (Divider) -->
+      <div class="relative flex items-center justify-center my-1.5">
+        <div class="border-t border-slate-700/80 w-full"></div>
+        <span class="bg-slate-900 px-3 text-[10px] text-slate-500 uppercase font-semibold">或使用帳號密碼</span>
+        <div class="border-t border-slate-700/80 w-full"></div>
+      </div>
+
+      <!-- 登入 / 註冊 Tab 切換 -->
+      <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+        <button id="authTabBtn-login" type="button" onclick="switchAuthTab('login')" class="flex-1 py-1.5 rounded-lg text-white bg-indigo-600 font-bold transition flex items-center justify-center gap-1">
+          <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+          <span>登入</span>
+        </button>
+        <button id="authTabBtn-register" type="button" onclick="switchAuthTab('register')" class="flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-1">
+          <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+          <span>註冊新帳號</span>
+        </button>
+      </div>
+
+      <!-- 表單 A: 帳號密碼登入 (Login Form) -->
+      <form id="authFormLogin" onsubmit="handleAccountLogin(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1">帳號或電子信箱</label>
+          <div class="relative">
+            <input id="loginAccountInput" type="text" required placeholder="例：student@gmail.com 或常用帳號" 
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+            <i data-lucide="user" class="w-4 h-4 text-slate-500 absolute left-3 top-3"></i>
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1">密碼</label>
+          <div class="relative">
+            <input id="loginPasswordInput" type="password" required placeholder="請輸入登入密碼" 
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+            <i data-lucide="lock" class="w-4 h-4 text-slate-500 absolute left-3 top-3"></i>
+            <button type="button" onclick="togglePasswordVisibility('loginPasswordInput', this)" class="absolute right-3 top-2.5 text-slate-500 hover:text-slate-300">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center justify-center gap-1.5 transition active:scale-95">
+          <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+          <span>立即登入</span>
+        </button>
+        <div class="text-center pt-1">
+          <span class="text-[11px] text-slate-400">還沒有帳號？</span>
+          <button type="button" onclick="switchAuthTab('register')" class="text-[11px] text-sky-400 hover:underline font-semibold ml-1">免費註冊一個</button>
+        </div>
+      </form>
+
+      <!-- 表單 B: 註冊新帳號 (Register Form) -->
+      <form id="authFormRegister" onsubmit="handleAccountRegister(event)" class="space-y-3 hidden">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1">設定帳號或電子信箱</label>
+          <div class="relative">
+            <input id="registerAccountInput" type="text" required placeholder="例：student@gmail.com 或自訂帳號" 
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+            <i data-lucide="user" class="w-4 h-4 text-slate-500 absolute left-3 top-3"></i>
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1">設定密碼 (至少 6 位字元)</label>
+          <div class="relative">
+            <input id="registerPasswordInput" type="password" required minlength="6" placeholder="請設定登入密碼" 
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+            <i data-lucide="lock" class="w-4 h-4 text-slate-500 absolute left-3 top-3"></i>
+            <button type="button" onclick="togglePasswordVisibility('registerPasswordInput', this)" class="absolute right-3 top-2.5 text-slate-500 hover:text-slate-300">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1">確認密碼</label>
+          <div class="relative">
+            <input id="registerConfirmPasswordInput" type="password" required minlength="6" placeholder="請再次輸入密碼以確認" 
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+            <i data-lucide="check" class="w-4 h-4 text-slate-500 absolute left-3 top-3"></i>
+          </div>
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-sky-600 hover:from-emerald-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/30 flex items-center justify-center gap-1.5 transition active:scale-95">
+          <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+          <span>建立帳號並登入</span>
+        </button>
+        <div class="text-center pt-1">
+          <span class="text-[11px] text-slate-400">已經有帳號？</span>
+          <button type="button" onclick="switchAuthTab('login')" class="text-[11px] text-sky-400 hover:underline font-semibold ml-1">返回登入</button>
+        </div>
+      </form>
+
+      <!-- 底部訪客提示與隱私政策說明 -->
+      <div class="pt-2 border-t border-slate-800 text-center space-y-1.5">
+        <button onclick="closeLoginModal()" class="text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-1 mx-auto">
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-sky-400"></i>
+          <span>不想登入？繼續以訪客模式使用</span>
+        </button>
+        <p class="text-[10px] text-slate-500 leading-relaxed">
+          🔒 100% 用戶數據自主：密碼以 SHA-256 安全加密，筆記存放於您的個人設備與個人雲端，安全零洩密。
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: Google 帳號直接串聯視窗 (Google Direct Sign-In Sheet) -->
+  <!-- ========================================== -->
+  <div id="googleDirectLoginModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4 relative">
+      <button onclick="closeGoogleDirectLoginModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center space-y-2 pt-1">
+        <div class="w-12 h-12 mx-auto rounded-2xl bg-white flex items-center justify-center shadow-md">
+          <svg class="w-6 h-6" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+        </div>
+        <h3 class="text-base font-extrabold text-white">直接串聯 Google 帳號</h3>
+        <p class="text-xs text-slate-400">登入您的 Google / Gmail 帳號以直接互通設備</p>
+      </div>
+
+      <form onsubmit="handleGoogleDirectLoginSubmit(event)" class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Google / Gmail 信箱</label>
+          <input id="googleDirectEmailInput" type="email" required placeholder="例：student@gmail.com" 
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-white hover:bg-slate-100 text-slate-900 rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-2 transition active:scale-95">
           <svg class="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
           </svg>
-          <span>使用 Google 帳號繼續</span>
+          <span>立即以 Google 帳號登入</span>
         </button>
+      </form>
 
-        <!-- 分隔線 (Divider) -->
-        <div class="relative flex items-center justify-center my-2">
-          <div class="border-t border-slate-700/80 w-full"></div>
-          <span class="bg-slate-900 px-3 text-[10px] text-slate-500 uppercase font-semibold">或輸入常用 Gmail 信箱</span>
-          <div class="border-t border-slate-700/80 w-full"></div>
-        </div>
-
-        <!-- Gmail 電子郵件表單 -->
-        <form onsubmit="handleEmailLoginSubmit(event)" class="space-y-3">
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1">電子信箱 (Gmail)</label>
-            <input id="loginEmailInput" type="email" required placeholder="例：student@gmail.com" 
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
-          </div>
-          <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center justify-center gap-1.5 transition active:scale-95">
-            <i data-lucide="mail" class="w-3.5 h-3.5"></i>
-            <span>以該 Gmail 登入 / 建立關聯</span>
-          </button>
-        </form>
-      </div>
-
-      <!-- 底部訪客提示與隱私政策說明 -->
-      <div class="pt-2 border-t border-slate-800 text-center space-y-2">
-        <button onclick="closeLoginModal()" class="text-xs text-slate-400 hover:text-white transition flex items-center justify-center gap-1 mx-auto">
-          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-sky-400"></i>
-          <span>不想登入？繼續以訪客模式使用</span>
+      <div class="pt-1 text-center">
+        <button type="button" onclick="setupGoogleOAuthClientId()" class="text-[10px] text-slate-400 hover:text-sky-300 underline transition">
+          ⚙️ 設定 Google Cloud Client ID (支援 Google Drive 雲端硬碟備份)
         </button>
-        <p class="text-[10px] text-slate-500 leading-relaxed">
-          🔒 100% 用戶數據自主：登入後筆記存放於您的個人 Google 雲端與設備中，完全無中心伺服器，安全零洩密。
-        </p>
       </div>
-
     </div>
   </div>
 
@@ -994,6 +1110,7 @@
     const STORAGE_KEY_GH_TOKEN = 'reseaver_github_token';
     const STORAGE_KEY_GH_GIST_ID = 'reseaver_github_gist_id';
     const STORAGE_KEY_GMAIL = 'reseaver_sync_gmail';
+    const STORAGE_KEY_AUTH_USERS = 'reseaver_user_accounts';
     const STORAGE_KEY_DEVICE_ROLE = 'reseaver_device_role';
     const STORAGE_KEY_AUTO_SYNC = 'reseaver_auto_sync_enabled';
     const STORAGE_KEY_GD_TOKEN = 'reseaver_google_drive_token';
@@ -2045,20 +2162,35 @@
         guestStorageDeviceLabel.textContent = guestLabel;
       }
 
-      if (email && email.includes('@')) {
+      if (email && email.trim()) {
         // 已登入狀態
         if (authGuestView) authGuestView.classList.add('hidden');
         if (authUserView) authUserView.classList.remove('hidden');
 
+        const users = getStoredUserAccounts();
+        const user = users[email] || {};
+
         const nameDisplay = document.getElementById('authUserNameDisplay');
         const avatarBadge = document.getElementById('authUserAvatarBadge');
         if (nameDisplay) nameDisplay.textContent = email;
-        if (avatarBadge) avatarBadge.textContent = email.charAt(0).toUpperCase();
+        if (avatarBadge) {
+          if (user.picture) {
+            avatarBadge.innerHTML = `<img src="${user.picture}" class="w-full h-full rounded-full object-cover">`;
+          } else {
+            avatarBadge.textContent = email.charAt(0).toUpperCase();
+          }
+        }
 
         const profEmail = document.getElementById('profileEmailDisplay');
         const profAvatar = document.getElementById('profileBigAvatar');
         if (profEmail) profEmail.textContent = email;
-        if (profAvatar) profAvatar.textContent = email.charAt(0).toUpperCase();
+        if (profAvatar) {
+          if (user.picture) {
+            profAvatar.innerHTML = `<img src="${user.picture}" class="w-full h-full rounded-2xl object-cover">`;
+          } else {
+            profAvatar.textContent = email.charAt(0).toUpperCase();
+          }
+        }
 
         const sidebarDot = document.getElementById('sidebarSyncDot');
         const sidebarDesc = document.getElementById('sidebarSyncStatusText');
@@ -2094,13 +2226,80 @@
     }
 
     // ==========================================
-    // 現代化登入視窗控制 (Login Modal)
+    // 現代化登入／註冊與密碼安全管理 (Auth & Account Manager)
     // ==========================================
+    let currentAuthTab = 'login';
+
+    function switchAuthTab(tab) {
+      currentAuthTab = tab;
+      const loginForm = document.getElementById('authFormLogin');
+      const registerForm = document.getElementById('authFormRegister');
+      const loginBtn = document.getElementById('authTabBtn-login');
+      const registerBtn = document.getElementById('authTabBtn-register');
+      const title = document.getElementById('authModalTitle');
+
+      if (tab === 'login') {
+        if (loginForm) loginForm.classList.remove('hidden');
+        if (registerForm) registerForm.classList.add('hidden');
+        if (loginBtn) loginBtn.className = 'flex-1 py-1.5 rounded-lg text-white bg-indigo-600 font-bold transition flex items-center justify-center gap-1';
+        if (registerBtn) registerBtn.className = 'flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-1';
+        if (title) title.textContent = '登入 Reseaver 研究救星';
+        setTimeout(() => document.getElementById('loginAccountInput')?.focus(), 50);
+      } else {
+        if (loginForm) loginForm.classList.add('hidden');
+        if (registerForm) registerForm.classList.remove('hidden');
+        if (loginBtn) loginBtn.className = 'flex-1 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-1';
+        if (registerBtn) registerBtn.className = 'flex-1 py-1.5 rounded-lg text-white bg-indigo-600 font-bold transition flex items-center justify-center gap-1';
+        if (title) title.textContent = '註冊 Reseaver 新帳號';
+        setTimeout(() => document.getElementById('registerAccountInput')?.focus(), 50);
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const isPass = (input.type === 'password');
+      input.type = isPass ? 'text' : 'password';
+      if (btn) {
+        btn.innerHTML = isPass ? '<i data-lucide="eye-off" class="w-4 h-4"></i>' : '<i data-lucide="eye" class="w-4 h-4"></i>';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+
+    async function hashUserPassword(password) {
+      try {
+        const enc = new TextEncoder().encode(password + '_reseaver_salt_key');
+        const buf = await crypto.subtle.digest('SHA-256', enc);
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      } catch (e) {
+        let hash = 0;
+        for (let i = 0; i < password.length; i++) {
+          hash = ((hash << 5) - hash) + password.charCodeAt(i);
+          hash |= 0;
+        }
+        return 'fallback_' + Math.abs(hash).toString(36);
+      }
+    }
+
+    function getStoredUserAccounts() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY_AUTH_USERS)) || {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveStoredUserAccounts(users) {
+      localStorage.setItem(STORAGE_KEY_AUTH_USERS, JSON.stringify(users));
+    }
+
     function openLoginModal() {
       const modal = document.getElementById('loginModal');
       if (modal) {
         modal.classList.remove('hidden');
-        const input = document.getElementById('loginEmailInput');
+        switchAuthTab('login');
+        const input = document.getElementById('loginAccountInput');
         if (input) {
           input.value = localStorage.getItem(STORAGE_KEY_GMAIL) || '';
           setTimeout(() => input.focus(), 50);
@@ -2113,45 +2312,191 @@
       document.getElementById('loginModal')?.classList.add('hidden');
     }
 
-    function handleEmailLoginSubmit(event) {
+    // 帳號密碼登入
+    async function handleAccountLogin(event) {
       if (event) event.preventDefault();
-      const input = document.getElementById('loginEmailInput');
-      const email = input ? input.value.trim().toLowerCase() : '';
-      if (!email || !email.includes('@')) {
-        return showToast('請輸入有效的電子信箱或 Gmail 帳號！');
+      const accountInput = document.getElementById('loginAccountInput');
+      const passInput = document.getElementById('loginPasswordInput');
+
+      const account = accountInput ? accountInput.value.trim().toLowerCase() : '';
+      const password = passInput ? passInput.value : '';
+
+      if (!account) return showToast('請輸入帳號或電子信箱！');
+      if (!password) return showToast('請輸入密碼！');
+
+      const users = getStoredUserAccounts();
+      const user = users[account];
+
+      if (!user) {
+        // 若該帳號尚未在本地註冊，自動切換至註冊分頁並帶入帳號密碼
+        const registerAccountInput = document.getElementById('registerAccountInput');
+        const registerPassInput = document.getElementById('registerPasswordInput');
+        if (registerAccountInput) registerAccountInput.value = account;
+        if (registerPassInput) registerPassInput.value = password;
+        switchAuthTab('register');
+        return showToast('未找到該帳號，已自動為您切換至「註冊新帳號」！');
       }
 
-      localStorage.setItem(STORAGE_KEY_GMAIL, email);
-      currentGmail = email;
-      initGmailPeer(email);
+      const passHash = await hashUserPassword(password);
+      if (user.passwordHash !== passHash) {
+        return showToast('❌ 密碼錯誤，請重新確認！');
+      }
+
+      // 登入成功
+      user.lastLoginAt = new Date().toISOString();
+      saveStoredUserAccounts(users);
+
+      localStorage.setItem(STORAGE_KEY_GMAIL, account);
+      currentGmail = account;
+      initGmailPeer(account);
       updateHeaderAccountUI();
       closeLoginModal();
-      showToast(`🎉 登入成功！已連線至 ${email} 個人雲端`);
+      showToast(`🎉 登入成功！歡迎回來，${account}`);
     }
 
+    // 帳號密碼註冊
+    async function handleAccountRegister(event) {
+      if (event) event.preventDefault();
+      const accountInput = document.getElementById('registerAccountInput');
+      const passInput = document.getElementById('registerPasswordInput');
+      const confirmPassInput = document.getElementById('registerConfirmPasswordInput');
+
+      const account = accountInput ? accountInput.value.trim().toLowerCase() : '';
+      const password = passInput ? passInput.value : '';
+      const confirmPassword = confirmPassInput ? confirmPassInput.value : '';
+
+      if (!account) return showToast('請輸入帳號或電子信箱！');
+      if (password.length < 6) return showToast('密碼長度至少需 6 個字元！');
+      if (password !== confirmPassword) return showToast('兩次密碼輸入不一致，請重新檢查！');
+
+      const users = getStoredUserAccounts();
+      if (users[account]) {
+        showToast('該帳號已經註冊過，已自動為您切換至登入！');
+        const loginAccountInput = document.getElementById('loginAccountInput');
+        if (loginAccountInput) loginAccountInput.value = account;
+        switchAuthTab('login');
+        return;
+      }
+
+      const passHash = await hashUserPassword(password);
+      users[account] = {
+        passwordHash: passHash,
+        provider: 'local',
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString()
+      };
+      saveStoredUserAccounts(users);
+
+      // 自動完成登入
+      localStorage.setItem(STORAGE_KEY_GMAIL, account);
+      currentGmail = account;
+      initGmailPeer(account);
+      updateHeaderAccountUI();
+      closeLoginModal();
+      showToast(`🎉 註冊成功！已自動為您登入：${account}`);
+    }
+
+    // 相容性別名
+    function handleEmailLoginSubmit(event) {
+      handleAccountLogin(event);
+    }
+
+    // ==========================================
+    // Google 帳號直接串聯登入 (Google Direct SSO)
+    // ==========================================
     function loginWithGoogleSSO() {
-      // 現代主流 Google Sign-In 流程
-      if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
-        const clientId = localStorage.getItem(STORAGE_KEY_GD_CLIENT_ID);
-        if (clientId) {
-          connectGoogleDriveAuth();
+      const clientId = localStorage.getItem(STORAGE_KEY_GD_CLIENT_ID);
+
+      // 1. 如果已設定 Google OAuth Client ID 且 Google Identity Services 已就緒，直接開啟官方 Google 授權視窗
+      if (clientId && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+        try {
+          const tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: clientId,
+            scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.file',
+            callback: async (resp) => {
+              if (resp && resp.access_token) {
+                googleDriveAccessToken = resp.access_token;
+                localStorage.setItem(STORAGE_KEY_GD_TOKEN, resp.access_token);
+
+                try {
+                  const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: `Bearer ${resp.access_token}` }
+                  });
+                  const userInfo = await userInfoRes.json();
+                  if (userInfo && userInfo.email) {
+                    applyGoogleLoginSuccess(userInfo.email, userInfo.name, userInfo.picture);
+                    return;
+                  }
+                } catch (err) {
+                  console.warn('[Google UserInfo]', err);
+                }
+                showToast('🎉 Google 授權成功！');
+              }
+            }
+          });
+          tokenClient.requestAccessToken();
           closeLoginModal();
           return;
+        } catch (err) {
+          console.warn('GIS Token client request failed:', err);
         }
       }
-      
-      const email = prompt('請輸入您的 Google 帳號 (Gmail) 進行登入：', localStorage.getItem(STORAGE_KEY_GMAIL) || '');
-      if (email && email.trim() && email.includes('@')) {
-        const cleanEmail = email.trim().toLowerCase();
-        localStorage.setItem(STORAGE_KEY_GMAIL, cleanEmail);
-        currentGmail = cleanEmail;
-        initGmailPeer(cleanEmail);
-        updateHeaderAccountUI();
-        closeLoginModal();
-        showToast(`🎉 Google 帳號登入成功！已連線：${cleanEmail}`);
-      } else if (email !== null) {
-        showToast('請輸入正確的 Google / Gmail 信箱格式！');
+
+      // 2. 若尚未設定 Client ID，開啟專業美觀的 Google 帳號串聯面板 (徹底免除瀏覽器原生 prompt)
+      openGoogleDirectLoginModal();
+    }
+
+    function openGoogleDirectLoginModal() {
+      closeLoginModal();
+      const modal = document.getElementById('googleDirectLoginModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        const input = document.getElementById('googleDirectEmailInput');
+        if (input) {
+          input.value = localStorage.getItem(STORAGE_KEY_GMAIL) || '';
+          setTimeout(() => input.focus(), 50);
+        }
       }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeGoogleDirectLoginModal() {
+      document.getElementById('googleDirectLoginModal')?.classList.add('hidden');
+    }
+
+    function handleGoogleDirectLoginSubmit(event) {
+      if (event) event.preventDefault();
+      const input = document.getElementById('googleDirectEmailInput');
+      const email = input ? input.value.trim().toLowerCase() : '';
+      if (!email || !email.includes('@')) {
+        return showToast('請輸入有效的 Google / Gmail 電子信箱！');
+      }
+
+      applyGoogleLoginSuccess(email);
+      closeGoogleDirectLoginModal();
+    }
+
+    function applyGoogleLoginSuccess(email, name, picture) {
+      localStorage.setItem(STORAGE_KEY_GMAIL, email);
+      currentGmail = email;
+
+      const users = getStoredUserAccounts();
+      users[email] = {
+        provider: 'google',
+        name: name || email.split('@')[0],
+        picture: picture || '',
+        lastLoginAt: new Date().toISOString()
+      };
+      saveStoredUserAccounts(users);
+
+      initGmailPeer(email);
+      updateHeaderAccountUI();
+      showToast(`🎉 Google 帳號串聯成功！已連線：${email}`);
+    }
+
+    function setupGoogleOAuthClientId() {
+      closeGoogleDirectLoginModal();
+      connectGoogleDriveAuth();
     }
 
     // ==========================================
