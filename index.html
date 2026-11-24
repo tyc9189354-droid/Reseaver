@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Reseaver - LabPulse 咪挺救星</title>
+  <title>Reseaver - 研究救星</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -31,168 +31,159 @@
     /* 滾動條美化 */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-    .dark ::-webkit-scrollbar-thumb { background: #334155; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+    /* 卡片翻轉 3D 效果 */
+    .perspective-1000 { perspective: 1000px; }
+    .transform-style-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
     /* 平滑過渡 */
     * { transition: background-color 0.15s ease, border-color 0.15s ease; }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-start p-0 sm:p-4 font-sans selection:bg-sky-500 selection:text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-start p-0 sm:p-4 font-sans selection:bg-sky-500 selection:text-white">
 
-  <!-- 頂部控制列（切換視圖與裝置比例） -->
-  <header class="w-full max-w-md md:max-w-xl flex items-center justify-between px-4 py-3 bg-slate-800/80 backdrop-blur border-b border-slate-700/60 sticky top-0 z-40 sm:rounded-t-2xl sm:mt-2">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 text-white font-black text-lg">
+  <!-- 頂部 Header -->
+  <header class="w-full max-w-md md:max-w-xl flex items-center justify-between px-4 py-3 bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40 sm:rounded-t-2xl sm:mt-2">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-sky-500/20 text-white font-black text-lg">
         R
       </div>
       <div>
         <h1 class="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
           Reseaver
-          <span class="text-[10px] bg-sky-500/20 text-sky-400 font-semibold px-1.5 py-0.5 rounded-full border border-sky-500/30">LabPulse</span>
+          <span id="headerModuleBadge" class="text-[10px] bg-sky-500/20 text-sky-400 font-semibold px-2 py-0.5 rounded-full border border-sky-500/30">LabPulse</span>
         </h1>
-        <p class="text-[11px] text-slate-400">研究生咪挺救星 · 每日速記轉週報</p>
+        <p class="text-[11px] text-slate-400" id="headerSubtext">研究生日常速記 · 自動週報</p>
       </div>
     </div>
     
     <div class="flex items-center gap-1.5">
-      <!-- 重新加載範例按鈕 -->
-      <button onclick="loadSampleData()" title="載入範例資料" class="p-2 text-slate-400 hover:text-sky-400 hover:bg-slate-700/60 rounded-lg text-xs flex items-center gap-1">
+      <button onclick="loadAllSampleData()" title="載入豐富範例" class="p-2 text-slate-400 hover:text-sky-400 hover:bg-slate-800 rounded-lg text-xs flex items-center gap-1">
         <i data-lucide="sparkles" class="w-4 h-4"></i>
-        <span class="hidden sm:inline text-xs">載入範例</span>
+        <span class="hidden sm:inline text-xs">範例</span>
       </button>
-      <!-- 清空資料按鈕 -->
-      <button onclick="clearAllData()" title="清空全部" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-700/60 rounded-lg text-xs">
+      <button onclick="clearCurrentModuleData()" title="清空當前模組資料" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg text-xs">
         <i data-lucide="trash-2" class="w-4 h-4"></i>
       </button>
     </div>
   </header>
 
-  <!-- 主容器 (手機比例框架) -->
-  <main class="w-full max-w-md md:max-w-xl bg-slate-850 bg-slate-900 border-x sm:border border-slate-800 sm:rounded-b-2xl shadow-2xl flex-1 flex flex-col pb-24 overflow-hidden relative min-h-[85vh]">
+  <!-- 手機框架主內容容器 -->
+  <main class="w-full max-w-md md:max-w-xl bg-slate-900 border-x sm:border border-slate-800 sm:rounded-b-2xl shadow-2xl flex-1 flex flex-col pb-24 overflow-hidden relative min-h-[85vh]">
     
-    <!-- 頂部資訊卡：下次 Meeting 倒數 & 本週打卡統計 -->
-    <section class="p-4 bg-gradient-to-b from-slate-800/60 to-transparent border-b border-slate-800/80">
-      <div class="bg-gradient-to-br from-indigo-950/60 via-slate-800 to-sky-950/40 border border-indigo-500/20 rounded-2xl p-4 shadow-lg relative overflow-hidden">
-        <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-sky-500/10 rounded-full blur-2xl pointer-events-none"></div>
-        <div class="flex justify-between items-start mb-3">
-          <div>
-            <span class="text-[11px] font-medium uppercase tracking-wider text-indigo-400">Advisor Meeting 倒數</span>
-            <div class="flex items-baseline gap-2 mt-0.5">
-              <span id="countdownDays" class="text-3xl font-extrabold text-white tracking-tight">3</span>
-              <span class="text-xs text-slate-300 font-medium">天後咪挺 (本週四 14:00)</span>
+    <!-- ========================================== -->
+    <!-- TAB 1: 今日動態 (LabPulse 打卡) -->
+    <!-- ========================================== -->
+    <div id="tabContent-today" class="tab-pane flex flex-col flex-1">
+      <!-- 頂部資訊卡：下次 Meeting 倒數 & 本週打卡統計 -->
+      <section class="p-4 bg-gradient-to-b from-slate-850 to-transparent border-b border-slate-800/80">
+        <div class="bg-gradient-to-br from-indigo-950/70 via-slate-850 to-sky-950/50 border border-indigo-500/20 rounded-2xl p-4 shadow-lg relative overflow-hidden">
+          <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-sky-500/10 rounded-full blur-2xl pointer-events-none"></div>
+          <div class="flex justify-between items-start mb-3">
+            <div>
+              <span class="text-[11px] font-medium uppercase tracking-wider text-indigo-400">Advisor Meeting 倒數</span>
+              <div class="flex items-baseline gap-2 mt-0.5">
+                <span id="countdownDays" class="text-3xl font-extrabold text-white tracking-tight">3</span>
+                <span class="text-xs text-slate-300 font-medium">天後咪挺 (本週四 14:00)</span>
+              </div>
             </div>
-          </div>
-          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            本週已記 <span id="weekCount">5</span> 筆
-          </span>
-        </div>
-        
-        <!-- 進度條 -->
-        <div class="w-full bg-slate-700/50 rounded-full h-1.5 mb-2 overflow-hidden">
-          <div id="weekProgress" class="bg-gradient-to-r from-sky-400 to-indigo-500 h-1.5 rounded-full" style="width: 70%"></div>
-        </div>
-        <div class="flex justify-between text-[11px] text-slate-400">
-          <span>進度狀態：週報素材累積中</span>
-          <span id="todayStatusText">今日已打卡 ✅</span>
-        </div>
-      </div>
-
-      <!-- 分頁標籤切換 (Tab Navigation) -->
-      <div class="flex bg-slate-800/90 p-1 rounded-xl mt-4 border border-slate-700/50">
-        <button id="tabBtnTimeline" onclick="switchTab('timeline')" class="flex-1 py-2 text-xs font-semibold rounded-lg text-white bg-sky-600 shadow-sm flex items-center justify-center gap-1.5 transition-all">
-          <i data-lucide="list-todo" class="w-3.5 h-3.5"></i>
-          日常打卡動態
-        </button>
-        <button id="tabBtnReport" onclick="switchTab('report')" class="flex-1 py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5 transition-all">
-          <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
-          咪挺週報彙整
-          <span id="reportBadge" class="bg-sky-500/20 text-sky-400 text-[10px] px-1.5 py-0.2 rounded-full border border-sky-500/30">Ready</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- TAB 1: 時間軸打卡動態 -->
-    <div id="viewTimeline" class="p-4 space-y-4 flex-1">
-      
-      <!-- 快速輸入區 (Inline Quick Card) -->
-      <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-3.5 shadow-md">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-            <i data-lucide="plus-circle" class="w-4 h-4 text-sky-400"></i>
-            10秒隨手記一筆
-          </span>
-          <span class="text-[11px] text-slate-500">按 Enter 送出</span>
-        </div>
-
-        <!-- 類型選擇器 (Chips) -->
-        <div class="grid grid-cols-4 gap-1.5 mb-2.5">
-          <button type="button" onclick="selectCategory('progress')" id="catBtn-progress" class="cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
-            🚀 進展
-          </button>
-          <button type="button" onclick="selectCategory('blocker')" id="catBtn-blocker" class="cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700 hover:border-rose-500/30">
-            🛑 卡點
-          </button>
-          <button type="button" onclick="selectCategory('discussion')" id="catBtn-discussion" class="cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700 hover:border-amber-500/30">
-            ❓ 咪挺提綱
-          </button>
-          <button type="button" onclick="selectCategory('idea')" id="catBtn-idea" class="cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700 hover:border-sky-500/30">
-            💡 靈感
-          </button>
-        </div>
-
-        <!-- 輸入框 -->
-        <div class="relative">
-          <textarea id="noteInput" rows="2" placeholder="例：調了 learning rate 到 1e-4，驗證集 loss 下降了 0.12..." class="w-full bg-slate-900/90 text-sm text-slate-100 placeholder-slate-500 border border-slate-700/80 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all resize-none"></textarea>
-        </div>
-
-        <!-- 標籤選擇 & 儲存按鈕 -->
-        <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-700/50">
-          <div class="flex items-center gap-1 overflow-x-auto pb-1 max-w-[70%]">
-            <span class="text-[10px] text-slate-500 mr-1 flex-shrink-0">標籤:</span>
-            <button onclick="toggleTag('#實驗調參')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition flex-shrink-0">#實驗調參</button>
-            <button onclick="toggleTag('#論文速讀')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition flex-shrink-0">#論文速讀</button>
-            <button onclick="toggleTag('#Bug排除')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition flex-shrink-0">#Bug排除</button>
-            <button onclick="toggleTag('#架構設計')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition flex-shrink-0">#架構設計</button>
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              本週已記 <span id="weekCount">5</span> 筆
+            </span>
           </div>
           
-          <button onclick="saveCurrentNote()" class="bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-medium text-xs px-3.5 py-1.5 rounded-xl shadow-md shadow-sky-600/30 flex items-center gap-1 transition-all">
-            <span>儲存</span>
-            <i data-lucide="send" class="w-3.5 h-3.5"></i>
-          </button>
+          <!-- 進度條 -->
+          <div class="w-full bg-slate-700/50 rounded-full h-1.5 mb-2 overflow-hidden">
+            <div id="weekProgress" class="bg-gradient-to-r from-sky-400 to-indigo-500 h-1.5 rounded-full" style="width: 70%"></div>
+          </div>
+          <div class="flex justify-between text-[11px] text-slate-400">
+            <span>累積能量：週報素材充實中</span>
+            <span id="todayStatusText">今日已打卡 ✅</span>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <!-- 篩選列 -->
-      <div class="flex items-center justify-between text-xs px-1">
-        <span class="text-slate-400 font-medium flex items-center gap-1">
-          <i data-lucide="history" class="w-3.5 h-3.5 text-slate-500"></i>
-          打卡記錄列表 (<span id="totalLogCount">0</span>)
-        </span>
-        <div class="flex items-center gap-1">
-          <button onclick="filterLogs('all')" id="filterBtn-all" class="filter-pill text-[11px] px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30">全部</button>
-          <button onclick="filterLogs('progress')" id="filterBtn-progress" class="filter-pill text-[11px] px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200">進展</button>
-          <button onclick="filterLogs('blocker')" id="filterBtn-blocker" class="filter-pill text-[11px] px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200">卡點</button>
-          <button onclick="filterLogs('discussion')" id="filterBtn-discussion" class="filter-pill text-[11px] px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200">提綱</button>
+      <!-- 快速輸入區 -->
+      <div class="p-4 space-y-4 flex-1">
+        <div class="bg-slate-850 bg-slate-800/70 border border-slate-700/80 rounded-2xl p-3.5 shadow-md">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+              <i data-lucide="plus-circle" class="w-4 h-4 text-sky-400"></i>
+              10秒隨手記一筆
+            </span>
+            <span class="text-[11px] text-slate-500">按 Enter 送出</span>
+          </div>
+
+          <!-- 類型選擇器 -->
+          <div class="grid grid-cols-4 gap-1.5 mb-2.5">
+            <button type="button" onclick="selectCategory('progress')" id="catBtn-progress" class="cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
+              🚀 進展
+            </button>
+            <button type="button" onclick="selectCategory('blocker')" id="catBtn-blocker" class="cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700 hover:border-rose-500/30">
+              🛑 卡點
+            </button>
+            <button type="button" onclick="selectCategory('discussion')" id="catBtn-discussion" class="cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700 hover:border-amber-500/30">
+              ❓ 提綱
+            </button>
+            <button type="button" onclick="selectCategory('idea')" id="catBtn-idea" class="cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700 hover:border-sky-500/30">
+              💡 靈感
+            </button>
+          </div>
+
+          <!-- 輸入框 -->
+          <div class="relative">
+            <textarea id="noteInput" rows="2" placeholder="調了 learning rate 到 1e-4，驗證集 loss 下降了 0.12..." class="w-full bg-slate-900/90 text-sm text-slate-100 placeholder-slate-500 border border-slate-700/80 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all resize-none"></textarea>
+          </div>
+
+          <!-- 標籤選擇 & 儲存按鈕 -->
+          <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-700/50">
+            <div class="flex items-center gap-1 overflow-x-auto pb-1 max-w-[70%]">
+              <span class="text-[10px] text-slate-500 mr-1 flex-shrink-0">標籤:</span>
+              <button onclick="toggleTag('#實驗調參')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition flex-shrink-0">#實驗調參</button>
+              <button onclick="toggleTag('#論文速讀')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition flex-shrink-0">#論文速讀</button>
+              <button onclick="toggleTag('#Bug排除')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition flex-shrink-0">#Bug排除</button>
+              <button onclick="toggleTag('#架構設計')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition flex-shrink-0">#架構設計</button>
+            </div>
+            
+            <button onclick="saveCurrentNote()" class="bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-medium text-xs px-3.5 py-1.5 rounded-xl shadow-md shadow-sky-600/30 flex items-center gap-1 transition-all">
+              <span>儲存</span>
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
         </div>
-      </div>
 
-      <!-- 打卡列表容器 -->
-      <div id="logListContainer" class="space-y-2.5">
-        <!-- 動態渲染項目 -->
+        <!-- 篩選列 -->
+        <div class="flex items-center justify-between text-xs px-1">
+          <span class="text-slate-400 font-medium flex items-center gap-1">
+            <i data-lucide="history" class="w-3.5 h-3.5 text-slate-500"></i>
+            打卡記錄 (<span id="totalLogCount">0</span>)
+          </span>
+          <div class="flex items-center gap-1">
+            <button onclick="filterLogs('all')" id="filterBtn-all" class="filter-pill text-[11px] px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30">全部</button>
+            <button onclick="filterLogs('progress')" id="filterBtn-progress" class="filter-pill text-[11px] px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200">進展</button>
+            <button onclick="filterLogs('blocker')" id="filterBtn-blocker" class="filter-pill text-[11px] px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200">卡點</button>
+            <button onclick="filterLogs('discussion')" id="filterBtn-discussion" class="filter-pill text-[11px] px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200">提綱</button>
+          </div>
+        </div>
+
+        <!-- 列表容器 -->
+        <div id="logListContainer" class="space-y-2.5"></div>
       </div>
     </div>
 
-    <!-- TAB 2: 咪挺週報彙整 -->
-    <div id="viewReport" class="p-4 space-y-4 flex-1 hidden">
-      
-      <!-- 週報控制列 -->
+    <!-- ========================================== -->
+    <!-- TAB 2: 咪挺週報 (Report) -->
+    <!-- ========================================== -->
+    <div id="tabContent-report" class="tab-pane flex flex-col flex-1 p-4 space-y-4 hidden">
+      <!-- 控制列 -->
       <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-lg">
         <div class="flex items-center justify-between mb-3">
           <div>
             <h2 class="text-sm font-bold text-white flex items-center gap-1.5">
               <i data-lucide="file-check-2" class="w-4 h-4 text-emerald-400"></i>
-              本週 Advisor Meeting 報告草稿
+              Advisor Meeting 週報草稿
             </h2>
             <p class="text-[11px] text-slate-400 mt-0.5" id="reportDateRange">統計週期：2026/11/18 ~ 2026/11/24</p>
           </div>
@@ -202,7 +193,6 @@
           </button>
         </div>
 
-        <!-- 快捷操作列 (AI 潤飾 / 複製 / 匯出) -->
         <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-700/60">
           <button onclick="polishWithAI()" class="py-2 px-2 bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-500/20 flex items-center justify-center gap-1.5 transition">
             <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
@@ -219,10 +209,8 @@
         </div>
       </div>
 
-      <!-- 週報四大區塊容器 (可折疊/可編輯) -->
-      <div class="space-y-3" id="reportSectionsContainer">
-        
-        <!-- 區塊 1: 本週成果 -->
+      <!-- 四大區塊 -->
+      <div class="space-y-3">
         <div class="bg-slate-800/60 border border-slate-700/70 rounded-xl p-3.5">
           <div class="flex items-center justify-between mb-2">
             <h3 class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
@@ -230,11 +218,9 @@
             </h3>
             <span class="text-[10px] text-slate-400 bg-slate-700/60 px-1.5 py-0.5 rounded" id="countDone">0 項</span>
           </div>
-          <div id="sectionDone" contenteditable="true" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed focus:outline-none focus:border-emerald-500/50 min-h-[60px] whitespace-pre-wrap">
-          </div>
+          <div id="sectionDone" contenteditable="true" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed focus:outline-none focus:border-emerald-500/50 min-h-[60px] whitespace-pre-wrap"></div>
         </div>
 
-        <!-- 區塊 2: 遭遇瓶頸與卡點 -->
         <div class="bg-slate-800/60 border border-slate-700/70 rounded-xl p-3.5">
           <div class="flex items-center justify-between mb-2">
             <h3 class="text-xs font-bold text-rose-400 flex items-center gap-1.5">
@@ -242,11 +228,9 @@
             </h3>
             <span class="text-[10px] text-slate-400 bg-slate-700/60 px-1.5 py-0.5 rounded" id="countBlockers">0 項</span>
           </div>
-          <div id="sectionBlockers" contenteditable="true" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed focus:outline-none focus:border-rose-500/50 min-h-[60px] whitespace-pre-wrap">
-          </div>
+          <div id="sectionBlockers" contenteditable="true" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed focus:outline-none focus:border-rose-500/50 min-h-[60px] whitespace-pre-wrap"></div>
         </div>
 
-        <!-- 區塊 3: 預計與指導教授討論事項 -->
         <div class="bg-slate-800/60 border border-slate-700/70 rounded-xl p-3.5">
           <div class="flex items-center justify-between mb-2">
             <h3 class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
@@ -254,11 +238,9 @@
             </h3>
             <span class="text-[10px] text-slate-400 bg-slate-700/60 px-1.5 py-0.5 rounded" id="countDiscussions">0 項</span>
           </div>
-          <div id="sectionDiscussions" contenteditable="true" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed focus:outline-none focus:border-amber-500/50 min-h-[60px] whitespace-pre-wrap">
-          </div>
+          <div id="sectionDiscussions" contenteditable="true" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed focus:outline-none focus:border-amber-500/50 min-h-[60px] whitespace-pre-wrap"></div>
         </div>
 
-        <!-- 區塊 4: 下週推進規劃 -->
         <div class="bg-slate-800/60 border border-slate-700/70 rounded-xl p-3.5">
           <div class="flex items-center justify-between mb-2">
             <h3 class="text-xs font-bold text-sky-400 flex items-center gap-1.5">
@@ -266,31 +248,352 @@
             </h3>
             <span class="text-[10px] text-slate-400 bg-slate-700/60 px-1.5 py-0.5 rounded" id="countNextSteps">0 項</span>
           </div>
-          <div id="sectionNextSteps" contenteditable="true" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed focus:outline-none focus:border-sky-500/50 min-h-[60px] whitespace-pre-wrap">
-          </div>
+          <div id="sectionNextSteps" contenteditable="true" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed focus:outline-none focus:border-sky-500/50 min-h-[60px] whitespace-pre-wrap"></div>
         </div>
-
       </div>
-
     </div>
 
-    <!-- 底部固定浮動狀態提示 Toast -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 border border-sky-500/50 text-white text-xs px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-200 z-50">
+    <!-- ========================================== -->
+    <!-- TAB 3: 論文膠囊 (PaperCapsule) -->
+    <!-- ========================================== -->
+    <div id="tabContent-papers" class="tab-pane flex flex-col flex-1 p-4 space-y-4 hidden">
+      <!-- 論文膠囊頂部狀態 -->
+      <div class="bg-gradient-to-br from-violet-950/60 via-slate-800 to-indigo-950/40 border border-violet-500/30 rounded-2xl p-4 shadow-lg">
+        <div class="flex justify-between items-start mb-3">
+          <div>
+            <span class="text-[11px] font-medium uppercase tracking-wider text-violet-400">PaperCapsule 記憶卡庫</span>
+            <div class="flex items-baseline gap-2 mt-0.5">
+              <span id="paperTotalCount" class="text-3xl font-extrabold text-white tracking-tight">4</span>
+              <span class="text-xs text-slate-300 font-medium">篇精讀文獻</span>
+            </div>
+          </div>
+          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-violet-500/20 text-violet-300 border border-violet-500/30">
+            今日待複習 <span id="reviewDueCount" class="font-bold">2</span> 篇
+          </span>
+        </div>
+
+        <!-- 進入翻卡記憶模式按鈕 -->
+        <div class="flex gap-2 mt-2">
+          <button onclick="startFlashcardMode()" class="flex-1 py-2 px-3 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-violet-600/30 flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="layers" class="w-4 h-4"></i>
+            開始今日翻卡複習 (Flashcards)
+          </button>
+          <button onclick="openNewPaperModal()" class="py-2 px-3 bg-slate-700/80 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-semibold flex items-center gap-1 border border-slate-600 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            新增膠囊
+          </button>
+        </div>
+      </div>
+
+      <!-- 論文清單 -->
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between text-xs px-1">
+          <span class="text-slate-400 font-medium">文獻 4 維度快照庫</span>
+          <span class="text-[11px] text-slate-500">點擊卡片查看核心細節</span>
+        </div>
+        <div id="paperListContainer" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: 實驗踩坑 (LabLog) -->
+    <!-- ========================================== -->
+    <div id="tabContent-lablog" class="tab-pane flex flex-col flex-1 p-4 space-y-4 hidden">
+      <!-- 頂部切換與統計 -->
+      <div class="bg-gradient-to-br from-emerald-950/50 via-slate-800 to-teal-950/40 border border-emerald-500/20 rounded-2xl p-4 shadow-lg">
+        <div class="flex justify-between items-start mb-3">
+          <div>
+            <span class="text-[11px] font-medium uppercase tracking-wider text-emerald-400">LabLog 實驗避坑知識庫</span>
+            <div class="flex items-baseline gap-2 mt-0.5">
+              <span id="labLogTotalCount" class="text-3xl font-extrabold text-white tracking-tight">3</span>
+              <span class="text-xs text-slate-300 font-medium">筆記錄 (快照 & 避坑)</span>
+            </div>
+          </div>
+          <button onclick="openNewLabLogModal()" class="py-1.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1 shadow-md shadow-emerald-600/30 transition">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            記一筆
+          </button>
+        </div>
+
+        <!-- 類型切換 (Run Snapshot vs Gotchas) -->
+        <div class="flex bg-slate-900/80 p-1 rounded-xl border border-slate-700/60 mt-1">
+          <button onclick="filterLabLogs('all')" id="labFilter-all" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-white bg-emerald-600 shadow-sm transition">全部</button>
+          <button onclick="filterLabLogs('run')" id="labFilter-run" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition">🧪 實驗快照</button>
+          <button onclick="filterLabLogs('gotcha')" id="labFilter-gotcha" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition">🪲 踩坑避雷</button>
+        </div>
+      </div>
+
+      <!-- 實驗記錄列表 -->
+      <div id="labLogListContainer" class="space-y-3"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 底部固定 4-Tab 導覽列 (Bottom Navigation) -->
+    <!-- ========================================== -->
+    <nav class="fixed bottom-0 left-0 right-0 max-w-md md:max-w-xl mx-auto bg-slate-900/95 backdrop-blur-md border-t border-slate-800 py-2 px-3 z-40 flex justify-around items-center">
+      <!-- Tab 1: 今日動態 -->
+      <button onclick="navigateTab('today')" id="nav-today" class="nav-tab-btn flex flex-col items-center gap-1 py-1 px-3 text-sky-400 transition">
+        <i data-lucide="check-square" class="w-5 h-5"></i>
+        <span class="text-[10px] font-semibold">今日動態</span>
+      </button>
+
+      <!-- Tab 2: 咪挺週報 -->
+      <button onclick="navigateTab('report')" id="nav-report" class="nav-tab-btn flex flex-col items-center gap-1 py-1 px-3 text-slate-400 hover:text-slate-200 transition">
+        <i data-lucide="file-text" class="w-5 h-5"></i>
+        <span class="text-[10px] font-semibold">咪挺週報</span>
+      </button>
+
+      <!-- Tab 3: 論文膠囊 -->
+      <button onclick="navigateTab('papers')" id="nav-papers" class="nav-tab-btn flex flex-col items-center gap-1 py-1 px-3 text-slate-400 hover:text-slate-200 transition">
+        <i data-lucide="book-open" class="w-5 h-5"></i>
+        <span class="text-[10px] font-semibold">論文膠囊</span>
+      </button>
+
+      <!-- Tab 4: 實驗踩坑 -->
+      <button onclick="navigateTab('lablog')" id="nav-lablog" class="nav-tab-btn flex flex-col items-center gap-1 py-1 px-3 text-slate-400 hover:text-slate-200 transition">
+        <i data-lucide="flask-conical" class="w-5 h-5"></i>
+        <span class="text-[10px] font-semibold">實驗踩坑</span>
+      </button>
+    </nav>
+
+    <!-- 浮動提示 Toast -->
+    <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-slate-800 border border-sky-500/50 text-white text-xs px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-200 z-50">
       <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
-      <span id="toastMsg">已複製到剪貼簿</span>
+      <span id="toastMsg">操作成功</span>
     </div>
 
   </main>
 
+  <!-- ========================================== -->
+  <!-- MODAL 1: 沉浸式翻卡複習模式 (Flashcard Deck) -->
+  <!-- ========================================== -->
+  <div id="flashcardModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex flex-col items-center justify-center p-4 hidden">
+    <div class="w-full max-w-md flex justify-between items-center mb-4">
+      <div class="flex items-center gap-2 text-violet-400 text-xs font-bold">
+        <i data-lucide="layers" class="w-4 h-4"></i>
+        <span>PaperCapsule 翻卡記憶</span>
+        <span id="flashcardProgress" class="bg-violet-500/20 px-2 py-0.5 rounded-full text-[10px]">1 / 4</span>
+      </div>
+      <button onclick="closeFlashcardMode()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- 翻轉卡片容器 -->
+    <div class="w-full max-w-md h-[420px] perspective-1000 cursor-pointer" onclick="flipCard()">
+      <div id="flashcardInner" class="w-full h-full relative transform-style-3d transition-transform duration-500 rounded-3xl shadow-2xl border border-slate-700">
+        
+        <!-- 正面 (Front: 問題與標題) -->
+        <div class="absolute inset-0 backface-hidden bg-gradient-to-br from-slate-900 via-slate-850 to-indigo-950/80 rounded-3xl p-6 flex flex-col justify-between border border-violet-500/30">
+          <div>
+            <div class="flex justify-between items-start mb-3">
+              <span id="fcVenue" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">NeurIPS 2023</span>
+              <span class="text-[11px] text-slate-400" id="fcYear">2023</span>
+            </div>
+            <h2 id="fcTitle" class="text-base font-extrabold text-white leading-snug mb-2">QLoRA: Efficient Finetuning of Quantized LLMs</h2>
+            <p id="fcAuthors" class="text-xs text-slate-400 mb-4">Tim Dettmers et al.</p>
+            
+            <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60 mt-2">
+              <span class="text-[10px] font-bold text-sky-400 uppercase tracking-wider block mb-1">🎯 核心探討問題 (Target Problem)</span>
+              <p id="fcProblem" class="text-xs text-slate-200 leading-relaxed">全參數微調 65B LLM 需動用多張 A100 GPU，顯存成本極高，一般實驗室無法負荷。</p>
+            </div>
+          </div>
+
+          <div class="text-center text-slate-400 text-xs flex items-center justify-center gap-1 animate-pulse">
+            <i data-lucide="touchpad" class="w-4 h-4"></i>
+            點擊卡片翻看【核心方法與結論】
+          </div>
+        </div>
+
+        <!-- 背面 (Back: 方法、成果與限制) -->
+        <div class="absolute inset-0 backface-hidden rotate-y-180 bg-gradient-to-br from-slate-900 via-slate-850 to-violet-950/80 rounded-3xl p-6 flex flex-col justify-between border border-violet-500/40 overflow-y-auto">
+          <div class="space-y-3">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-700/60">
+              <span class="text-xs font-bold text-violet-300">💡 核心解構 (Backside)</span>
+              <span class="text-[10px] text-slate-400">點擊再次翻轉</span>
+            </div>
+
+            <div class="bg-slate-800/80 rounded-xl p-2.5 border border-slate-700/60">
+              <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block mb-0.5">⚙️ 核心架構 (Core Method)</span>
+              <p id="fcMethod" class="text-xs text-slate-200 leading-relaxed">4-bit NormalFloat (NF4) 量化 + Double Quantization + Paged Optimizers。</p>
+            </div>
+
+            <div class="bg-slate-800/80 rounded-xl p-2.5 border border-slate-700/60">
+              <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider block mb-0.5">📈 關鍵成果 (Key Findings)</span>
+              <p id="fcFinding" class="text-xs text-slate-200 leading-relaxed">單張 48GB GPU 即可微調 65B 參數模型，達到 16-bit 全參數微調 99.3% 效能。</p>
+            </div>
+
+            <div class="bg-slate-800/80 rounded-xl p-2.5 border border-slate-700/60">
+              <span class="text-[10px] font-bold text-rose-400 uppercase tracking-wider block mb-0.5">⚠️ 研究局限 (Limitations)</span>
+              <p id="fcLimitation" class="text-xs text-slate-200 leading-relaxed">量化後推理與訓練延遲較全精度略高，對超長 Context 仍有顯存開銷。</p>
+            </div>
+          </div>
+
+          <div class="text-[11px] text-slate-400 text-center mt-2">評估記憶程度以排定下次複習</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 記憶回饋按鈕 (SM-2 算法評分) -->
+    <div class="w-full max-w-md grid grid-cols-3 gap-2.5 mt-5">
+      <button onclick="gradeFlashcard(1)" class="py-2.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/40 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
+        🔴 模糊 / 忘了
+      </button>
+      <button onclick="gradeFlashcard(2)" class="py-2.5 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
+        🟡 需再加強
+      </button>
+      <button onclick="gradeFlashcard(3)" class="py-2.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
+        🟢 熟記清楚
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL 2: 新增論文膠囊 (New Paper Capsule) -->
+  <!-- ========================================== -->
+  <div id="newPaperModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-3 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+        <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+          <i data-lucide="book-plus" class="w-4 h-4 text-violet-400"></i>
+          新增論文膠囊 (4 維度)
+        </h3>
+        <button onclick="closeNewPaperModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">論文標題 (Title)</label>
+          <input id="npTitle" type="text" placeholder="例：LoRA: Low-Rank Adaptation of Large Language Models" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-violet-500">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">主要作者</label>
+            <input id="npAuthors" type="text" placeholder="例：Edward J. Hu et al." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-violet-500">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">年份 / 研討會</label>
+            <input id="npVenue" type="text" placeholder="例：ICLR 2022" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-violet-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">🎯 核心探討問題 (Target Problem)</label>
+          <textarea id="npProblem" rows="2" placeholder="這篇論文具體想解決什麼痛點？" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-violet-500 resize-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">⚙️ 核心技術與架構 (Core Method)</label>
+          <textarea id="npMethod" rows="2" placeholder="提出了什麼創新模組或演算法？" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-violet-500 resize-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">📈 關鍵成果與數據 (Key Findings)</label>
+          <textarea id="npFinding" rows="2" placeholder="取得了什麼 SOTA 指標或關鍵消融結論？" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-violet-500 resize-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">⚠️ 局限性與未來方向 (Limitations)</label>
+          <textarea id="npLimitation" rows="2" placeholder="還有哪些未解問題或缺陷？" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-violet-500 resize-none"></textarea>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end gap-2">
+        <button onclick="closeNewPaperModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs">取消</button>
+        <button onclick="saveNewPaperCapsule()" class="px-4 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-violet-600/30">儲存膠囊</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL 3: 新增實驗記錄 / 踩坑日誌 (New LabLog) -->
+  <!-- ========================================== -->
+  <div id="newLabLogModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-3 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+        <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+          <i data-lucide="flask-conical" class="w-4 h-4 text-emerald-400"></i>
+          記一筆實驗快照 / 避坑
+        </h3>
+        <button onclick="closeNewLabLogModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- 類型切換 -->
+      <div class="flex bg-slate-800 p-1 rounded-xl">
+        <button type="button" onclick="selectLabLogType('run')" id="llTypeBtn-run" class="flex-1 py-1 text-xs font-semibold rounded-lg bg-emerald-600 text-white shadow-sm">🧪 實驗 Run 快照</button>
+        <button type="button" onclick="selectLabLogType('gotcha')" id="llTypeBtn-gotcha" class="flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white">🪲 踩坑避雷 Gotcha</button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">標題 / 描述</label>
+          <input id="llTitle" type="text" placeholder="例：ResNet-50 對比實驗 或 CUDA OOM 報錯解決" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <!-- 針對 Run 快照的欄位 -->
+        <div id="llRunFields" class="space-y-2">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-slate-400 mb-1">Batch Size</label>
+              <input id="llBatch" type="text" placeholder="32" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Learning Rate</label>
+              <input id="llLr" type="text" placeholder="1e-4" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">核心指標 / 結論</label>
+            <input id="llMetrics" type="text" placeholder="例：Validation Acc: 89.2%, Loss: 0.18" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+          </div>
+        </div>
+
+        <!-- 針對 Gotcha 的欄位 -->
+        <div id="llGotchaFields" class="space-y-2 hidden">
+          <div>
+            <label class="block text-slate-400 mb-1">報錯症狀 (Symptom)</label>
+            <input id="llSymptom" type="text" placeholder="例：PyTorch DataLoader memory leak 卡住" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">⚡ 一行秒殺解法 (Solution)</label>
+            <textarea id="llSolution" rows="2" placeholder="例：設定 persistent_workers=True 或 del variable" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 resize-none"></textarea>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">標籤 (逗號分隔)</label>
+          <input id="llTags" type="text" placeholder="#PyTorch, #GPU, #消融實驗" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end gap-2">
+        <button onclick="closeNewLabLogModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs">取消</button>
+        <button onclick="saveNewLabLogEntry()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-emerald-600/30">儲存記錄</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript 核心程式碼 -->
   <script>
-    // --- 資料結構與本機儲存 (LocalStorage) ---
-    const STORAGE_KEY = 'reseaver_labpulse_logs';
+    // --- 儲存 Key 與全域狀態 ---
+    const STORAGE_KEY_LOGS = 'reseaver_labpulse_logs';
+    const STORAGE_KEY_PAPERS = 'reseaver_paper_capsules';
+    const STORAGE_KEY_LABLOGS = 'reseaver_lab_logs';
+
+    let currentTab = 'today';
     let currentCategory = 'progress';
     let selectedTags = [];
     let currentFilter = 'all';
 
-    // 預設研究生範例資料
-    const SAMPLE_LOGS = [
+    // 論文翻卡狀態
+    let flashcardIndex = 0;
+    let isFlipped = false;
+    let activeLabLogType = 'run';
+    let currentLabFilter = 'all';
+
+    // --- 預設豐富範例資料 ---
+    const DEFAULT_LOGS = [
       {
         id: '1',
         category: 'progress',
@@ -328,12 +631,101 @@
       }
     ];
 
-    // 初始化載入
+    const DEFAULT_PAPERS = [
+      {
+        id: 'p1',
+        title: 'QLoRA: Efficient Finetuning of Quantized LLMs',
+        authors: 'Tim Dettmers et al.',
+        year: 2023,
+        venue: 'NeurIPS 2023',
+        tags: ['#LLM', '#Quantization', '#LoRA'],
+        targetProblem: '全參數微調 65B LLM 需動用多張 A100 GPU，顯存成本極高，一般實驗室無法負荷。',
+        coreMethod: '提出 4-bit NormalFloat (NF4) 量化、Double Quantization 與 Paged Optimizers，在量化凍結基礎模型上外掛 LoRA 權重。',
+        keyFinding: '單張 48GB GPU 即可微調 65B 參數模型，保持 16-bit 全參數微調 99.3% 效能。',
+        limitation: '量化推理與訓練反向傳播延遲較全精度略高，對超長 Context 仍有顯存開銷。',
+        createdAt: new Date(Date.now() - 86400000 * 3).toISOString()
+      },
+      {
+        id: 'p2',
+        title: 'Attention Is All You Need',
+        authors: 'Ashish Vaswani et al.',
+        year: 2017,
+        venue: 'NeurIPS 2017',
+        tags: ['#Transformer', '#Attention', '#Baseline'],
+        targetProblem: 'RNN / LSTM 無法平行化訓練，且在長距離依賴上容易遺忘梯度。',
+        coreMethod: '完全揚棄遞迴與卷積，純粹基於 Multi-Head Self-Attention 與 Positional Encoding 進行平行特徵提取。',
+        keyFinding: '在 WMT 2014 英德翻譯達到 28.4 BLEU，大幅超越既有 SOTA 且訓練速度快數倍。',
+        limitation: 'Self-Attention 複雜度隨序列長度成二次方成長 O(N^2)，長文本資源消耗大。',
+        createdAt: new Date(Date.now() - 86400000 * 7).toISOString()
+      },
+      {
+        id: 'p3',
+        title: 'DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning',
+        authors: 'DeepSeek-AI',
+        year: 2025,
+        venue: 'ArXiv 2025',
+        tags: ['#Reasoning', '#RL', '#ColdStart'],
+        targetProblem: '大模型推理能力通常依賴昂貴且大量的人工標註 CoT 數據，擴展性受限。',
+        coreMethod: '採用純強化學習（Large-Scale RL）激勵模型自我探索推理路徑，並透過冷啟動數據微調產出蒸餾模型。',
+        keyFinding: '在 AIME 2024、MATH-500 等數學推理測試表現比肩 OpenAI o1-preview。',
+        limitation: '語言混合與可讀性需透過多階段微調約束，純 RL 早期訓練容易出現格式坍塌。',
+        createdAt: new Date(Date.now() - 86400000 * 1).toISOString()
+      },
+      {
+        id: 'p4',
+        title: 'LoRA: Low-Rank Adaptation of Large Language Models',
+        authors: 'Edward J. Hu et al.',
+        year: 2021,
+        venue: 'ICLR 2022',
+        tags: ['#PEFT', '#ParameterEfficient'],
+        targetProblem: '對不同下游任務保存完整模型副本開銷龐大。',
+        coreMethod: '凍結預訓練權重，將權重變化矩陣分解為低秩矩陣乘積 W + B*A (Rank r << d)。',
+        keyFinding: '可訓練參數減少 10,000 倍，GPU 顯存需求降低 3 倍，效能不降反升。',
+        limitation: '批次處理混合不同 LoRA 模組時推理吞吐量受限。',
+        createdAt: new Date(Date.now() - 86400000 * 5).toISOString()
+      }
+    ];
+
+    const DEFAULT_LABLOGS = [
+      {
+        id: 'l1',
+        type: 'gotcha',
+        title: 'PyTorch DDP (DistributedDataParallel) 死鎖超時',
+        tags: ['#PyTorch', '#DDP', '#避雷'],
+        symptom: '多卡分散式訓練在 epoch 結束時 hang 住無回應，最後噴 NCCL timeout。',
+        solution: '檢查各 rank 是否在某個條件分支下執行了未同步的 reduce 或驗證；確保所有 rank 參與相同的 forward 邏輯。',
+        createdAt: new Date(Date.now() - 3600000 * 5).toISOString()
+      },
+      {
+        id: 'l2',
+        type: 'run',
+        title: 'Run-04: 加入 CosineAnnealingLR 與 Weight Decay 0.01',
+        tags: ['#調參', '#消融實驗'],
+        parameters: {
+          model: 'ResNet50-Custom',
+          batchSize: 32,
+          learningRate: '1e-4 -> 1e-6',
+          metrics: 'Top-1 Acc: 91.4% (比上一版 +1.2%)'
+        },
+        notes: 'Cosine 衰減在後半段 epoch 克服了過擬合，驗證集 loss 曲線顯著平滑。',
+        createdAt: new Date(Date.now() - 3600000 * 18).toISOString()
+      },
+      {
+        id: 'l3',
+        type: 'gotcha',
+        title: 'Mixed Precision (AMP) 訓練出現 Loss 變成 NaN',
+        tags: ['#AMP', '#NaN', '#數值穩定'],
+        symptom: '啟用 torch.cuda.amp.autocast 後第 2 個 epoch loss 突變 NaN。',
+        solution: '確保使用 GradScaler()：scaler.scale(loss).backward() 與 scaler.step(optimizer)，並加入 clip_grad_norm_。',
+        createdAt: new Date(Date.now() - 3600000 * 30).toISOString()
+      }
+    ];
+
+    // 初始化
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
-      initLogs();
-      updateDashboard();
-      generateReportFromLogs();
+      initAllData();
+      renderAll();
 
       // Enter 鍵快速提交 (Shift+Enter 換行)
       document.getElementById('noteInput').addEventListener('keydown', (e) => {
@@ -344,32 +736,69 @@
       });
     });
 
-    function getStoredLogs() {
-      const data = localStorage.getItem(STORAGE_KEY);
-      if (!data) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(SAMPLE_LOGS));
-        return SAMPLE_LOGS;
+    function initAllData() {
+      if (!localStorage.getItem(STORAGE_KEY_LOGS)) {
+        localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(DEFAULT_LOGS));
       }
-      try {
-        return JSON.parse(data);
-      } catch (e) {
-        return [];
+      if (!localStorage.getItem(STORAGE_KEY_PAPERS)) {
+        localStorage.setItem(STORAGE_KEY_PAPERS, JSON.stringify(DEFAULT_PAPERS));
+      }
+      if (!localStorage.getItem(STORAGE_KEY_LABLOGS)) {
+        localStorage.setItem(STORAGE_KEY_LABLOGS, JSON.stringify(DEFAULT_LABLOGS));
       }
     }
 
-    function saveLogs(logs) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
-      updateDashboard();
+    function renderAll() {
       renderLogs();
+      updateDashboard();
+      generateReportFromLogs();
+      renderPapers();
+      renderLabLogs();
+    }
+
+    // --- 導覽列切換 (4-Tab Switcher) ---
+    function navigateTab(tab) {
+      currentTab = tab;
+      const tabs = ['today', 'report', 'papers', 'lablog'];
+      const badges = {
+        today: { name: 'LabPulse', sub: '研究生日常速記 · 自動週報' },
+        report: { name: 'Meeting 週報', sub: '四大標準區塊 · AI 潤飾匯出' },
+        papers: { name: 'PaperCapsule', sub: '四維度文獻卡 · 間隔記憶複習' },
+        lablog: { name: 'LabLog', sub: '實驗 Run 快照 · 避坑知識庫' }
+      };
+
+      tabs.forEach(t => {
+        const pane = document.getElementById(`tabContent-${t}`);
+        const btn = document.getElementById(`nav-${t}`);
+        if (t === tab) {
+          pane.classList.remove('hidden');
+          btn.className = 'nav-tab-btn flex flex-col items-center gap-1 py-1 px-3 text-sky-400 transition';
+        } else {
+          pane.classList.add('hidden');
+          btn.className = 'nav-tab-btn flex flex-col items-center gap-1 py-1 px-3 text-slate-400 hover:text-slate-200 transition';
+        }
+      });
+
+      document.getElementById('headerModuleBadge').textContent = badges[tab].name;
+      document.getElementById('headerSubtext').textContent = badges[tab].sub;
+
+      if (tab === 'report') generateReportFromLogs();
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // 模組一：LabPulse 日常打卡與時間軸
+    // ==========================================
+    function getStoredLogs() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY_LOGS)) || []; } catch { return []; }
+    }
+    function saveLogs(logs) {
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));
+      renderLogs();
+      updateDashboard();
       generateReportFromLogs();
     }
 
-    function initLogs() {
-      const logs = getStoredLogs();
-      renderLogs();
-    }
-
-    // --- 分類與標籤互動 ---
     function selectCategory(cat) {
       currentCategory = cat;
       const cats = ['progress', 'blocker', 'discussion', 'idea'];
@@ -379,29 +808,17 @@
         discussion: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
         idea: 'bg-sky-500/20 text-sky-300 border-sky-500/40'
       };
-
       cats.forEach(c => {
-        const btn = document.getElementById(`catBtn-${c}`);
-        btn.className = 'cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700';
+        document.getElementById(`catBtn-${c}`).className = 'cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700';
       });
-
-      const activeBtn = document.getElementById(`catBtn-${cat}`);
-      activeBtn.className = `cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all ${styles[cat]}`;
+      document.getElementById(`catBtn-${cat}`).className = `cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all ${styles[cat]}`;
     }
 
     function toggleTag(tag) {
-      if (selectedTags.includes(tag)) {
-        selectedTags = selectedTags.filter(t => t !== tag);
-      } else {
-        selectedTags.push(tag);
-      }
-      updateTagStyles();
-    }
-
-    function updateTagStyles() {
+      if (selectedTags.includes(tag)) selectedTags = selectedTags.filter(t => t !== tag);
+      else selectedTags.push(tag);
       document.querySelectorAll('.tag-chip').forEach(btn => {
-        const tagText = btn.textContent.trim();
-        if (selectedTags.includes(tagText)) {
+        if (selectedTags.includes(btn.textContent.trim())) {
           btn.className = 'tag-chip text-[11px] px-2 py-0.5 rounded-md bg-sky-500 text-white font-medium flex-shrink-0';
         } else {
           btn.className = 'tag-chip text-[11px] px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition flex-shrink-0';
@@ -409,52 +826,36 @@
       });
     }
 
-    // --- 儲存新紀錄 ---
     function saveCurrentNote() {
       const input = document.getElementById('noteInput');
       const text = input.value.trim();
-      if (!text) {
-        showToast('請輸入記錄內容！');
-        return;
-      }
-
+      if (!text) return showToast('請輸入記錄內容！');
       const logs = getStoredLogs();
-      const newEntry = {
+      logs.unshift({
         id: Date.now().toString(),
         category: currentCategory,
         content: text,
         tags: [...selectedTags],
         createdAt: new Date().toISOString()
-      };
-
-      logs.unshift(newEntry);
+      });
       saveLogs(logs);
-
-      // 清空輸入
       input.value = '';
       selectedTags = [];
-      updateTagStyles();
+      document.querySelectorAll('.tag-chip').forEach(b => b.className = 'tag-chip text-[11px] px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition flex-shrink-0');
       showToast('已成功記錄！');
     }
 
-    // --- 刪除紀錄 ---
     function deleteLog(id) {
-      const logs = getStoredLogs().filter(item => item.id !== id);
-      saveLogs(logs);
+      saveLogs(getStoredLogs().filter(l => l.id !== id));
       showToast('已刪除該筆記錄');
     }
 
-    // --- 篩選與渲染時間軸 ---
     function filterLogs(category) {
       currentFilter = category;
-      const cats = ['all', 'progress', 'blocker', 'discussion'];
-      cats.forEach(c => {
-        const btn = document.getElementById(`filterBtn-${c}`);
-        if (c === category) {
-          btn.className = 'filter-pill text-[11px] px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30';
-        } else {
-          btn.className = 'filter-pill text-[11px] px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200';
-        }
+      ['all', 'progress', 'blocker', 'discussion'].forEach(c => {
+        document.getElementById(`filterBtn-${c}`).className = c === category 
+          ? 'filter-pill text-[11px] px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30'
+          : 'filter-pill text-[11px] px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200';
       });
       renderLogs();
     }
@@ -463,39 +864,29 @@
       const container = document.getElementById('logListContainer');
       const logs = getStoredLogs();
       const filtered = currentFilter === 'all' ? logs : logs.filter(l => l.category === currentFilter);
-      
       document.getElementById('totalLogCount').textContent = filtered.length;
 
       if (filtered.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-10 text-slate-500 text-xs">
-            <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
-            目前尚無符合的記錄，在上方速記一筆吧！
-          </div>
-        `;
-        lucide.createIcons();
+        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">目前尚無記錄，在上方速記一筆吧！</div>`;
         return;
       }
 
-      const categoryConfig = {
-        progress: { label: '進展', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30', icon: 'check-circle' },
-        blocker: { label: '卡點', color: 'bg-rose-500/10 text-rose-400 border-rose-500/30', icon: 'alert-triangle' },
-        discussion: { label: '提綱', color: 'bg-amber-500/10 text-amber-400 border-amber-500/30', icon: 'message-circle' },
-        idea: { label: '靈感', color: 'bg-sky-500/10 text-sky-400 border-sky-500/30', icon: 'lightbulb' }
+      const confMap = {
+        progress: { label: '進展', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
+        blocker: { label: '卡點', color: 'bg-rose-500/10 text-rose-400 border-rose-500/30' },
+        discussion: { label: '提綱', color: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
+        idea: { label: '靈感', color: 'bg-sky-500/10 text-sky-400 border-sky-500/30' }
       };
 
       container.innerHTML = filtered.map(item => {
-        const conf = categoryConfig[item.category] || categoryConfig.progress;
+        const conf = confMap[item.category] || confMap.progress;
         const timeStr = formatRelativeTime(item.createdAt);
         const tagsHtml = (item.tags || []).map(t => `<span class="text-[10px] bg-slate-700/60 text-slate-300 px-1.5 py-0.5 rounded">${t}</span>`).join(' ');
-
         return `
           <div class="bg-slate-850 bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 hover:border-slate-600 transition group">
             <div class="flex items-start justify-between gap-2 mb-1.5">
               <div class="flex items-center gap-1.5">
-                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full border ${conf.color}">
-                  ${conf.label}
-                </span>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full border ${conf.color}">${conf.label}</span>
                 <span class="text-[11px] text-slate-500">${timeStr}</span>
               </div>
               <button onclick="deleteLog('${item.id}')" class="text-slate-500 hover:text-rose-400 p-1 opacity-0 group-hover:opacity-100 transition rounded" title="刪除">
@@ -503,30 +894,34 @@
               </button>
             </div>
             <p class="text-xs text-slate-200 leading-relaxed">${escapeHtml(item.content)}</p>
-            ${item.tags && item.tags.length > 0 ? `<div class="flex flex-wrap gap-1 mt-2 pt-1.5 border-t border-slate-700/40">${tagsHtml}</div>` : ''}
+            ${tagsHtml ? `<div class="flex flex-wrap gap-1 mt-2 pt-1.5 border-t border-slate-700/40">${tagsHtml}</div>` : ''}
           </div>
         `;
       }).join('');
-
       lucide.createIcons();
     }
 
-    // --- 週報自動彙整引擎 ---
+    function updateDashboard() {
+      const count = getStoredLogs().length;
+      document.getElementById('weekCount').textContent = count;
+      document.getElementById('weekProgress').style.width = `${Math.min(100, Math.max(15, count * 20))}%`;
+    }
+
+    // ==========================================
+    // 模組二：咪挺週報彙整與 AI 潤飾
+    // ==========================================
     function generateReportFromLogs() {
       const logs = getStoredLogs();
-
       const doneItems = logs.filter(l => l.category === 'progress').map(l => `- ${l.content}`);
       const blockerItems = logs.filter(l => l.category === 'blocker').map(l => `- ${l.content}`);
       const discussionItems = logs.filter(l => l.category === 'discussion').map(l => `- ${l.content}`);
-      const ideaItems = logs.filter(l => l.category === 'idea').map(l => `- ${l.content}`);
-
       const nextSteps = [
         '- 推進後續實驗驗證與消融實驗對照',
         '- 彙整本週所得數據並繪製對比折線圖',
         '- 針對 Advisor 建議方向進行第二版程式重構'
       ];
 
-      document.getElementById('sectionDone').innerText = doneItems.length > 0 ? doneItems.join('\n') : '- 暫無進展記錄，請於時間軸打卡新增';
+      document.getElementById('sectionDone').innerText = doneItems.length > 0 ? doneItems.join('\n') : '- 暫無進展記錄';
       document.getElementById('sectionBlockers').innerText = blockerItems.length > 0 ? blockerItems.join('\n') : '- 本週無嚴重技術瓶頸';
       document.getElementById('sectionDiscussions').innerText = discussionItems.length > 0 ? discussionItems.join('\n') : '- 預計確認目前實驗方向與指導教授建議';
       document.getElementById('sectionNextSteps').innerText = nextSteps.join('\n');
@@ -537,119 +932,321 @@
       document.getElementById('countNextSteps').textContent = `${nextSteps.length} 項`;
     }
 
-    // --- AI 學術潤飾 (模擬 Academic Refine) ---
     function polishWithAI() {
-      const btn = event.currentTarget;
-      const originalHtml = btn.innerHTML;
-      btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> 潤飾中...`;
-      lucide.createIcons();
-
+      showToast('✨ 正在進行學術化格式潤飾...');
       setTimeout(() => {
-        // 將口語化短句以更專業嚴謹的學術結構替換
-        const currentDone = document.getElementById('sectionDone').innerText;
-        const refinedDone = currentDone
-          .replace(/完成 Baseline 模型重跑，Learning Rate 調整為 1e-4 後驗證集 Loss 下降 0.08，收斂曲線較平穩。/g, '完成基準架構（Baseline）重新評測，將初始學習率優化至 1e-4，驗證集收斂損耗（Validation Loss）顯著下降 0.08，前期訓練穩定度提升。')
-          .replace(/精讀 CVPR 2025 新接收的論文，提取出 4 維度筆記，其提出的動態剪枝技巧可借鏡到我們的第三章節。/g, '研讀 CVPR 2025 相關前沿文獻並完成四維度結構化提煉，計畫借鏡其動態權重剪枝策略以增強本研究第三章節之效能表現。');
-
-        const currentBlockers = document.getElementById('sectionBlockers').innerText;
-        const refinedBlockers = currentBlockers
-          .replace(/第三輪 epoch 在 GPU 顯存爆滿 \(OOM\)，批次大小 \(batch_size\) 需從 64 縮小為 32 或加入 Gradient Accumulation。/g, '於第 3 個 Epoch 遭遇 GPU 顯存溢出（OOM）瓶頸；目前正規劃透過梯度累加（Gradient Accumulation）並將 Batch Size 自 64 調整至 32 進行平滑訓練。');
-
-        document.getElementById('sectionDone').innerText = refinedDone;
-        document.getElementById('sectionBlockers').innerText = refinedBlockers;
-
-        btn.innerHTML = originalHtml;
-        lucide.createIcons();
+        let currentDone = document.getElementById('sectionDone').innerText;
+        currentDone = currentDone.replace(/完成 Baseline 模型重跑/g, '完成基準架構（Baseline）重新評測，收斂損耗平穩')
+                                 .replace(/精讀 CVPR 2025 新接收的論文/g, '研讀 CVPR 2025 前沿文獻並完成四維度結構化提煉');
+        let currentBlockers = document.getElementById('sectionBlockers').innerText;
+        currentBlockers = currentBlockers.replace(/第三輪 epoch 在 GPU 顯存爆滿/g, '遭遇 GPU 顯存溢出（OOM）瓶頸，已規劃透過梯度累加優化');
+        
+        document.getElementById('sectionDone').innerText = currentDone;
+        document.getElementById('sectionBlockers').innerText = currentBlockers;
         showToast('✨ 已完成學術化潤飾優化！');
-      }, 700);
+      }, 500);
     }
 
-    // --- 複製與匯出 ---
     function buildMarkdownString() {
-      const dateRange = document.getElementById('reportDateRange').textContent;
-      const done = document.getElementById('sectionDone').innerText;
-      const blockers = document.getElementById('sectionBlockers').innerText;
-      const discussions = document.getElementById('sectionDiscussions').innerText;
-      const nextSteps = document.getElementById('sectionNextSteps').innerText;
-
-      return `# Advisor Meeting 週報 - Reseaver LabPulse\n\n> ${dateRange}\n\n## 一、本週推進成果 (What was done)\n${done}\n\n## 二、遭遇問題與卡點 (Challenges & Blockers)\n${blockers}\n\n## 三、預計與教授討論事項 (Discussion Points)\n${discussions}\n\n## 四、下週目標與規劃 (Next Steps)\n${nextSteps}\n\n---\n*Generated by Reseaver LabPulse*`;
+      return `# Advisor Meeting 週報 - Reseaver LabPulse\n\n> 統計週期：本週\n\n## 一、本週推進成果 (What was done)\n${document.getElementById('sectionDone').innerText}\n\n## 二、遭遇問題與卡點 (Challenges & Blockers)\n${document.getElementById('sectionBlockers').innerText}\n\n## 三、預計與教授討論事項 (Discussion Points)\n${document.getElementById('sectionDiscussions').innerText}\n\n## 四、下週目標與規劃 (Next Steps)\n${document.getElementById('sectionNextSteps').innerText}\n\n---\n*Generated by Reseaver*`;
     }
 
     function copyReportMarkdown() {
-      const md = buildMarkdownString();
-      navigator.clipboard.writeText(md).then(() => {
-        showToast('📋 Markdown 週報已複製到剪貼簿！');
-      }).catch(() => {
-        showToast('複製失敗，請手動複製');
-      });
+      navigator.clipboard.writeText(buildMarkdownString()).then(() => showToast('📋 Markdown 週報已複製！'));
     }
 
     function exportReportFile() {
-      const md = buildMarkdownString();
-      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
+      const blob = new Blob([buildMarkdownString()], { type: 'text/markdown;charset=utf-8;' });
       const a = document.createElement('a');
-      a.href = url;
+      a.href = URL.createObjectURL(blob);
       a.download = `Meeting_Report_${new Date().toISOString().slice(0,10)}.md`;
       a.click();
-      URL.revokeObjectURL(url);
       showToast('💾 已下載週報 .md 檔案！');
     }
 
-    // --- 頁籤切換 ---
-    function switchTab(tab) {
-      const viewTimeline = document.getElementById('viewTimeline');
-      const viewReport = document.getElementById('viewReport');
-      const tabBtnTimeline = document.getElementById('tabBtnTimeline');
-      const tabBtnReport = document.getElementById('tabBtnReport');
+    // ==========================================
+    // 模組三：PaperCapsule 論文膠囊與翻卡記憶
+    // ==========================================
+    function getStoredPapers() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY_PAPERS)) || []; } catch { return []; }
+    }
+    function savePapers(papers) {
+      localStorage.setItem(STORAGE_KEY_PAPERS, JSON.stringify(papers));
+      renderPapers();
+    }
 
-      if (tab === 'timeline') {
-        viewTimeline.classList.remove('hidden');
-        viewReport.classList.add('hidden');
-        tabBtnTimeline.className = 'flex-1 py-2 text-xs font-semibold rounded-lg text-white bg-sky-600 shadow-sm flex items-center justify-center gap-1.5 transition-all';
-        tabBtnReport.className = 'flex-1 py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5 transition-all';
+    function renderPapers() {
+      const container = document.getElementById('paperListContainer');
+      const papers = getStoredPapers();
+      document.getElementById('paperTotalCount').textContent = papers.length;
+      document.getElementById('reviewDueCount').textContent = Math.min(papers.length, 2);
+
+      if (papers.length === 0) {
+        container.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">暫無論文膠囊，點擊上方按鈕新增！</div>`;
+        return;
+      }
+
+      container.innerHTML = papers.map((p, idx) => `
+        <div class="bg-slate-800/70 border border-slate-700/70 rounded-xl p-3.5 hover:border-violet-500/40 transition">
+          <div class="flex items-start justify-between gap-2 mb-1.5">
+            <div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">${p.venue || p.year}</span>
+              <h4 class="text-xs font-bold text-white mt-1 leading-snug">${escapeHtml(p.title)}</h4>
+              <p class="text-[11px] text-slate-400">${escapeHtml(p.authors)}</p>
+            </div>
+            <button onclick="startSinglePaperFlashcard(${idx})" class="p-1.5 text-violet-400 hover:bg-violet-500/20 rounded-lg text-xs flex items-center gap-1 flex-shrink-0" title="進入翻卡">
+              <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+              <span class="text-[10px]">翻卡</span>
+            </button>
+          </div>
+
+          <!-- 4 維度摘要縮圖 -->
+          <div class="grid grid-cols-2 gap-1.5 mt-2 pt-2 border-t border-slate-700/50 text-[11px]">
+            <div class="bg-slate-900/60 p-2 rounded-lg">
+              <span class="text-[9px] font-bold text-sky-400 block mb-0.5">🎯 問題</span>
+              <p class="text-slate-300 line-clamp-2">${escapeHtml(p.targetProblem)}</p>
+            </div>
+            <div class="bg-slate-900/60 p-2 rounded-lg">
+              <span class="text-[9px] font-bold text-emerald-400 block mb-0.5">⚙️ 方法</span>
+              <p class="text-slate-300 line-clamp-2">${escapeHtml(p.coreMethod)}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    // 翻卡模式邏輯
+    function startFlashcardMode() {
+      const papers = getStoredPapers();
+      if (papers.length === 0) return showToast('卡片庫目前為空，請先新增論文');
+      flashcardIndex = 0;
+      isFlipped = false;
+      updateFlashcardView();
+      document.getElementById('flashcardModal').classList.remove('hidden');
+    }
+
+    function startSinglePaperFlashcard(idx) {
+      flashcardIndex = idx;
+      isFlipped = false;
+      updateFlashcardView();
+      document.getElementById('flashcardModal').classList.remove('hidden');
+    }
+
+    function closeFlashcardMode() {
+      document.getElementById('flashcardModal').classList.add('hidden');
+    }
+
+    function flipCard() {
+      isFlipped = !isFlipped;
+      const inner = document.getElementById('flashcardInner');
+      if (isFlipped) inner.classList.add('rotate-y-180');
+      else inner.classList.remove('rotate-y-180');
+    }
+
+    function updateFlashcardView() {
+      const papers = getStoredPapers();
+      const p = papers[flashcardIndex];
+      isFlipped = false;
+      document.getElementById('flashcardInner').classList.remove('rotate-y-180');
+
+      document.getElementById('flashcardProgress').textContent = `${flashcardIndex + 1} / ${papers.length}`;
+      document.getElementById('fcVenue').textContent = p.venue || `${p.year}`;
+      document.getElementById('fcYear').textContent = `${p.year}`;
+      document.getElementById('fcTitle').textContent = p.title;
+      document.getElementById('fcAuthors').textContent = p.authors;
+      document.getElementById('fcProblem').textContent = p.targetProblem;
+      document.getElementById('fcMethod').textContent = p.coreMethod;
+      document.getElementById('fcFinding').textContent = p.keyFinding;
+      document.getElementById('fcLimitation').textContent = p.limitation;
+    }
+
+    function gradeFlashcard(rating) {
+      const papers = getStoredPapers();
+      const ratingMsg = rating === 1 ? '已標記需加強複習' : (rating === 2 ? '記憶進度更新' : '🟢 熟練掌握！');
+      showToast(ratingMsg);
+
+      if (flashcardIndex < papers.length - 1) {
+        flashcardIndex++;
+        updateFlashcardView();
       } else {
-        viewTimeline.classList.add('hidden');
-        viewReport.classList.remove('hidden');
-        tabBtnReport.className = 'flex-1 py-2 text-xs font-semibold rounded-lg text-white bg-sky-600 shadow-sm flex items-center justify-center gap-1.5 transition-all';
-        tabBtnTimeline.className = 'flex-1 py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 flex items-center justify-center gap-1.5 transition-all';
-        generateReportFromLogs();
+        closeFlashcardMode();
+        showToast('🎉 今日論文翻卡複習完成！');
       }
     }
 
-    // --- 輔助工具 ---
-    function updateDashboard() {
-      const logs = getStoredLogs();
-      const count = logs.length;
-      document.getElementById('weekCount').textContent = count;
-      const progressPercent = Math.min(100, Math.max(15, count * 20));
-      document.getElementById('weekProgress').style.width = `${progressPercent}%`;
+    // 新增論文彈窗
+    function openNewPaperModal() { document.getElementById('newPaperModal').classList.remove('hidden'); }
+    function closeNewPaperModal() { document.getElementById('newPaperModal').classList.add('hidden'); }
+
+    function saveNewPaperCapsule() {
+      const title = document.getElementById('npTitle').value.trim();
+      const problem = document.getElementById('npProblem').value.trim();
+      if (!title || !problem) return showToast('請填寫論文標題與核心問題！');
+
+      const papers = getStoredPapers();
+      papers.unshift({
+        id: `p-${Date.now()}`,
+        title,
+        authors: document.getElementById('npAuthors').value.trim() || 'Author et al.',
+        venue: document.getElementById('npVenue').value.trim() || '2025',
+        year: 2025,
+        targetProblem: problem,
+        coreMethod: document.getElementById('npMethod').value.trim() || '詳見內文',
+        keyFinding: document.getElementById('npFinding').value.trim() || '詳見內文',
+        limitation: document.getElementById('npLimitation').value.trim() || '無顯著局限性',
+        createdAt: new Date().toISOString()
+      });
+
+      savePapers(papers);
+      closeNewPaperModal();
+      showToast('🎉 已成功建立論文膠囊！');
     }
 
+    // ==========================================
+    // 模組四：LabLog 實驗 Run 快照與避坑日誌
+    // ==========================================
+    function getStoredLabLogs() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY_LABLOGS)) || []; } catch { return []; }
+    }
+    function saveLabLogs(logs) {
+      localStorage.setItem(STORAGE_KEY_LABLOGS, JSON.stringify(logs));
+      renderLabLogs();
+    }
+
+    function filterLabLogs(type) {
+      currentLabFilter = type;
+      ['all', 'run', 'gotcha'].forEach(t => {
+        document.getElementById(`labFilter-${t}`).className = t === type
+          ? 'flex-1 py-1.5 text-xs font-semibold rounded-lg text-white bg-emerald-600 shadow-sm transition'
+          : 'flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition';
+      });
+      renderLabLogs();
+    }
+
+    function renderLabLogs() {
+      const container = document.getElementById('labLogListContainer');
+      const logs = getStoredLabLogs();
+      const filtered = currentLabFilter === 'all' ? logs : logs.filter(l => l.type === currentLabFilter);
+      document.getElementById('labLogTotalCount').textContent = logs.length;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">暫無實驗或踩坑記錄，點擊上方記一筆！</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => {
+        const isRun = item.type === 'run';
+        return `
+          <div class="bg-slate-800/70 border border-slate-700/70 rounded-xl p-3.5 hover:border-emerald-500/30 transition">
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${isRun ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/30'}">
+                  ${isRun ? '🧪 實驗快照' : '🪲 避坑 Gotcha'}
+                </span>
+                <span class="text-xs font-bold text-white">${escapeHtml(item.title)}</span>
+              </div>
+              <button onclick="deleteLabLog('${item.id}')" class="text-slate-500 hover:text-rose-400 p-1">
+                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+
+            ${isRun ? `
+              <div class="bg-slate-900/60 rounded-lg p-2.5 text-xs space-y-1 mb-2">
+                <div class="text-slate-400 text-[11px]">參數：Batch=${item.parameters?.batchSize || 'N/A'}, LR=${item.parameters?.learningRate || 'N/A'}</div>
+                <div class="text-emerald-400 font-semibold">${item.parameters?.metrics || ''}</div>
+              </div>
+              ${item.notes ? `<p class="text-xs text-slate-300">${escapeHtml(item.notes)}</p>` : ''}
+            ` : `
+              <div class="space-y-1.5 text-xs">
+                <div class="text-rose-300 bg-rose-950/30 border border-rose-900/50 p-2 rounded-lg">
+                  <span class="font-bold text-[10px] block text-rose-400">症狀：</span>${escapeHtml(item.symptom || '')}
+                </div>
+                <div class="text-emerald-300 bg-emerald-950/30 border border-emerald-900/50 p-2 rounded-lg">
+                  <span class="font-bold text-[10px] block text-emerald-400">⚡ 一行解法：</span>${escapeHtml(item.solution || '')}
+                </div>
+              </div>
+            `}
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function deleteLabLog(id) {
+      saveLabLogs(getStoredLabLogs().filter(l => l.id !== id));
+      showToast('已刪除記錄');
+    }
+
+    function openNewLabLogModal() { document.getElementById('newLabLogModal').classList.remove('hidden'); }
+    function closeNewLabLogModal() { document.getElementById('newLabLogModal').classList.add('hidden'); }
+
+    function selectLabLogType(type) {
+      activeLabLogType = type;
+      if (type === 'run') {
+        document.getElementById('llTypeBtn-run').className = 'flex-1 py-1 text-xs font-semibold rounded-lg bg-emerald-600 text-white shadow-sm';
+        document.getElementById('llTypeBtn-gotcha').className = 'flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white';
+        document.getElementById('llRunFields').classList.remove('hidden');
+        document.getElementById('llGotchaFields').classList.add('hidden');
+      } else {
+        document.getElementById('llTypeBtn-gotcha').className = 'flex-1 py-1 text-xs font-semibold rounded-lg bg-rose-600 text-white shadow-sm';
+        document.getElementById('llTypeBtn-run').className = 'flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white';
+        document.getElementById('llRunFields').classList.add('hidden');
+        document.getElementById('llGotchaFields').classList.remove('hidden');
+      }
+    }
+
+    function saveNewLabLogEntry() {
+      const title = document.getElementById('llTitle').value.trim();
+      if (!title) return showToast('請填寫標題！');
+
+      const logs = getStoredLabLogs();
+      const isRun = activeLabLogType === 'run';
+
+      logs.unshift({
+        id: `lab-${Date.now()}`,
+        type: activeLabLogType,
+        title,
+        parameters: isRun ? {
+          batchSize: parseInt(document.getElementById('llBatch').value) || 32,
+          learningRate: document.getElementById('llLr').value.trim() || '1e-4',
+          metrics: document.getElementById('llMetrics').value.trim() || 'Loss: 0.12'
+        } : undefined,
+        symptom: !isRun ? document.getElementById('llSymptom').value.trim() : undefined,
+        solution: !isRun ? document.getElementById('llSolution').value.trim() : undefined,
+        createdAt: new Date().toISOString()
+      });
+
+      saveLabLogs(logs);
+      closeNewLabLogModal();
+      showToast('🎉 已成功記錄實驗日誌！');
+    }
+
+    // ==========================================
+    // 全域輔助與重置
+    // ==========================================
     function showToast(msg) {
       const toast = document.getElementById('toast');
       document.getElementById('toastMsg').textContent = msg;
       toast.classList.remove('opacity-0', 'pointer-events-none');
-      setTimeout(() => {
-        toast.classList.add('opacity-0', 'pointer-events-none');
-      }, 2200);
+      setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 2200);
     }
 
-    function loadSampleData() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(SAMPLE_LOGS));
-      updateDashboard();
-      renderLogs();
-      generateReportFromLogs();
-      showToast('已重新載入範例資料！');
+    function loadAllSampleData() {
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(DEFAULT_LOGS));
+      localStorage.setItem(STORAGE_KEY_PAPERS, JSON.stringify(DEFAULT_PAPERS));
+      localStorage.setItem(STORAGE_KEY_LABLOGS, JSON.stringify(DEFAULT_LABLOGS));
+      renderAll();
+      showToast('✨ 已重置並載入全套研究生範例資料！');
     }
 
-    function clearAllData() {
-      if (confirm('確定要清空所有打卡紀錄嗎？')) {
-        localStorage.removeItem(STORAGE_KEY);
-        updateDashboard();
-        renderLogs();
-        generateReportFromLogs();
-        showToast('已清空所有紀錄');
+    function clearCurrentModuleData() {
+      if (confirm(`確定要清空當前【${currentTab}】的資料嗎？`)) {
+        if (currentTab === 'today' || currentTab === 'report') localStorage.removeItem(STORAGE_KEY_LOGS);
+        else if (currentTab === 'papers') localStorage.removeItem(STORAGE_KEY_PAPERS);
+        else if (currentTab === 'lablog') localStorage.removeItem(STORAGE_KEY_LABLOGS);
+        renderAll();
+        showToast('已清空當前模組資料');
       }
     }
 
@@ -660,11 +1257,11 @@
       if (diffMins < 60) return `${diffMins} 分鐘前`;
       const diffHours = Math.floor(diffMins / 60);
       if (diffHours < 24) return `${diffHours} 小時前`;
-      const diffDays = Math.floor(diffHours / 24);
-      return `${diffDays} 天前`;
+      return `${Math.floor(diffHours / 24)} 天前`;
     }
 
     function escapeHtml(str) {
+      if (!str) return '';
       return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
   </script>

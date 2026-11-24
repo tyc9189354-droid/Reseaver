@@ -14,8 +14,18 @@
 - 🪄 **AI 學術潤飾**：一鍵將口語化日常筆記升級為嚴謹的學術化匯報語氣。
 - 📋 **即時匯出**：支援一鍵「複製 Markdown」、「複製純文字」、「下載 .md 報告檔案」。
 
+### 2. PaperCapsule（論文膠囊記憶卡）
+- 💊 **結構化 4 維度摘要**：提煉「🎯 核心問題」、「⚙️ 創新方法」、「📈 關鍵指標」、「⚠️ 研究局限」，告別冗長無效筆記。
+- 🎴 **3D 沉浸式翻卡記憶 (Flashcards)**：搭車或等實驗時隨手翻卡，正面展示論文標題與問題，翻轉背面展示核心方法與指標。
+- 🧠 **間隔重複複習 (Spaced Repetition)**：支援「模糊 / 需加強 / 熟記」評分回饋，強化對領域重要 Baseline 的記憶。
+- ➕ **快速新增與標籤檢索**：支援年份、研討會（NeurIPS / CVPR / ICLR）與領域標籤分類。
+
+### 3. LabLog（實驗快照與避坑日誌）
+- 🧪 **實驗 Run 快照**：快速記錄模型超參數（Batch Size, LR, Metrics）與調參結論。
+- 🪲 **避坑 Gotchas 知識庫**：專門記錄「困擾許久但解法只需一行」的環境配置與報錯解法（如 CUDA OOM, PyTorch DDP 死鎖, NaN Loss）。
+
 ## 快速體驗 (Quick Start)
-- 直接使用瀏覽器開啟專案根目錄下的 [`index.html`](file:///c:/D/Project/Reseaver/index.html) 即可立即體驗完整的 **LabPulse 互動原型**（支援手機比例預覽與本機 LocalStorage 儲存）。
+- 直接使用瀏覽器開啟專案根目錄下的 [`index.html`](file:///c:/D/Project/Reseaver/index.html) 即可立即體驗完整的 **Reseaver 4-Tab 互動原型**（支援手機比例預覽與本機 LocalStorage 儲存）。
 
 ## 規劃功能模組 (Roadmap)
 - 📝 **LabPulse（咪挺救星）**：日常打卡自動轉週報與討論提綱 (已完成原型與核心邏輯)。
