@@ -1,0 +1,19 @@
+{
+  "name": "Reseaver 研究救星",
+  "short_name": "Reseaver",
+  "description": "專為研究生打造的高效日常速記、Advisor Meeting 週報與論文記憶 App",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#020617",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

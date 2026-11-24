@@ -27,6 +27,25 @@
 ## 快速體驗 (Quick Start)
 - 直接使用瀏覽器開啟專案根目錄下的 [`index.html`](file:///c:/D/Project/Reseaver/index.html) 即可立即體驗完整的 **Reseaver 4-Tab 互動原型**（支援手機比例預覽與本機 LocalStorage 儲存）。
 
+## 快速體驗與手機安裝 (Mobile Installation & OTA Updates)
+
+### 📲 手機端下載安裝到桌面（iOS & Android）：
+本專案支援現代 **PWA（漸進式 Web App）** 標準，無需透過繁瑣的 App Store 審查，直接安裝到手機桌面：
+- **iPhone (iOS)**：
+  1. 使用 Safari 開啟線上網址。
+  2. 點擊瀏覽器下方「**分享**」按鈕 ➔ 選擇「**加入主畫面**」。
+  3. 手機桌面即出現 Reseaver 獨立 App 圖標，享有全螢幕沉浸式體驗。
+- **Android**：
+  1. 使用 Chrome 開啟線上網址。
+  2. 點擊提示「**安裝 Reseaver 應用程式**」（或右上角選單「加到主畫面」）。
+
+### 🔄 雲端即時同步更新機制 (Over-The-Air, OTA)：
+- 本專案已配置具備自動熱更新機制的 `service-worker.js`。
+- **未來每當您在電腦端修改程式碼並執行 `git push` 後**：
+  1. GitHub Pages 會自動重新部署。
+  2. 使用者手機上的 Reseaver App 在背景檢測到新版本，會即時彈出「✨ 檢測到最新更新！點擊立即同步」橫幅。
+  3. 點擊後無需重新下載安裝包，**1 秒無縫切換至最新功能**！
+
 ## 規劃功能模組 (Roadmap)
 - 📝 **LabPulse（咪挺救星）**：日常打卡自動轉週報與討論提綱 (已完成原型與核心邏輯)。
 - 💊 **PaperCapsule（論文膠囊）**：結構化記錄論文 4 維度（問題、方法、成果、局限）與間隔重複翻卡記憶。
