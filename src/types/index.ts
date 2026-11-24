@@ -27,6 +27,16 @@ export interface WeeklyReport {
   status: 'draft' | 'finalized';
 }
 
+// --- Meeting 設定 (多組 Meeting 管理) ---
+export interface MeetingItem {
+  id: string;
+  title: string;          // 例如：指導教授個別咪挺、實驗室大咪、CVPR 投稿截稿
+  targetTime: string;     // ISO 8601 或 'YYYY-MM-DDTHH:mm'
+  repeatWeekly: boolean;  // 是否每週自動循環
+  description?: string;
+  color?: string;         // 標籤顏色
+}
+
 // --- PaperCapsule (論文膠囊) ---
 export interface PaperCapsule {
   id: string;
@@ -57,18 +67,16 @@ export interface LabLogEntry {
   title: string;
   createdAt: string;
   tags: string[];
-  // 針對 Run 快照
   parameters?: {
     model?: string;
     batchSize?: number;
     learningRate?: string;
     optimizer?: string;
     epochs?: number;
-    metrics?: string; // e.g. "Acc: 89.4%, Loss: 0.14"
+    metrics?: string;
   };
   notes?: string;
-  // 針對 Gotcha 踩坑
-  symptom?: string;    // 報錯症狀
-  rootCause?: string;  // 踩坑根本原因
-  solution?: string;   // 一行秒殺解法
+  symptom?: string;
+  rootCause?: string;
+  solution?: string;
 }
