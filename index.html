@@ -1135,7 +1135,12 @@
     const STORAGE_KEY_AUTO_SYNC = 'reseaver_auto_sync_enabled';
     const STORAGE_KEY_GD_TOKEN = 'reseaver_google_drive_token';
     const STORAGE_KEY_GD_CLIENT_ID = 'reseaver_google_client_id';
+    const DEFAULT_GOOGLE_CLIENT_ID = '813108073239-9e878lansrj2jqf1slrl5jnjdh2743do.apps.googleusercontent.com';
     const CLEAN_INIT_FLAG = 'reseaver_clean_slate_applied_v1';
+
+    function getGoogleClientId() {
+      return localStorage.getItem(STORAGE_KEY_GD_CLIENT_ID) || DEFAULT_GOOGLE_CLIENT_ID;
+    }
 
     let currentTab = 'today';
     let currentCategory = 'progress';
@@ -2427,7 +2432,7 @@
     // 官方 Google 原生帳號選擇器與登入 (Google Identity Services SSO)
     // ==========================================
     function initGoogleIdentityServices() {
-      const clientId = localStorage.getItem(STORAGE_KEY_GD_CLIENT_ID);
+      const clientId = getGoogleClientId();
       if (!clientId) return;
 
       if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
@@ -2496,7 +2501,7 @@
     }
 
     function loginWithGoogleSSO() {
-      const clientId = localStorage.getItem(STORAGE_KEY_GD_CLIENT_ID);
+      const clientId = getGoogleClientId();
 
       // 1. 如果已有 Google Client ID 且 Google Identity Services 已就緒，觸發 Google 原生帳號選擇器
       if (clientId) {
@@ -2698,15 +2703,9 @@
     }
 
     function connectGoogleDriveAuth() {
-      let clientId = localStorage.getItem(STORAGE_KEY_GD_CLIENT_ID);
+      let clientId = getGoogleClientId();
       if (!clientId) {
-        clientId = prompt('請輸入您的 Google Cloud OAuth Client ID (若無請直接使用上方 Gmail 快速關聯個人雲端)：', '');
-        if (clientId && clientId.trim()) {
-          clientId = clientId.trim();
-          localStorage.setItem(STORAGE_KEY_GD_CLIENT_ID, clientId);
-        } else {
-          return showToast('已取消 Google Drive 連動設定');
-        }
+        return openGoogleOAuthSetupModal();
       }
 
       if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
