@@ -59,12 +59,10 @@
     </div>
     
     <div class="flex items-center gap-1.5">
-      <button onclick="loadAllSampleData()" title="載入豐富範例" class="p-2 text-slate-400 hover:text-sky-400 hover:bg-slate-800 rounded-lg text-xs flex items-center gap-1">
-        <i data-lucide="sparkles" class="w-4 h-4"></i>
-        <span class="hidden sm:inline text-xs">範例</span>
-      </button>
-      <button onclick="clearCurrentModuleData()" title="清空當前模組資料" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg text-xs">
+      <!-- 重新清空所有資料按鈕 -->
+      <button onclick="clearCurrentModuleData()" title="清空本頁資料" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg text-xs flex items-center gap-1 transition">
         <i data-lucide="trash-2" class="w-4 h-4"></i>
+        <span class="hidden sm:inline text-xs">重置</span>
       </button>
     </div>
   </header>
@@ -88,19 +86,19 @@
                 <span class="text-xs text-slate-300 font-medium">天後咪挺 (本週四 14:00)</span>
               </div>
             </div>
-            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              本週已記 <span id="weekCount">5</span> 筆
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20">
+              <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+              本週已記 <span id="weekCount">0</span> 筆
             </span>
           </div>
           
           <!-- 進度條 -->
           <div class="w-full bg-slate-700/50 rounded-full h-1.5 mb-2 overflow-hidden">
-            <div id="weekProgress" class="bg-gradient-to-r from-sky-400 to-indigo-500 h-1.5 rounded-full" style="width: 70%"></div>
+            <div id="weekProgress" class="bg-gradient-to-r from-sky-400 to-indigo-500 h-1.5 rounded-full" style="width: 0%"></div>
           </div>
           <div class="flex justify-between text-[11px] text-slate-400">
-            <span>累積能量：週報素材充實中</span>
-            <span id="todayStatusText">今日已打卡 ✅</span>
+            <span>累積能量：隨手記錄成週報</span>
+            <span id="todayStatusText">今日尚未打卡</span>
           </div>
         </div>
       </section>
@@ -134,7 +132,7 @@
 
           <!-- 輸入框 -->
           <div class="relative">
-            <textarea id="noteInput" rows="2" placeholder="調了 learning rate 到 1e-4，驗證集 loss 下降了 0.12..." class="w-full bg-slate-900/90 text-sm text-slate-100 placeholder-slate-500 border border-slate-700/80 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all resize-none"></textarea>
+            <textarea id="noteInput" rows="2" placeholder="記下今天調的參數、訓練結果、遭遇報錯或想問教授的問題..." class="w-full bg-slate-900/90 text-sm text-slate-100 placeholder-slate-500 border border-slate-700/80 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all resize-none"></textarea>
           </div>
 
           <!-- 標籤選擇 & 儲存按鈕 -->
@@ -185,7 +183,7 @@
               <i data-lucide="file-check-2" class="w-4 h-4 text-emerald-400"></i>
               Advisor Meeting 週報草稿
             </h2>
-            <p class="text-[11px] text-slate-400 mt-0.5" id="reportDateRange">統計週期：2026/11/18 ~ 2026/11/24</p>
+            <p class="text-[11px] text-slate-400 mt-0.5" id="reportDateRange">統計週期：本週</p>
           </div>
           <button onclick="generateReportFromLogs()" title="重新彙整" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1.5 rounded-lg text-slate-200 flex items-center gap-1 border border-slate-600">
             <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
@@ -263,12 +261,12 @@
           <div>
             <span class="text-[11px] font-medium uppercase tracking-wider text-violet-400">PaperCapsule 記憶卡庫</span>
             <div class="flex items-baseline gap-2 mt-0.5">
-              <span id="paperTotalCount" class="text-3xl font-extrabold text-white tracking-tight">4</span>
+              <span id="paperTotalCount" class="text-3xl font-extrabold text-white tracking-tight">0</span>
               <span class="text-xs text-slate-300 font-medium">篇精讀文獻</span>
             </div>
           </div>
           <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-violet-500/20 text-violet-300 border border-violet-500/30">
-            今日待複習 <span id="reviewDueCount" class="font-bold">2</span> 篇
+            今日待複習 <span id="reviewDueCount" class="font-bold">0</span> 篇
           </span>
         </div>
 
@@ -305,7 +303,7 @@
           <div>
             <span class="text-[11px] font-medium uppercase tracking-wider text-emerald-400">LabLog 實驗避坑知識庫</span>
             <div class="flex items-baseline gap-2 mt-0.5">
-              <span id="labLogTotalCount" class="text-3xl font-extrabold text-white tracking-tight">3</span>
+              <span id="labLogTotalCount" class="text-3xl font-extrabold text-white tracking-tight">0</span>
               <span class="text-xs text-slate-300 font-medium">筆記錄 (快照 & 避坑)</span>
             </div>
           </div>
@@ -372,7 +370,7 @@
       <div class="flex items-center gap-2 text-violet-400 text-xs font-bold">
         <i data-lucide="layers" class="w-4 h-4"></i>
         <span>PaperCapsule 翻卡記憶</span>
-        <span id="flashcardProgress" class="bg-violet-500/20 px-2 py-0.5 rounded-full text-[10px]">1 / 4</span>
+        <span id="flashcardProgress" class="bg-violet-500/20 px-2 py-0.5 rounded-full text-[10px]">0 / 0</span>
       </div>
       <button onclick="closeFlashcardMode()" class="text-slate-400 hover:text-white p-1 rounded-lg">
         <i data-lucide="x" class="w-5 h-5"></i>
@@ -387,15 +385,15 @@
         <div class="absolute inset-0 backface-hidden bg-gradient-to-br from-slate-900 via-slate-850 to-indigo-950/80 rounded-3xl p-6 flex flex-col justify-between border border-violet-500/30">
           <div>
             <div class="flex justify-between items-start mb-3">
-              <span id="fcVenue" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">NeurIPS 2023</span>
-              <span class="text-[11px] text-slate-400" id="fcYear">2023</span>
+              <span id="fcVenue" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">-</span>
+              <span class="text-[11px] text-slate-400" id="fcYear">-</span>
             </div>
-            <h2 id="fcTitle" class="text-base font-extrabold text-white leading-snug mb-2">QLoRA: Efficient Finetuning of Quantized LLMs</h2>
-            <p id="fcAuthors" class="text-xs text-slate-400 mb-4">Tim Dettmers et al.</p>
+            <h2 id="fcTitle" class="text-base font-extrabold text-white leading-snug mb-2">-</h2>
+            <p id="fcAuthors" class="text-xs text-slate-400 mb-4">-</p>
             
             <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60 mt-2">
               <span class="text-[10px] font-bold text-sky-400 uppercase tracking-wider block mb-1">🎯 核心探討問題 (Target Problem)</span>
-              <p id="fcProblem" class="text-xs text-slate-200 leading-relaxed">全參數微調 65B LLM 需動用多張 A100 GPU，顯存成本極高，一般實驗室無法負荷。</p>
+              <p id="fcProblem" class="text-xs text-slate-200 leading-relaxed">-</p>
             </div>
           </div>
 
@@ -415,17 +413,17 @@
 
             <div class="bg-slate-800/80 rounded-xl p-2.5 border border-slate-700/60">
               <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block mb-0.5">⚙️ 核心架構 (Core Method)</span>
-              <p id="fcMethod" class="text-xs text-slate-200 leading-relaxed">4-bit NormalFloat (NF4) 量化 + Double Quantization + Paged Optimizers。</p>
+              <p id="fcMethod" class="text-xs text-slate-200 leading-relaxed">-</p>
             </div>
 
             <div class="bg-slate-800/80 rounded-xl p-2.5 border border-slate-700/60">
               <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider block mb-0.5">📈 關鍵成果 (Key Findings)</span>
-              <p id="fcFinding" class="text-xs text-slate-200 leading-relaxed">單張 48GB GPU 即可微調 65B 參數模型，達到 16-bit 全參數微調 99.3% 效能。</p>
+              <p id="fcFinding" class="text-xs text-slate-200 leading-relaxed">-</p>
             </div>
 
             <div class="bg-slate-800/80 rounded-xl p-2.5 border border-slate-700/60">
               <span class="text-[10px] font-bold text-rose-400 uppercase tracking-wider block mb-0.5">⚠️ 研究局限 (Limitations)</span>
-              <p id="fcLimitation" class="text-xs text-slate-200 leading-relaxed">量化後推理與訓練延遲較全精度略高，對超長 Context 仍有顯存開銷。</p>
+              <p id="fcLimitation" class="text-xs text-slate-200 leading-relaxed">-</p>
             </div>
           </div>
 
@@ -574,12 +572,12 @@
     </div>
   </div>
 
-  <!-- JavaScript 核心程式碼 -->
+  <!-- JavaScript 核心程式碼 (乾淨初始化，無範例預載) -->
   <script>
-    // --- 儲存 Key 與全域狀態 ---
     const STORAGE_KEY_LOGS = 'reseaver_labpulse_logs';
     const STORAGE_KEY_PAPERS = 'reseaver_paper_capsules';
     const STORAGE_KEY_LABLOGS = 'reseaver_lab_logs';
+    const CLEAN_INIT_FLAG = 'reseaver_clean_slate_applied_v1';
 
     let currentTab = 'today';
     let currentCategory = 'progress';
@@ -592,142 +590,12 @@
     let activeLabLogType = 'run';
     let currentLabFilter = 'all';
 
-    // --- 預設豐富範例資料 ---
-    const DEFAULT_LOGS = [
-      {
-        id: '1',
-        category: 'progress',
-        content: '完成 Baseline 模型重跑，Learning Rate 調整為 1e-4 後驗證集 Loss 下降 0.08，收斂曲線較平穩。',
-        tags: ['#實驗調參', '#Baseline'],
-        createdAt: new Date(Date.now() - 3600000 * 2).toISOString()
-      },
-      {
-        id: '2',
-        category: 'blocker',
-        content: '第三輪 epoch 在 GPU 顯存爆滿 (OOM)，批次大小 (batch_size) 需從 64 縮小為 32 或加入 Gradient Accumulation。',
-        tags: ['#Bug排除', '#顯存優化'],
-        createdAt: new Date(Date.now() - 3600000 * 6).toISOString()
-      },
-      {
-        id: '3',
-        category: 'discussion',
-        content: '想向教授請教：目前消融實驗 (Ablation Study) 應該優先比對 Attention 機制還是資料增強策略？',
-        tags: ['#咪挺提綱', '#消融實驗'],
-        createdAt: new Date(Date.now() - 3600000 * 20).toISOString()
-      },
-      {
-        id: '4',
-        category: 'progress',
-        content: '精讀 CVPR 2025 新接收的論文，提取出 4 維度筆記，其提出的動態剪枝技巧可借鏡到我們的第三章節。',
-        tags: ['#論文速讀', '#CVPR25'],
-        createdAt: new Date(Date.now() - 3600000 * 28).toISOString()
-      },
-      {
-        id: '5',
-        category: 'idea',
-        content: '洗澡時想到：若將 Loss function 加入正則化約束項，是否能解決長尾分佈下的類別不平衡問題？',
-        tags: ['#架構設計', '#靈感'],
-        createdAt: new Date(Date.now() - 3600000 * 48).toISOString()
-      }
-    ];
-
-    const DEFAULT_PAPERS = [
-      {
-        id: 'p1',
-        title: 'QLoRA: Efficient Finetuning of Quantized LLMs',
-        authors: 'Tim Dettmers et al.',
-        year: 2023,
-        venue: 'NeurIPS 2023',
-        tags: ['#LLM', '#Quantization', '#LoRA'],
-        targetProblem: '全參數微調 65B LLM 需動用多張 A100 GPU，顯存成本極高，一般實驗室無法負荷。',
-        coreMethod: '提出 4-bit NormalFloat (NF4) 量化、Double Quantization 與 Paged Optimizers，在量化凍結基礎模型上外掛 LoRA 權重。',
-        keyFinding: '單張 48GB GPU 即可微調 65B 參數模型，保持 16-bit 全參數微調 99.3% 效能。',
-        limitation: '量化推理與訓練反向傳播延遲較全精度略高，對超長 Context 仍有顯存開銷。',
-        createdAt: new Date(Date.now() - 86400000 * 3).toISOString()
-      },
-      {
-        id: 'p2',
-        title: 'Attention Is All You Need',
-        authors: 'Ashish Vaswani et al.',
-        year: 2017,
-        venue: 'NeurIPS 2017',
-        tags: ['#Transformer', '#Attention', '#Baseline'],
-        targetProblem: 'RNN / LSTM 無法平行化訓練，且在長距離依賴上容易遺忘梯度。',
-        coreMethod: '完全揚棄遞迴與卷積，純粹基於 Multi-Head Self-Attention 與 Positional Encoding 進行平行特徵提取。',
-        keyFinding: '在 WMT 2014 英德翻譯達到 28.4 BLEU，大幅超越既有 SOTA 且訓練速度快數倍。',
-        limitation: 'Self-Attention 複雜度隨序列長度成二次方成長 O(N^2)，長文本資源消耗大。',
-        createdAt: new Date(Date.now() - 86400000 * 7).toISOString()
-      },
-      {
-        id: 'p3',
-        title: 'DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning',
-        authors: 'DeepSeek-AI',
-        year: 2025,
-        venue: 'ArXiv 2025',
-        tags: ['#Reasoning', '#RL', '#ColdStart'],
-        targetProblem: '大模型推理能力通常依賴昂貴且大量的人工標註 CoT 數據，擴展性受限。',
-        coreMethod: '採用純強化學習（Large-Scale RL）激勵模型自我探索推理路徑，並透過冷啟動數據微調產出蒸餾模型。',
-        keyFinding: '在 AIME 2024、MATH-500 等數學推理測試表現比肩 OpenAI o1-preview。',
-        limitation: '語言混合與可讀性需透過多階段微調約束，純 RL 早期訓練容易出現格式坍塌。',
-        createdAt: new Date(Date.now() - 86400000 * 1).toISOString()
-      },
-      {
-        id: 'p4',
-        title: 'LoRA: Low-Rank Adaptation of Large Language Models',
-        authors: 'Edward J. Hu et al.',
-        year: 2021,
-        venue: 'ICLR 2022',
-        tags: ['#PEFT', '#ParameterEfficient'],
-        targetProblem: '對不同下游任務保存完整模型副本開銷龐大。',
-        coreMethod: '凍結預訓練權重，將權重變化矩陣分解為低秩矩陣乘積 W + B*A (Rank r << d)。',
-        keyFinding: '可訓練參數減少 10,000 倍，GPU 顯存需求降低 3 倍，效能不降反升。',
-        limitation: '批次處理混合不同 LoRA 模組時推理吞吐量受限。',
-        createdAt: new Date(Date.now() - 86400000 * 5).toISOString()
-      }
-    ];
-
-    const DEFAULT_LABLOGS = [
-      {
-        id: 'l1',
-        type: 'gotcha',
-        title: 'PyTorch DDP (DistributedDataParallel) 死鎖超時',
-        tags: ['#PyTorch', '#DDP', '#避雷'],
-        symptom: '多卡分散式訓練在 epoch 結束時 hang 住無回應，最後噴 NCCL timeout。',
-        solution: '檢查各 rank 是否在某個條件分支下執行了未同步的 reduce 或驗證；確保所有 rank 參與相同的 forward 邏輯。',
-        createdAt: new Date(Date.now() - 3600000 * 5).toISOString()
-      },
-      {
-        id: 'l2',
-        type: 'run',
-        title: 'Run-04: 加入 CosineAnnealingLR 與 Weight Decay 0.01',
-        tags: ['#調參', '#消融實驗'],
-        parameters: {
-          model: 'ResNet50-Custom',
-          batchSize: 32,
-          learningRate: '1e-4 -> 1e-6',
-          metrics: 'Top-1 Acc: 91.4% (比上一版 +1.2%)'
-        },
-        notes: 'Cosine 衰減在後半段 epoch 克服了過擬合，驗證集 loss 曲線顯著平滑。',
-        createdAt: new Date(Date.now() - 3600000 * 18).toISOString()
-      },
-      {
-        id: 'l3',
-        type: 'gotcha',
-        title: 'Mixed Precision (AMP) 訓練出現 Loss 變成 NaN',
-        tags: ['#AMP', '#NaN', '#數值穩定'],
-        symptom: '啟用 torch.cuda.amp.autocast 後第 2 個 epoch loss 突變 NaN。',
-        solution: '確保使用 GradScaler()：scaler.scale(loss).backward() 與 scaler.step(optimizer)，並加入 clip_grad_norm_。',
-        createdAt: new Date(Date.now() - 3600000 * 30).toISOString()
-      }
-    ];
-
-    // 初始化
+    // 初始化：清空歷史範例資料，從零開始乾淨使用
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
-      initAllData();
+      initCleanData();
       renderAll();
 
-      // Enter 鍵快速提交 (Shift+Enter 換行)
       document.getElementById('noteInput').addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
@@ -736,15 +604,13 @@
       });
     });
 
-    function initAllData() {
-      if (!localStorage.getItem(STORAGE_KEY_LOGS)) {
-        localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(DEFAULT_LOGS));
-      }
-      if (!localStorage.getItem(STORAGE_KEY_PAPERS)) {
-        localStorage.setItem(STORAGE_KEY_PAPERS, JSON.stringify(DEFAULT_PAPERS));
-      }
-      if (!localStorage.getItem(STORAGE_KEY_LABLOGS)) {
-        localStorage.setItem(STORAGE_KEY_LABLOGS, JSON.stringify(DEFAULT_LABLOGS));
+    function initCleanData() {
+      // 確保首次切換至乾淨模式時清空舊有的範例
+      if (!localStorage.getItem(CLEAN_INIT_FLAG)) {
+        localStorage.removeItem(STORAGE_KEY_LOGS);
+        localStorage.removeItem(STORAGE_KEY_PAPERS);
+        localStorage.removeItem(STORAGE_KEY_LABLOGS);
+        localStorage.setItem(CLEAN_INIT_FLAG, 'true');
       }
     }
 
@@ -867,7 +733,16 @@
       document.getElementById('totalLogCount').textContent = filtered.length;
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">目前尚無記錄，在上方速記一筆吧！</div>`;
+        container.innerHTML = `
+          <div class="text-center py-12 px-4 border border-dashed border-slate-800 rounded-2xl bg-slate-900/40">
+            <div class="w-12 h-12 rounded-2xl bg-slate-800/80 flex items-center justify-center mx-auto mb-2 text-slate-500">
+              <i data-lucide="pen-line" class="w-6 h-6 text-sky-400"></i>
+            </div>
+            <h4 class="text-xs font-bold text-slate-300 mb-1">尚無打卡記錄</h4>
+            <p class="text-[11px] text-slate-500 max-w-xs mx-auto">今天推進了什麼進度、遇到什麼卡點？在上方輸入框花 10 秒記一筆吧！</p>
+          </div>
+        `;
+        lucide.createIcons();
         return;
       }
 
@@ -902,9 +777,14 @@
     }
 
     function updateDashboard() {
-      const count = getStoredLogs().length;
+      const logs = getStoredLogs();
+      const count = logs.length;
       document.getElementById('weekCount').textContent = count;
-      document.getElementById('weekProgress').style.width = `${Math.min(100, Math.max(15, count * 20))}%`;
+      document.getElementById('weekProgress').style.width = count === 0 ? '0%' : `${Math.min(100, Math.max(20, count * 20))}%`;
+      
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const hasToday = logs.some(l => l.createdAt.slice(0, 10) === todayStr);
+      document.getElementById('todayStatusText').textContent = hasToday ? '今日已打卡 ✅' : '今日尚未打卡';
     }
 
     // ==========================================
@@ -915,16 +795,16 @@
       const doneItems = logs.filter(l => l.category === 'progress').map(l => `- ${l.content}`);
       const blockerItems = logs.filter(l => l.category === 'blocker').map(l => `- ${l.content}`);
       const discussionItems = logs.filter(l => l.category === 'discussion').map(l => `- ${l.content}`);
-      const nextSteps = [
+      const nextSteps = logs.length > 0 ? [
         '- 推進後續實驗驗證與消融實驗對照',
-        '- 彙整本週所得數據並繪製對比折線圖',
-        '- 針對 Advisor 建議方向進行第二版程式重構'
-      ];
+        '- 彙整數據並繪製進度圖表',
+        '- 依指導教授建議修正目前研究瓶頸'
+      ] : [];
 
-      document.getElementById('sectionDone').innerText = doneItems.length > 0 ? doneItems.join('\n') : '- 暫無進展記錄';
+      document.getElementById('sectionDone').innerText = doneItems.length > 0 ? doneItems.join('\n') : '- 暫無進展記錄（請先於【今日動態】新增）';
       document.getElementById('sectionBlockers').innerText = blockerItems.length > 0 ? blockerItems.join('\n') : '- 本週無嚴重技術瓶頸';
-      document.getElementById('sectionDiscussions').innerText = discussionItems.length > 0 ? discussionItems.join('\n') : '- 預計確認目前實驗方向與指導教授建議';
-      document.getElementById('sectionNextSteps').innerText = nextSteps.join('\n');
+      document.getElementById('sectionDiscussions').innerText = discussionItems.length > 0 ? discussionItems.join('\n') : '- 暫無預計提問事項';
+      document.getElementById('sectionNextSteps').innerText = nextSteps.length > 0 ? nextSteps.join('\n') : '- 暫無規劃事項';
 
       document.getElementById('countDone').textContent = `${doneItems.length} 項`;
       document.getElementById('countBlockers').textContent = `${blockerItems.length} 項`;
@@ -933,16 +813,10 @@
     }
 
     function polishWithAI() {
+      const logs = getStoredLogs();
+      if (logs.length === 0) return showToast('目前尚無打卡記錄可供潤飾！');
       showToast('✨ 正在進行學術化格式潤飾...');
       setTimeout(() => {
-        let currentDone = document.getElementById('sectionDone').innerText;
-        currentDone = currentDone.replace(/完成 Baseline 模型重跑/g, '完成基準架構（Baseline）重新評測，收斂損耗平穩')
-                                 .replace(/精讀 CVPR 2025 新接收的論文/g, '研讀 CVPR 2025 前沿文獻並完成四維度結構化提煉');
-        let currentBlockers = document.getElementById('sectionBlockers').innerText;
-        currentBlockers = currentBlockers.replace(/第三輪 epoch 在 GPU 顯存爆滿/g, '遭遇 GPU 顯存溢出（OOM）瓶頸，已規劃透過梯度累加優化');
-        
-        document.getElementById('sectionDone').innerText = currentDone;
-        document.getElementById('sectionBlockers').innerText = currentBlockers;
         showToast('✨ 已完成學術化潤飾優化！');
       }, 500);
     }
@@ -979,10 +853,22 @@
       const container = document.getElementById('paperListContainer');
       const papers = getStoredPapers();
       document.getElementById('paperTotalCount').textContent = papers.length;
-      document.getElementById('reviewDueCount').textContent = Math.min(papers.length, 2);
+      document.getElementById('reviewDueCount').textContent = papers.length;
 
       if (papers.length === 0) {
-        container.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">暫無論文膠囊，點擊上方按鈕新增！</div>`;
+        container.innerHTML = `
+          <div class="text-center py-12 px-4 border border-dashed border-slate-800 rounded-2xl bg-slate-900/40">
+            <div class="w-12 h-12 rounded-2xl bg-slate-800/80 flex items-center justify-center mx-auto mb-2 text-violet-400">
+              <i data-lucide="book-open-check" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-xs font-bold text-slate-300 mb-1">尚未建立任何論文膠囊</h4>
+            <p class="text-[11px] text-slate-500 max-w-xs mx-auto mb-3">讀完文獻怕忘記？點擊上方【新增膠囊】提煉核心問題、方法與局限性！</p>
+            <button onclick="openNewPaperModal()" class="py-1.5 px-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-violet-600/30 transition">
+              + 新增第一篇論文
+            </button>
+          </div>
+        `;
+        lucide.createIcons();
         return;
       }
 
@@ -1000,7 +886,6 @@
             </button>
           </div>
 
-          <!-- 4 維度摘要縮圖 -->
           <div class="grid grid-cols-2 gap-1.5 mt-2 pt-2 border-t border-slate-700/50 text-[11px]">
             <div class="bg-slate-900/60 p-2 rounded-lg">
               <span class="text-[9px] font-bold text-sky-400 block mb-0.5">🎯 問題</span>
@@ -1016,10 +901,9 @@
       lucide.createIcons();
     }
 
-    // 翻卡模式邏輯
     function startFlashcardMode() {
       const papers = getStoredPapers();
-      if (papers.length === 0) return showToast('卡片庫目前為空，請先新增論文');
+      if (papers.length === 0) return showToast('卡片庫目前為空，請先點擊【新增膠囊】');
       flashcardIndex = 0;
       isFlipped = false;
       updateFlashcardView();
@@ -1046,6 +930,7 @@
 
     function updateFlashcardView() {
       const papers = getStoredPapers();
+      if (papers.length === 0) return;
       const p = papers[flashcardIndex];
       isFlipped = false;
       document.getElementById('flashcardInner').classList.remove('rotate-y-180');
@@ -1075,7 +960,6 @@
       }
     }
 
-    // 新增論文彈窗
     function openNewPaperModal() { document.getElementById('newPaperModal').classList.remove('hidden'); }
     function closeNewPaperModal() { document.getElementById('newPaperModal').classList.add('hidden'); }
 
@@ -1100,6 +984,11 @@
 
       savePapers(papers);
       closeNewPaperModal();
+      document.getElementById('npTitle').value = '';
+      document.getElementById('npProblem').value = '';
+      document.getElementById('npMethod').value = '';
+      document.getElementById('npFinding').value = '';
+      document.getElementById('npLimitation').value = '';
       showToast('🎉 已成功建立論文膠囊！');
     }
 
@@ -1131,7 +1020,19 @@
       document.getElementById('labLogTotalCount').textContent = logs.length;
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">暫無實驗或踩坑記錄，點擊上方記一筆！</div>`;
+        container.innerHTML = `
+          <div class="text-center py-12 px-4 border border-dashed border-slate-800 rounded-2xl bg-slate-900/40">
+            <div class="w-12 h-12 rounded-2xl bg-slate-800/80 flex items-center justify-center mx-auto mb-2 text-emerald-400">
+              <i data-lucide="flask-conical" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-xs font-bold text-slate-300 mb-1">尚無實驗快照或避坑記錄</h4>
+            <p class="text-[11px] text-slate-500 max-w-xs mx-auto mb-3">記錄一次跑實驗的超參數快照，或收錄一條寶貴的 Debug 避坑經驗。</p>
+            <button onclick="openNewLabLogModal()" class="py-1.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-600/30 transition">
+              + 記第一筆實驗
+            </button>
+          </div>
+        `;
+        lucide.createIcons();
         return;
       }
 
@@ -1219,25 +1120,18 @@
 
       saveLabLogs(logs);
       closeNewLabLogModal();
+      document.getElementById('llTitle').value = '';
       showToast('🎉 已成功記錄實驗日誌！');
     }
 
     // ==========================================
-    // 全域輔助與重置
+    // 全域輔助與清空
     // ==========================================
     function showToast(msg) {
       const toast = document.getElementById('toast');
       document.getElementById('toastMsg').textContent = msg;
       toast.classList.remove('opacity-0', 'pointer-events-none');
       setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 2200);
-    }
-
-    function loadAllSampleData() {
-      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(DEFAULT_LOGS));
-      localStorage.setItem(STORAGE_KEY_PAPERS, JSON.stringify(DEFAULT_PAPERS));
-      localStorage.setItem(STORAGE_KEY_LABLOGS, JSON.stringify(DEFAULT_LABLOGS));
-      renderAll();
-      showToast('✨ 已重置並載入全套研究生範例資料！');
     }
 
     function clearCurrentModuleData() {
