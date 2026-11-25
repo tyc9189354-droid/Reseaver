@@ -1326,7 +1326,7 @@
               <button type="button" onclick="insertMathSnippet('matrix')" class="text-sky-400 hover:text-white bg-sky-950/60 px-1.5 py-0.5 rounded border border-sky-500/30">⚡ 矩陣</button>
             </div>
           </div>
-          <textarea id="npMethod" rows="3" placeholder="提出之創新模組，支援標準 LaTeX 數學公式如：$W = W_0 + B A$ 或 $\min_\theta \mathcal{L}(\theta)$" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-violet-500 font-mono text-xs"></textarea>
+          <textarea id="npMethod" rows="3" placeholder="提出之創新架構、機制或自然數學表達式（如：W = W₀ + (α/r)(B × A) 或 min_θ L(θ)）" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-violet-500 text-xs"></textarea>
         </div>
         <div>
           <label class="block text-slate-300 font-semibold mb-1">📈 關鍵成果與數據 (Key Findings & Metrics)</label>
@@ -3054,6 +3054,100 @@ ${m}
     // ==========================================
     // 模組三：PaperCapsule 論文膠囊與翻卡記憶
     // ==========================================
+
+    // 將 LaTeX 語法全面轉換為自然易讀的純文字數學表達（消除 \text, \frac, \pi, $ 等標籤）
+    function cleanLatexToReadableMath(text) {
+      if (!text || typeof text !== 'string') return '';
+      let s = text;
+
+      // 1. 分數轉換: \frac{a}{b} -> (a / b)
+      s = s.replace(/\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}/g, '($1 / $2)');
+      s = s.replace(/\\frac\s*([a-zA-Z0-9])\s*([a-zA-Z0-9])/g, '($1 / $2)');
+
+      // 1.5 根號轉換: \sqrt{x} -> √(x), \sqrt[n]{x} -> ⁿ√(x)
+      s = s.replace(/\\sqrt\s*\[([^\]]+)\]\s*\{([^{}]+)\}/g, '$1√($2)');
+      s = s.replace(/\\sqrt\s*\{([^{}]+)\}/g, '√($1)');
+
+      // 2. 文字與字體包裹標籤: \text{...}, \mathbf{...}, \mathcal{...}, \boldsymbol{...}
+      s = s.replace(/\\(?:text|mathrm|mathbf|mathit|mathsf|operatorname|mathcal|boldsymbol|bm)\s*\{([^{}]+)\}/g, '$1');
+      s = s.replace(/\\(?:text|mathrm|mathbf|mathit|mathsf|operatorname|mathcal|boldsymbol|bm)\s+([a-zA-Z0-9])/g, '$1');
+      s = s.replace(/\\mathbb\{R\}\^\{([^{}]+)\}/g, 'ℝ^($1)')
+           .replace(/\\mathbb\{R\}/g, 'ℝ')
+           .replace(/\\mathbb\{Z\}\^\{([^{}]+)\}/g, 'ℤ^($1)')
+           .replace(/\\mathbb\{Z\}/g, 'ℤ')
+           .replace(/\\mathbb\{N\}/g, 'ℕ')
+           .replace(/\\mathbb\{C\}/g, 'ℂ')
+           .replace(/\\mathbb\{Q\}/g, 'ℚ');
+
+      // 3. 希臘字母轉換
+      const greekMap = {
+        'alpha': 'α', 'beta': 'β', 'gamma': 'γ', 'Gamma': 'Γ',
+        'delta': 'δ', 'Delta': 'Δ', 'epsilon': 'ε', 'varepsilon': 'ε',
+        'zeta': 'ζ', 'eta': 'η', 'theta': 'θ', 'Theta': 'Θ',
+        'iota': 'ι', 'kappa': 'κ', 'lambda': 'λ', 'Lambda': 'Λ',
+        'mu': 'μ', 'nu': 'ν', 'xi': 'ξ', 'Xi': 'Ξ',
+        'pi': 'π', 'Pi': 'Π', 'rho': 'ρ', 'sigma': 'σ', 'Sigma': 'Σ',
+        'tau': 'τ', 'upsilon': 'υ', 'phi': 'φ', 'Phi': 'Φ',
+        'chi': 'χ', 'psi': 'ψ', 'Psi': 'Ψ', 'omega': 'ω', 'Omega': 'Ω'
+      };
+      for (const [k, v] of Object.entries(greekMap)) {
+        s = s.replace(new RegExp('\\\\' + k + '(?![a-zA-Z])', 'g'), v);
+      }
+
+      // 4. 數學運算子與關係符號
+      const opMap = {
+        'leftarrow': '←', 'rightarrow': '→', 'leftrightarrow': '↔',
+        'Leftarrow': '⇐', 'Rightarrow': '⇒', 'Leftrightarrow': '⇔',
+        'gets': '←', 'to': '→', 'mapsto': '↦',
+        'times': '×', 'cdot': '·', 'pm': '±', 'mp': '∓', 'div': '÷',
+        'leq': '≤', 'le': '≤', 'geq': '≥', 'ge': '≥', 'neq': '≠', 'ne': '≠',
+        'approx': '≈', 'equiv': '≡', 'sim': '~', 'propto': '∝',
+        'in': '∈', 'notin': '∉', 'subset': '⊂', 'subseteq': '⊆',
+        'cup': '∪', 'cap': '∩', 'forall': '∀', 'exists': '∃',
+        'nabla': '∇', 'partial': '∂', 'infty': '∞', 'emptyset': '∅',
+        'sum': '∑', 'prod': '∏', 'int': '∫', 'min': 'min', 'max': 'max', 'arg': 'arg',
+        'odot': '⊙', 'otimes': '⊗', 'oplus': '⊕', 'circ': '∘', 'bullet': '•',
+        'dagger': '†', 'ell': 'ℓ', 'lVert': '‖', 'rVert': '‖', 'langle': '⟨', 'rangle': '⟩',
+        'left\\(': '(', 'right\\)': ')', 'left\\[': '[', 'right\\]': ']',
+        'left\\{': '{', 'right\\}': '}', '\\{': '{', '\\}': '}',
+        'quad': ' ', 'qquad': '  '
+      };
+      for (const [k, v] of Object.entries(opMap)) {
+        s = s.replace(new RegExp('\\\\' + k + '(?![a-zA-Z])', 'g'), v);
+      }
+
+      // 5. 常見下標與上標字元自然化
+      const subMap = {
+        '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
+        '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
+        'i': 'ᵢ', 'j': 'ⱼ', 'k': 'ₖ', 'm': 'ₘ', 'n': 'ₙ',
+        'p': 'ₚ', 't': 'ₜ', 'r': 'ᵣ', 'u': 'ᵤ', 'v': 'ᵥ', 'x': 'ₓ'
+      };
+      s = s.replace(/_\{([0-9ijkmnptruvx])\}/g, (m, c) => subMap[c] || ('_' + c));
+      s = s.replace(/_([0-9ijkmnptruvx])(?![a-zA-Z0-9])/g, (m, c) => subMap[c] || ('_' + c));
+      s = s.replace(/_\{([^{}]+)\}/g, '_$1');
+      s = s.replace(/\^\{([0-9])\}/g, (m, c) => c === '2' ? '²' : (c === '3' ? '³' : ('^' + c)));
+      s = s.replace(/\^([0-9])(?![0-9])/g, (m, c) => c === '2' ? '²' : (c === '3' ? '³' : ('^' + c)));
+      s = s.replace(/\^\{T\}/g, 'ᵀ');
+      s = s.replace(/\^\{([^{}]+)\}/g, '^($1)');
+
+      // 6. 移除 $ 符號與 LaTeX 行內/區塊界定符
+      s = s.replace(/\$\$([\s\S]*?)\$\$/g, '$1');
+      s = s.replace(/\$([^\$]+)\$/g, '$1');
+      s = s.replace(/\\\[([\s\S]*?)\\\]/g, '$1');
+      s = s.replace(/\\\(([\s\S]*?)\\\)/g, '$1');
+
+      // 7. 清理殘留反斜線與多餘標記
+      s = s.replace(/\\,/g, ' ');
+      s = s.replace(/\\([a-zA-Z]+)/g, '$1');
+      s = s.replace(/\\/g, '');
+
+      // 8. 壓縮多餘空白
+      s = s.replace(/[ \t]+/g, ' ');
+
+      return s.trim();
+    }
+
     function getStoredPapers() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY_PAPERS)) || []; } catch { return []; }
     }
@@ -3096,18 +3190,18 @@ ${m}
                 <span class="text-[10px] font-bold">翻卡</span>
               </button>
             </div>
-            <h4 class="text-xs font-bold text-white leading-snug">${escapeHtml(p.title)}</h4>
+            <h4 class="text-xs font-bold text-white leading-snug">${escapeHtml(cleanLatexToReadableMath(p.title))}</h4>
             <p class="text-[11px] text-slate-400 mt-0.5 mb-2">${escapeHtml(p.authors)}</p>
           </div>
 
           <div class="space-y-1.5 mt-2 pt-2 border-t border-slate-700/50 text-[11px]">
             <div class="bg-slate-900/60 p-2 rounded-lg">
               <span class="text-[9px] font-bold text-sky-400 block mb-0.5">🎯 問題</span>
-              <p class="text-slate-300 line-clamp-2">${escapeHtml(p.targetProblem)}</p>
+              <p class="text-slate-300 line-clamp-2">${escapeHtml(cleanLatexToReadableMath(p.targetProblem))}</p>
             </div>
             <div class="bg-slate-900/60 p-2 rounded-lg">
-              <span class="text-[9px] font-bold text-emerald-400 block mb-0.5">⚙️ 核心架構與數學</span>
-              <p class="text-slate-300 text-xs leading-relaxed font-mono">${escapeHtml(p.coreMethod)}</p>
+              <span class="text-[9px] font-bold text-emerald-400 block mb-0.5">⚙️ 核心架構與數學表達</span>
+              <p class="text-slate-200 text-xs leading-relaxed font-sans">${escapeHtml(cleanLatexToReadableMath(p.coreMethod))}</p>
             </div>
           </div>
         </div>
@@ -3150,12 +3244,12 @@ ${m}
       document.getElementById('flashcardProgress').textContent = `${flashcardIndex + 1} / ${papers.length}`;
       document.getElementById('fcVenue').textContent = p.venue || `${p.year}`;
       document.getElementById('fcYear').textContent = `${p.year}`;
-      document.getElementById('fcTitle').textContent = p.title;
+      document.getElementById('fcTitle').textContent = cleanLatexToReadableMath(p.title);
       document.getElementById('fcAuthors').textContent = p.authors;
-      document.getElementById('fcProblem').textContent = p.targetProblem;
-      document.getElementById('fcMethod').textContent = p.coreMethod;
-      document.getElementById('fcFinding').textContent = p.keyFinding;
-      document.getElementById('fcLimitation').textContent = p.limitation;
+      document.getElementById('fcProblem').textContent = cleanLatexToReadableMath(p.targetProblem);
+      document.getElementById('fcMethod').textContent = cleanLatexToReadableMath(p.coreMethod);
+      document.getElementById('fcFinding').textContent = cleanLatexToReadableMath(p.keyFinding);
+      document.getElementById('fcLimitation').textContent = cleanLatexToReadableMath(p.limitation);
 
       renderMathSafely(document.getElementById('flashcardModal'));
     }
@@ -3186,11 +3280,11 @@ ${m}
       if (!el) return;
       let snippet = '';
       if (type === 'opt') {
-        snippet = '\n核心目標式：$\\min_\\theta \\mathcal{L}_{task}(f(x; \\theta_0 + \\Delta \\theta), y)$';
+        snippet = '\n核心目標式：min_θ L_task(f(x; θ₀ + Δθ), y)';
       } else if (type === 'loss') {
-        snippet = '\n損失函數：$\\mathcal{L} = \\mathcal{L}_{CE} + \\lambda \\mathcal{L}_{reg}$';
+        snippet = '\n損失函數：L = L_CE + λ L_reg';
       } else if (type === 'matrix') {
-        snippet = '\n權重分解：$W = W_0 + \\frac{\\alpha}{r} (B \\times A), \\quad B \\in \\mathbb{R}^{d \\times r}, A \\in \\mathbb{R}^{r \\times k}$';
+        snippet = '\n權重分解：W = W₀ + (α/r)(B × A), 其中 B ∈ ℝ^(d×r), A ∈ ℝ^(r×k)';
       }
       const start = el.selectionStart || el.value.length;
       const end = el.selectionEnd || el.value.length;
@@ -3567,10 +3661,11 @@ ${m}
 【真實性與反杜撰原則】
 1. 嚴禁編造、虛構任何不存在的數據、公式或陳腔濫調。
 2. 請根據所附帶之論文官方元數據與原文節錄，精準提取真實作者名單、真實會議/期刊、真實創新機制與真實實驗指標。
-3. 核心數學公式 (coreMethod)：請務必提取該篇論文真正提出之關鍵創新公式（使用標準 LaTeX 格式如 $W = W_0 + \\frac{\\alpha}{r}BA$、BFV 同態加密或分散式密鑰計算式，並逐一清晰說明變數物理含義）。若該論文為純系統架構/軟體工程論文無公式，請精闢總結系統架構機制，絕不可硬套虛假的最佳化公式！
+3. 核心數學表達與架構 (coreMethod)：請務必提取該篇論文真正提出之關鍵創新公式與計算架構。
+   【重要：數學式嚴格禁止輸出原始 LaTeX 語法標籤】（切勿出現 \\text{...}、\\frac{a}{b}、\\mathcal{...}、$、\\pi、\\mu 等反斜線標籤），請一律轉換為乾淨易讀的自然純文字與通用 Unicode 數學符號（例如：W = W₀ + (α/r)(B × A)、Verify(πᵢ, μᵢ, pkᵢ) = 1、min_θ L(θ)、e_smudge ← χ_smudge），並逐一清晰說明變數物理含義。若該論文為純系統架構/軟體工程論文無公式，請精闢總結系統架構機制，絕不可硬套虛假的最佳化公式！
 4. 關鍵數據與結論 (keyFinding)：請務必回傳論文中真實報告的 Benchmark 數據、提升幅度、參數量或消融實驗結論（例如精確的百分比、提升倍數或評測分數）。
 5. 局限性 (limitation)：請忠實摘錄作者於文中探討之真實限制、計算開銷、假設前提或未來改進方向。
-6. 【重要格式規範】：請務必回傳嚴格純 JSON 格式。在包含 LaTeX 數學公式時，請將反斜線以雙反斜線轉義（例如使用 \\\\text, \\\\pi, \\\\mu, \\\\alpha, \\\\frac），確保完全相容標準 JSON 格式。
+6. 【重要格式規範】：請務必回傳嚴格純 JSON 格式。數學表達式請使用乾淨的自然 Unicode 符號，切勿使用帶有反斜線的 LaTeX 語法，以確保格式純淨且在任何介面皆可直接清晰閱讀。
 
 論文資料：
 """
@@ -3583,7 +3678,7 @@ ${metaContext}${raw}
   "authors": "真實作者名單 (例如: Edward J. Hu, Yelong Shen, Phillip Wallis et al.)",
   "venue": "發表會議/期刊與年份 (例如: ICLR 2022 / NeurIPS 2023 / CVPR 2024 / IEEE S&P 2024 / SECRYPT 2026)",
   "targetProblem": "論文具體欲解決之真實研究痛點、先前技術限制與研究動機（基於論文真實論述）",
-  "coreMethod": "論文提出之創新架構、演算法機制，以及最核心的關鍵數學公式（務必採用真實論文中的標準 LaTeX 格式，例如 Transformer 注意力機制公式、LoRA 權重矩陣低秩分解 $W = W_0 + \\frac{\\alpha}{r}BA$、或 Full-RNS 同態解密方程式，並逐一清晰說明變數物理含義；若論文為純系統架構/軟體工程論文無公式，請精闢總結系統架構機制，絕不可硬套虛假的最佳化公式！）",
+  "coreMethod": "論文提出之創新架構、演算法機制，以及最核心的關鍵數學公式（嚴格禁止 LaTeX 反斜線與 $ 符號，請使用乾淨自然之 Unicode 數學符號如 W = W₀ + (α/r)(B × A) 或 Verify(πᵢ, μᵢ, pkᵢ) = 1，並逐一清晰說明變數物理含義；若為無公式之系統架構論文請精闢總結系統架構機制，絕不可硬套虛假的最佳化公式！）",
   "keyFinding": "論文在標準基準測試（Benchmark）上取得的具體真實量化數據、SOTA 指標或關鍵實驗結論（例如：參數量減少比例、加速倍數、GLUE / ImageNet / BLEU 等真實數據）",
   "limitation": "作者在論文中提及的真實局限性、計算開銷、假設前提或未來改進方向"
 }`;
@@ -3734,10 +3829,11 @@ ${metaContext}${raw}
         const uniqueMath = Array.from(new Set(mathMatches))
           .sort((a, b) => b.length - a.length)
           .slice(0, 3)
+          .map(m => cleanLatexToReadableMath(m))
           .join('\n');
         mathSection = `\n\n【原文提煉之核心數學公式】\n${uniqueMath}`;
       } else {
-        mathSection = '\n\n📌 註：輸入之文字未包含顯式 LaTeX 數學式。可點擊上方「📐 目標式 / 🔍 Loss / ⚡ 矩陣」快捷插入公式模板，或綁定免費 Gemini API Key 啟用 AI 聯網提煉完整公式。';
+        mathSection = '\n\n📌 註：輸入之文字未包含顯式數學式。可點擊上方「📐 目標式 / 🔍 Loss / ⚡ 矩陣」快捷插入公式模板，或綁定免費 Gemini API Key 啟用 AI 聯網提煉完整公式。';
       }
 
       // 4. 局限性與未來方向 (Limitations & Future Work)
@@ -3748,24 +3844,24 @@ ${metaContext}${raw}
         : '論文摘要未特別載明局限性，建議精讀正文 Discussion / Limitations 章節深入評估。';
 
       fillPaperCapsuleForm({
-        title,
+        title: cleanLatexToReadableMath(title),
         authors: authors || '（請補充作者名單）',
         venue: venue || 'Academic Conference / Journal',
-        targetProblem,
-        coreMethod: coreMethodText + mathSection,
-        keyFinding,
-        limitation
+        targetProblem: cleanLatexToReadableMath(targetProblem),
+        coreMethod: cleanLatexToReadableMath(coreMethodText + mathSection),
+        keyFinding: cleanLatexToReadableMath(keyFinding),
+        limitation: cleanLatexToReadableMath(limitation)
       });
     }
 
     function fillPaperCapsuleForm(data) {
-      if (data.title) document.getElementById('npTitle').value = data.title;
+      if (data.title) document.getElementById('npTitle').value = cleanLatexToReadableMath(data.title);
       if (data.authors) document.getElementById('npAuthors').value = data.authors;
       if (data.venue) document.getElementById('npVenue').value = data.venue;
-      if (data.targetProblem) document.getElementById('npProblem').value = data.targetProblem;
-      if (data.coreMethod) document.getElementById('npMethod').value = data.coreMethod;
-      if (data.keyFinding) document.getElementById('npFinding').value = data.keyFinding;
-      if (data.limitation) document.getElementById('npLimitation').value = data.limitation;
+      if (data.targetProblem) document.getElementById('npProblem').value = cleanLatexToReadableMath(data.targetProblem);
+      if (data.coreMethod) document.getElementById('npMethod').value = cleanLatexToReadableMath(data.coreMethod);
+      if (data.keyFinding) document.getElementById('npFinding').value = cleanLatexToReadableMath(data.keyFinding);
+      if (data.limitation) document.getElementById('npLimitation').value = cleanLatexToReadableMath(data.limitation);
     }
 
     function renderMathSafely(containerEl) {
@@ -3787,8 +3883,8 @@ ${metaContext}${raw}
     }
 
     function saveNewPaperCapsule() {
-      const title = document.getElementById('npTitle').value.trim();
-      const problem = document.getElementById('npProblem').value.trim();
+      const title = cleanLatexToReadableMath(document.getElementById('npTitle').value.trim());
+      const problem = cleanLatexToReadableMath(document.getElementById('npProblem').value.trim());
       if (!title || !problem) return showToast('請填寫論文標題與核心問題！');
       const venueVal = document.getElementById('npVenue').value.trim() || '2025';
       const yearMatch = venueVal.match(/\b(19\d\d|20\d\d)\b/);
@@ -3802,9 +3898,9 @@ ${metaContext}${raw}
         venue: venueVal,
         year: yearVal,
         targetProblem: problem,
-        coreMethod: document.getElementById('npMethod').value.trim() || '詳見內文',
-        keyFinding: document.getElementById('npFinding').value.trim() || '詳見內文',
-        limitation: document.getElementById('npLimitation').value.trim() || '無顯著局限性',
+        coreMethod: cleanLatexToReadableMath(document.getElementById('npMethod').value.trim()) || '詳見內文',
+        keyFinding: cleanLatexToReadableMath(document.getElementById('npFinding').value.trim()) || '詳見內文',
+        limitation: cleanLatexToReadableMath(document.getElementById('npLimitation').value.trim()) || '無顯著局限性',
         createdAt: new Date().toISOString()
       });
       savePapers(papers);
