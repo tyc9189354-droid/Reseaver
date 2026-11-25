@@ -1064,13 +1064,13 @@
         </div>
         <div>
           <h3 class="text-base font-extrabold text-white">Google Gemini API 設定</h3>
-          <p class="text-xs text-slate-400">啟用最先進的 Gemini 1.5 Flash 智能摘要</p>
+          <p class="text-xs text-slate-400">啟用最先進的 Gemini 2.0 Flash 智能摘要與論文膠囊聯網萃取</p>
         </div>
       </div>
 
       <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-3.5 space-y-2 text-xs text-slate-300">
-        <p>如需使用雲端最新 Gemini 深度語義模型萃取會議摘要，請貼上您的 Google AI Studio API Key：</p>
-        <p class="text-[11px] text-slate-400">若未設定或處於離線狀態，系統會自動無縫切換為本地內建的高階學術語義規則引擎，隨時可用。</p>
+        <p>貼上您的 Google AI Studio API Key，即可啟用「AI 聯網深挖」能力：自動搜尋全球論文真實官方發表、提煉真實核心 LaTeX 數學公式與 SOTA 實驗指標！</p>
+        <p class="text-[11px] text-slate-400">若未設定，系統亦支援內建高階學術語義規則引擎與 DOI 跨庫解析，本地安全運行。</p>
       </div>
 
       <form onsubmit="handleSaveGeminiApiKey(event)" class="space-y-3">
@@ -1266,12 +1266,12 @@
 
       <!-- AI 智能快填區塊 (Universal Paper Source Input - 不限 arXiv) -->
       <div class="bg-gradient-to-br from-violet-950/60 via-slate-850 to-indigo-950/50 border border-violet-500/30 rounded-2xl p-3.5 space-y-2.5 shadow-inner">
-        <div class="flex items-center justify-between flex-wrap gap-1">
+        <div class="flex items-center justify-between flex-wrap gap-1.5">
           <span class="text-xs font-bold text-violet-300 flex items-center gap-1.5">
             <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
             <span>AI 智能萃取論文（不限來源 · 含核心數學公式提煉）</span>
           </span>
-          <span class="text-[10px] text-slate-400">支援 URL / 摘要 / BibTeX / 內文</span>
+          <div id="paperApiKeyBadge" class="flex items-center gap-1.5"></div>
         </div>
 
         <textarea id="aiPaperSmartInput" rows="3" placeholder="貼上任意論文資料（AI 自動為您解析並提煉核心數學公式）：&#10;• 論文網址或識別碼（arXiv, DOI, OpenReview, IEEE, 研討會連結等）&#10;• 論文 Abstract（摘要）、Introduction 或 Methodology 章節文字&#10;• Google Scholar 的 BibTeX 引用資訊" class="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-violet-500 leading-relaxed font-sans"></textarea>
@@ -1519,6 +1519,7 @@
       initGmailSyncOnStartup();
       updateHeaderAccountUI();
       updatePersonalCloudStats();
+      updatePaperApiKeyBadge();
       // 安靜預載 Google 憑證服務（triggerPrompt = false，絕不主動彈窗打擾使用者）
       initGoogleIdentityServices(false);
       window.addEventListener('resize', applyDeviceEnvironment);
@@ -2715,12 +2716,14 @@ ${m}
         localStorage.removeItem(STORAGE_KEY_GEMINI_KEY);
         showToast('已清除 API Key，將使用內建離線學術語義引擎');
       }
+      if (typeof updatePaperApiKeyBadge === 'function') updatePaperApiKeyBadge();
       closeGeminiApiKeyModal();
     }
     function clearGeminiApiKey() {
       localStorage.removeItem(STORAGE_KEY_GEMINI_KEY);
       const input = document.getElementById('geminiApiKeyInput');
       if (input) input.value = '';
+      if (typeof updatePaperApiKeyBadge === 'function') updatePaperApiKeyBadge();
       showToast('已清除 Gemini API Key');
     }
 
@@ -3066,6 +3069,7 @@ ${m}
     }
     function openNewPaperModal() { 
       document.getElementById('newPaperModal').classList.remove('hidden'); 
+      updatePaperApiKeyBadge();
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
     function closeNewPaperModal() { document.getElementById('newPaperModal').classList.add('hidden'); }
@@ -3092,6 +3096,128 @@ ${m}
       el.focus();
     }
 
+    function updatePaperApiKeyBadge() {
+      const badgeEl = document.getElementById('paperApiKeyBadge');
+      if (!badgeEl) return;
+      const key = localStorage.getItem(STORAGE_KEY_GEMINI_KEY);
+      if (key && key.trim()) {
+        badgeEl.innerHTML = `
+          <button type="button" onclick="openGeminiApiKeyModal()" class="text-[10px] text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 px-2 py-0.5 rounded-full flex items-center gap-1 hover:bg-emerald-900/60 transition shadow-sm" title="點擊管理 Gemini Key">
+            <i data-lucide="sparkles" class="w-3 h-3 text-amber-300"></i>
+            <span>Gemini 2.0 聯網深挖中</span>
+            <i data-lucide="settings" class="w-2.5 h-2.5 text-slate-400"></i>
+          </button>
+        `;
+      } else {
+        badgeEl.innerHTML = `
+          <button type="button" onclick="openGeminiApiKeyModal()" class="text-[10px] text-amber-300 bg-amber-950/80 border border-amber-500/40 px-2 py-0.5 rounded-full flex items-center gap-1 hover:bg-amber-900/60 transition shadow-sm" title="推薦綁定：啟用 AI 聯網自動檢索真實論文公式與 SOTA 數據">
+            <i data-lucide="key" class="w-3 h-3 text-amber-300"></i>
+            <span>綁定免費 Gemini Key (極致精準)</span>
+          </button>
+        `;
+      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // ==========================================
+    // 學術文獻元數據智能解析器 (DOI / arXiv / Crossref / BibTeX)
+    // ==========================================
+    async function resolveAcademicPaperMetadata(raw) {
+      if (!raw || typeof raw !== 'string') return null;
+
+      // 1. 偵測 DOI (例如 10.1145/..., 10.1109/..., https://doi.org/10.xxxx)
+      const doiMatch = raw.match(/(?:doi\.org\/|doi:\s*|^|\s)(10\.\d{4,9}\/[-._;()/:A-Za-z0-9]+)/i);
+      if (doiMatch) {
+        const doi = doiMatch[1].replace(/[.,;)]+$/, '');
+        try {
+          const res = await fetch(`https://api.crossref.org/works/${encodeURIComponent(doi)}`, {
+            signal: AbortSignal.timeout(4500),
+            headers: { 'User-Agent': 'Reseaver/1.0 (academic-research-tool)' }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const item = data.message;
+            if (item) {
+              const title = (item.title && item.title[0]) ? item.title[0].replace(/<[^>]+>/g, '').trim() : '';
+              const authors = item.author && item.author.length
+                ? item.author.map(a => `${a.given ? a.given + ' ' : ''}${a.family || ''}`).filter(Boolean).slice(0, 4).join(', ') + (item.author.length > 4 ? ' et al.' : '')
+                : '';
+              const venue = (item['container-title'] && item['container-title'][0]) || item.publisher || 'Journal / Conference';
+              const year = item.created?.['date-parts']?.[0]?.[0] || item.published?.['date-parts']?.[0]?.[0] || '';
+              const abstract = item.abstract ? item.abstract.replace(/<[^>]+>/g, '').trim() : '';
+              return {
+                title,
+                authors: authors || 'Academic Author et al.',
+                venue: year ? `${venue} ${year}` : venue,
+                year: year || '',
+                abstract,
+                doi,
+                source: 'crossref_doi'
+              };
+            }
+          }
+        } catch (e) {
+          console.warn('[Crossref DOI Fetch]', e);
+        }
+      }
+
+      // 2. 偵測 arXiv ID (例如 2106.09685, arxiv.org/abs/2106.09685)
+      const arxivMatch = raw.match(/(?:arxiv\.org\/(?:abs|pdf)\/|arxiv:\s*)(\d{4}\.\d{4,5}(?:v\d+)?)|^\s*(\d{4}\.\d{4,5}(?:v\d+)?)\s*$/i);
+      if (arxivMatch) {
+        const arxivId = (arxivMatch[1] || arxivMatch[2]).trim();
+        try {
+          const res = await fetch(`https://api.crossref.org/works?query.bibliographic=${encodeURIComponent(arxivId)}&rows=1`, {
+            signal: AbortSignal.timeout(3500)
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const item = data.message?.items?.[0];
+            if (item && item.title && item.title[0]) {
+              const title = item.title[0].replace(/<[^>]+>/g, '').trim();
+              const authors = item.author && item.author.length
+                ? item.author.map(a => `${a.given ? a.given + ' ' : ''}${a.family || ''}`).filter(Boolean).slice(0, 4).join(', ') + (item.author.length > 4 ? ' et al.' : '')
+                : '';
+              const venue = (item['container-title'] && item['container-title'][0]) || `arXiv ${arxivId}`;
+              const year = item.published?.['date-parts']?.[0]?.[0] || '20' + arxivId.slice(0, 2);
+              const abstract = item.abstract ? item.abstract.replace(/<[^>]+>/g, '').trim() : '';
+              return {
+                title,
+                authors: authors || 'arXiv Researcher et al.',
+                venue: `${venue} ${year}`,
+                year,
+                abstract,
+                arxivId,
+                source: 'crossref_arxiv'
+              };
+            }
+          }
+        } catch (e) {
+          console.warn('[Crossref arXiv Fetch]', e);
+        }
+      }
+
+      // 3. 偵測 BibTeX 格式
+      if (raw.includes('@') && raw.includes('{')) {
+        const titleMatch = raw.match(/title\s*=\s*[{"]([^}"]+)[}"]/i);
+        const authorMatch = raw.match(/author\s*=\s*[{"]([^}"]+)[}"]/i);
+        const bookMatch = raw.match(/(?:booktitle|journal)\s*=\s*[{"]([^}"]+)[}"]/i);
+        const yearMatch = raw.match(/year\s*=\s*[{"]?(\d{4})[}"]?/i);
+        const abstractMatch = raw.match(/abstract\s*=\s*[{"]([^}"]+)[}"]/i);
+        if (titleMatch) {
+          return {
+            title: titleMatch[1].trim(),
+            authors: authorMatch ? authorMatch[1].replace(/\s+and\s+/g, ', ').trim() : '',
+            venue: (bookMatch ? bookMatch[1].trim() : 'Academic Venue') + (yearMatch ? ` ${yearMatch[1]}` : ''),
+            year: yearMatch ? yearMatch[1] : '',
+            abstract: abstractMatch ? abstractMatch[1].trim() : '',
+            source: 'bibtex'
+          };
+        }
+      }
+
+      return null;
+    }
+
     async function runAiPaperExtract() {
       const input = document.getElementById('aiPaperSmartInput')?.value.trim();
       if (!input) {
@@ -3100,152 +3226,215 @@ ${m}
       }
 
       const btnText = document.getElementById('triggerAiPaperExtractBtnText');
-      if (btnText) btnText.textContent = '⚡ 深度解析論文與公式中...';
+      if (btnText) btnText.textContent = '⚡ 正在檢索與深度解析論文...';
 
+      // 1. 嘗試預解析學術元數據 (DOI/arXiv/BibTeX)
+      let resolvedMeta = null;
+      try {
+        resolvedMeta = await resolveAcademicPaperMetadata(input);
+      } catch (e) {
+        console.warn('學術元數據預解析異常：', e);
+      }
+
+      // 2. 檢驗 Gemini API Key
       const apiKey = localStorage.getItem(STORAGE_KEY_GEMINI_KEY);
 
       if (apiKey && apiKey.trim()) {
         try {
-          const success = await callGeminiPaperExtract(apiKey.trim(), input);
+          const success = await callGeminiPaperExtract(apiKey.trim(), input, resolvedMeta);
           if (success) {
             if (btnText) btnText.textContent = '⚡ 一鍵 AI 萃取並填入';
-            showToast('🎉 已透過 Gemini AI 成功解析論文與數學公式！');
+            showToast('🎉 已透過 Gemini 聯網 AI 成功提煉真實論文架構與數學公式！');
             return;
           }
         } catch (e) {
-          console.warn('Gemini 論文解析失敗，啟動離線學術解析引擎：', e);
+          console.warn('Gemini 論文解析異常，啟動離線學術解析引擎：', e);
+        }
+      } else {
+        // 若使用者尚未設定 Key 且輸入為簡短 URL 或識別碼，給予友善引導
+        if (input.length < 120 && !input.includes('\n')) {
+          const wantKey = confirm(
+            '💡 提示：您尚未綁定 Google Gemini API Key。\n\n' +
+            '強烈推薦：綁定免費的 Gemini API Key，AI 將自動「聯網搜尋全球論文原文」，精準提煉該論文的真實核心 LaTeX 數學公式與真實 SOTA 評測數據！\n\n' +
+            '• 點擊【確定】立即免費領取/輸入 API Key\n' +
+            '• 點擊【取消】使用內建離線學術語義規則引擎'
+          );
+          if (wantKey) {
+            if (btnText) btnText.textContent = '⚡ 一鍵 AI 萃取並填入';
+            openGeminiApiKeyModal();
+            return;
+          }
         }
       }
 
-      await runOfflinePaperExtract(input);
+      // 3. 離線高保真學術語義提煉（絕不編造虛假範本）
+      await runOfflinePaperExtract(input, resolvedMeta);
       if (btnText) btnText.textContent = '⚡ 一鍵 AI 萃取並填入';
-      showToast('⚡ 已透過內建學術解析引擎提煉完成！');
+      showToast('⚡ 已透過內建高階學術語義引擎提煉完成！');
     }
 
-    async function callGeminiPaperExtract(apiKey, raw) {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
-      const prompt = `你是一位世界頂級的 AI 與電腦科學學術論文評閱人。請分析以下論文資料（可能是網址、DOI、Abstract 摘要、Introduction、方法論節錄或 BibTeX）：
+    async function callGeminiPaperExtract(apiKey, raw, resolvedMeta = null) {
+      const metaContext = resolvedMeta
+        ? `【已知學術文獻元數據】\n標題: ${resolvedMeta.title}\n作者: ${resolvedMeta.authors}\n發表來源: ${resolvedMeta.venue}\n摘要: ${resolvedMeta.abstract || '未附帶'}\n\n`
+        : '';
+
+      const prompt = `你是一位享有崇高學術聲譽的頂級 AI 與電腦科學資深教授兼頂會 (NeurIPS / ICLR / CVPR / ACL / S&P) 審稿人。
+請精準剖析以下論文，提取 6 個關鍵學術維度。
+
+【真實性與反杜撰原則】
+1. 嚴禁編造、虛構任何不存在的數據、公式或陳腔濫調。
+2. 若輸入包含論文標題、網址、arXiv ID 或 DOI，請調用 Google Search 檢索該篇論文的官方發表原文、真實作者名單、真實會議/期刊、真實創新機制與真實實驗指標。
+3. 核心數學公式 (coreMethod)：請務必提取該篇論文真正提出之關鍵創新公式（使用標準 LaTeX 格式如 $W = W_0 + \\frac{\\alpha}{r}BA$ 或注意力機制公式或擴散方程，並逐一清晰說明變數物理含義）。若該論文為純系統架構/軟體工程論文無公式，請精闢總結系統架構機制，絕不可硬套虛假的最佳化公式！
+4. 關鍵數據與結論 (keyFinding)：請務必回傳論文中真實報告的 Benchmark 數據、提升幅度、參數量或消融實驗結論（例如精確的百分比、提升倍數或評測分數）。
+5. 局限性 (limitation)：請忠實摘錄作者於文中探討之真實限制、計算開銷、假設前提或未來改進方向。
+
+論文資料：
 """
-${raw}
+${metaContext}${raw}
 """
 
-請深度剖析該研究，提取 6 個關鍵維度，嚴格只回傳純 JSON 格式（不要有 Markdown code fence 或其他文字），鍵值如下：
+請嚴格只回傳純 JSON 格式（不要有 Markdown code fence 或其他多餘說明）：
 {
-  "title": "論文完整標題 (附上中文標題)",
-  "authors": "主要作者 (例如: Edward J. Hu, Yelong Shen et al.)",
-  "venue": "發表會議/期刊與年份 (例如: ICLR 2022 / CVPR 2024 / arXiv 2023)",
-  "targetProblem": "論文具體欲解決的核心痛點、現有方法限制與研究動機",
-  "coreMethod": "提出之創新架構、演算法，以及最關鍵的數學公式 (務必使用標準 LaTeX 格式如 $W = W_0 + BA$ 或 $$\\min_\\theta \\mathcal{L}$$ 並附變數物理意義)",
-  "keyFinding": "取得了何種關鍵實驗數據、SOTA 評測指標、參數量減少比例或消融實驗結論",
-  "limitation": "本篇論文的主要假設條件、計算資源門檻、理論局限或未來改進方向"
+  "title": "論文原始完整英文標題 (附上精準正體中文標題翻譯)",
+  "authors": "真實作者名單 (例如: Edward J. Hu, Yelong Shen, Phillip Wallis et al.)",
+  "venue": "發表會議/期刊與年份 (例如: ICLR 2022 / NeurIPS 2023 / CVPR 2024 / IEEE S&P 2024)",
+  "targetProblem": "論文具體欲解決之真實研究痛點、先前技術限制與研究動機（基於論文真實論述）",
+  "coreMethod": "論文提出之創新架構、演算法機制，以及最核心的關鍵數學公式（務必採用真實論文中的標準 LaTeX 格式，例如 Transformer 注意力機制公式、LoRA 權重矩陣低秩分解 $W = W_0 + \\frac{\\alpha}{r}BA$、或 Diffusion 擴散方程，並逐一清晰說明變數物理含義；若論文為純系統架構/軟體工程論文無公式，請精闢總結系統架構機制，絕不可硬套虛假的最佳化公式！）",
+  "keyFinding": "論文在標準基準測試（Benchmark）上取得的具體真實量化數據、SOTA 指標或關鍵實驗結論（例如：參數量減少比例、加速倍數、GLUE / ImageNet / BLEU 等真實數據）",
+  "limitation": "作者在論文中提及的真實局限性、計算開銷、假設前提或未來改進方向"
 }`;
 
-      const resp = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 1500
+      // 優先調用 Gemini 2.0 Flash 搭配 Google Search 聯網工具
+      const modelsToTry = [
+        {
+          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
+          body: {
+            contents: [{ parts: [{ text: prompt }] }],
+            tools: [{ googleSearch: {} }],
+            generationConfig: { temperature: 0.1, maxOutputTokens: 2048 }
           }
-        })
-      });
+        },
+        {
+          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
+          body: {
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.1, maxOutputTokens: 2048 }
+          }
+        },
+        {
+          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
+          body: {
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.1, maxOutputTokens: 2048 }
+          }
+        }
+      ];
 
-      if (!resp.ok) {
-        throw new Error(`HTTP ${resp.status}`);
-      }
-
-      const data = await resp.json();
-      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!rawText) throw new Error('API 沒有回傳文字');
-
-      let parsed = null;
-      try {
-        const cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
-        parsed = JSON.parse(cleaned);
-      } catch (err) {
-        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
-      }
-
-      if (!parsed) throw new Error('無法解析回傳之 JSON');
-
-      fillPaperCapsuleForm(parsed);
-      return true;
-    }
-
-    async function runOfflinePaperExtract(raw) {
-      // 1. 偵測是否為 arXiv 網址或 ID
-      const arxivMatch = raw.match(/(?:arxiv\.org\/(?:abs|pdf)\/|arxiv:\s*)(\d{4}\.\d{4,5}(?:v\d+)?)/i);
-      if (arxivMatch) {
-        const arxivId = arxivMatch[1];
+      for (const req of modelsToTry) {
         try {
-          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://export.arxiv.org/api/query?id_list=${arxivId}`)}`;
-          const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(4000) });
-          if (res.ok) {
-            const json = await res.json();
-            const xml = json.contents;
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(xml, 'text/xml');
-            const entry = doc.querySelector('entry');
-            if (entry) {
-              const title = entry.querySelector('title')?.textContent.trim().replace(/\s+/g, ' ') || '';
-              const summary = entry.querySelector('summary')?.textContent.trim().replace(/\s+/g, ' ') || '';
-              const authors = Array.from(entry.querySelectorAll('author name')).map(n => n.textContent.trim()).slice(0, 3).join(', ') + ' et al.';
-              const published = entry.querySelector('published')?.textContent.slice(0, 4) || 'arXiv';
+          const resp = await fetch(req.url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+          });
+          if (!resp.ok) continue;
 
-              fillPaperCapsuleForm({
-                title,
-                authors,
-                venue: `arXiv ${published}`,
-                targetProblem: summary.slice(0, 160) + '...',
-                coreMethod: `基於 ${title} 提出之核心模型架構。\n數學最佳化式：$\\min_\\theta \\mathcal{L}_{task}(\\theta)$`,
-                keyFinding: '在多個公開基準測試集上取得顯著效能提升，相較傳統 Baseline 展現更高精確度。',
-                limitation: '模型參數量與推論延遲仍需在大規模邊緣設備上進一步驗證。'
-              });
-              return;
-            }
+          const data = await resp.json();
+          const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!rawText) continue;
+
+          let parsed = null;
+          try {
+            const cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+            parsed = JSON.parse(cleaned);
+          } catch (err) {
+            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
+          }
+
+          if (parsed && (parsed.title || parsed.coreMethod)) {
+            fillPaperCapsuleForm(parsed);
+            return true;
           }
         } catch (e) {
-          console.warn('arXiv API 抓取失敗，使用正則文字解析：', e);
+          console.warn('[Gemini Model Try Fail]', e);
         }
       }
 
-      // 2. 偵測 BibTeX 格式
-      if (raw.includes('@') && raw.includes('{')) {
-        const titleMatch = raw.match(/title\s*=\s*[{"]([^}"]+)[}"]/i);
-        const authorMatch = raw.match(/author\s*=\s*[{"]([^}"]+)[}"]/i);
-        const bookMatch = raw.match(/(?:booktitle|journal)\s*=\s*[{"]([^}"]+)[}"]/i);
-        const yearMatch = raw.match(/year\s*=\s*[{"]?(\d{4})[}"]?/i);
+      throw new Error('所有 Gemini 模型解析均未獲取有效學術 JSON 結果');
+    }
 
-        if (titleMatch) {
-          fillPaperCapsuleForm({
-            title: titleMatch[1],
-            authors: authorMatch ? authorMatch[1].split(' and ')[0] + ' et al.' : 'Author et al.',
-            venue: (bookMatch ? bookMatch[1] : 'Conference') + (yearMatch ? ` ${yearMatch[1]}` : ''),
-            targetProblem: '針對現有模型在特定任務上之效能與泛化能力瓶頸進行探索與改善。',
-            coreMethod: '提出新穎之神經網路模組與訓練策略。\n核心損失函數：$\\mathcal{L}_{total} = \\mathcal{L}_{CE} + \\alpha \\mathcal{L}_{reg}$',
-            keyFinding: '於標準評測指標（F1 / Accuracy / mAP）上取得超越先前 Baseline 之成績。',
-            limitation: '訓練收斂所需 Epoch 數較高，超參數需針對不同資料集進行細緻調優。'
-          });
-          return;
+    async function runOfflinePaperExtract(raw, resolvedMeta = null) {
+      let title = resolvedMeta?.title || '';
+      let authors = resolvedMeta?.authors || '';
+      let venue = resolvedMeta?.venue || '';
+      let text = (resolvedMeta?.abstract && resolvedMeta.abstract.length > 30) ? resolvedMeta.abstract : raw;
+
+      // 若未解析到標題，從文字中抓取第一行作為候選
+      if (!title) {
+        const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+        const firstLine = lines[0] || '';
+        if (firstLine.length < 180 && !firstLine.startsWith('http')) {
+          title = firstLine.replace(/^(?:Title|論文標題)[:：]\s*/i, '');
+        } else {
+          title = '學術文獻精讀快照';
         }
       }
 
-      // 3. 通用非結構化文字/摘要解析
-      const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
-      const titleCandidate = lines[0]?.length < 150 ? lines[0] : '精讀學術論文解構';
-      const bodyText = raw.length > 500 ? raw.slice(0, 500) : raw;
+      // 將文字分割為完整句子進行語義特徵打分
+      const sentences = text
+        .replace(/([.?!])\s+(?=[A-Z0-9\u4e00-\u9fa5])/g, '$1|§|')
+        .split('|§|')
+        .map(s => s.trim())
+        .filter(s => s.length > 12);
+
+      // 1. 關鍵成果與數據 (Key Findings & Metrics) - 先分析量化指標句子
+      const resultRegex = /\b(outperform|achieve|surpass|state-of-the-art|sota|baseline|accuracy|f1|bleu|speedup|percent|%|reduce|margin|result|demonstrate|show that|提升|超越|降低|達成)\b/i;
+      const resultSents = sentences.filter(s => resultRegex.test(s));
+      const keyFinding = resultSents.length > 0
+        ? resultSents.slice(0, 2).join(' ')
+        : (sentences[sentences.length - 1] || '原文實驗評測結論詳見全文報告。');
+
+      // 2. 核心探討問題 (Target Problem) - 排除純實驗成果句，優先選取痛點/背景句
+      const problemRegex = /\b(address|tackle|solve|challenge|problem|limitation|drawback|bottleneck|suffer|existing|traditional|prior|however|despite|dominant|痛點|限制|挑戰)\b/i;
+      const problemSents = sentences.filter(s => problemRegex.test(s) && !resultRegex.test(s));
+      const targetProblem = problemSents.length > 0
+        ? problemSents.slice(0, 2).join(' ')
+        : (sentences[0] || text.slice(0, 200) + '...');
+
+      // 3. 核心技術、架構與關鍵數學公式 (Core Method & Math)
+      const methodRegex = /\b(propose|present|introduce|framework|method|model|approach|architecture|algorithm|formulat|technique|design|提出|架構|模組|演算法)\b/i;
+      const methodSents = sentences.filter(s => methodRegex.test(s) && !resultRegex.test(s));
+      const coreMethodText = methodSents.length > 0 ? methodSents.slice(0, 2).join(' ') : '基於原文提出之核心方法架構。';
+
+      // 偵測原文中是否已有 LaTeX 數學公式或變數（按長度排序，優先提取完整核心公式）
+      const mathMatches = text.match(/\$[^\$]+\$|\\\[[\s\S]+?\\\]|\\begin\{equation\}[\s\S]+?\\end\{equation\}|\\mathcal\{[^}]+\}|\\sum|\\min|\\mathbb\{[^}]+\}|\\mathbf\{[^}]+\}/g);
+      let mathSection = '';
+      if (mathMatches && mathMatches.length > 0) {
+        const uniqueMath = Array.from(new Set(mathMatches))
+          .sort((a, b) => b.length - a.length)
+          .slice(0, 3)
+          .join('\n');
+        mathSection = `\n\n【原文提煉之核心數學公式】\n${uniqueMath}`;
+      } else {
+        mathSection = '\n\n📌 註：輸入之文字未包含顯式 LaTeX 數學式。可點擊上方「📐 目標式 / 🔍 Loss / ⚡ 矩陣」快捷插入公式模板，或綁定免費 Gemini API Key 啟用 AI 聯網提煉完整公式。';
+      }
+
+      // 4. 局限性與未來方向 (Limitations & Future Work)
+      const limitRegex = /\b(limit|trade-off|overhead|cost|future|remain|open question|fail|computational|scalab|restrict|assumption|局限|缺點|未來方向)\b/i;
+      const limitSents = sentences.filter(s => limitRegex.test(s));
+      const limitation = limitSents.length > 0
+        ? limitSents.slice(0, 1).join(' ')
+        : '論文摘要未特別載明局限性，建議精讀正文 Discussion / Limitations 章節深入評估。';
 
       fillPaperCapsuleForm({
-        title: titleCandidate,
-        authors: 'Author et al.',
-        venue: 'Conference / Journal',
-        targetProblem: bodyText.slice(0, 180) + '...',
-        coreMethod: `基於所提之創新架構進行特徵提取與轉換。\n核心最佳化：$\\mathcal{L} = \\mathbb{E}_{x \\sim \\mathcal{D}} [\\ell(f(x; \\theta), y)]$`,
-        keyFinding: '實驗證明該架構兼顧計算效率與預測精度，具備良好之消融穩定性。',
-        limitation: '未來工作可延伸至少樣本 (Few-shot) 與跨域無監督場景。'
+        title,
+        authors: authors || '（請補充作者名單）',
+        venue: venue || 'Academic Conference / Journal',
+        targetProblem,
+        coreMethod: coreMethodText + mathSection,
+        keyFinding,
+        limitation
       });
     }
 
@@ -3281,13 +3470,17 @@ ${raw}
       const title = document.getElementById('npTitle').value.trim();
       const problem = document.getElementById('npProblem').value.trim();
       if (!title || !problem) return showToast('請填寫論文標題與核心問題！');
+      const venueVal = document.getElementById('npVenue').value.trim() || '2025';
+      const yearMatch = venueVal.match(/\b(19\d\d|20\d\d)\b/);
+      const yearVal = yearMatch ? parseInt(yearMatch[1], 10) : new Date().getFullYear();
+
       const papers = getStoredPapers();
       papers.unshift({
         id: `p-${Date.now()}`,
         title,
         authors: document.getElementById('npAuthors').value.trim() || 'Author et al.',
-        venue: document.getElementById('npVenue').value.trim() || '2025',
-        year: 2025,
+        venue: venueVal,
+        year: yearVal,
         targetProblem: problem,
         coreMethod: document.getElementById('npMethod').value.trim() || '詳見內文',
         keyFinding: document.getElementById('npFinding').value.trim() || '詳見內文',
@@ -3584,6 +3777,7 @@ ${raw}
     function updateGmailStatusUI(isReady) {
       updateHeaderAccountUI();
       updatePersonalCloudStats();
+      updatePaperApiKeyBadge();
     }
 
     // 仿造常見主流應用的帳號狀態更新 (未登入訪客模式 vs 已登入個人雲端)
@@ -3645,6 +3839,7 @@ ${raw}
       }
 
       updatePersonalCloudStats();
+      updatePaperApiKeyBadge();
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
@@ -4027,6 +4222,7 @@ ${raw}
 
       applyDeviceEnvironment();
       updatePersonalCloudStats();
+      updatePaperApiKeyBadge();
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
@@ -4085,6 +4281,7 @@ ${raw}
           if (btn) btn.disabled = false;
           showToast('🎉 成功連線另一端裝置，已完成雙向即時同步！');
           updatePersonalCloudStats();
+      updatePaperApiKeyBadge();
         });
 
         setTimeout(() => {
@@ -4114,6 +4311,7 @@ ${raw}
 
       // 2. 更新 Header 與個人雲端統計狀態
       updatePersonalCloudStats();
+      updatePaperApiKeyBadge();
       updateHeaderAccountUI();
 
       // 3. 若有連動 Google Drive OAuth，自動上傳至 Google Drive 檔案 reseaver_database.json
