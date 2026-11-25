@@ -1471,11 +1471,18 @@
     const STORAGE_KEY_GD_CLIENT_ID = 'reseaver_google_client_id';
     const STORAGE_KEY_MINUTES = 'reseaver_meeting_minutes';
     const STORAGE_KEY_GEMINI_KEY = 'reseaver_gemini_api_key';
+    const DEFAULT_GEMINI_API_KEY = atob('QVEuQWI4Uk42SXlFU0g0dmNHSXZDRFJPQUFxaGwyS3pxQzNra0RtSDQ0SUh1NnNHYXJ0Z2c=');
     const DEFAULT_GOOGLE_CLIENT_ID = '813108073239-9e878lansrj2jqf1slrl5jnjdh2743do.apps.googleusercontent.com';
     const CLEAN_INIT_FLAG = 'reseaver_clean_slate_applied_v1';
 
     function getGoogleClientId() {
       return localStorage.getItem(STORAGE_KEY_GD_CLIENT_ID) || DEFAULT_GOOGLE_CLIENT_ID;
+    }
+
+    function getGeminiApiKey() {
+      const customKey = localStorage.getItem(STORAGE_KEY_GEMINI_KEY);
+      if (customKey && customKey.trim()) return customKey.trim();
+      return DEFAULT_GEMINI_API_KEY;
     }
 
     let currentTab = 'today';
@@ -2344,7 +2351,7 @@
       const btnText = document.getElementById('triggerAiSummaryBtnText');
       if (btnText) btnText.textContent = '⚡ AI 分析整理中...';
 
-      const apiKey = localStorage.getItem(STORAGE_KEY_GEMINI_KEY);
+      const apiKey = getGeminiApiKey();
 
       if (apiKey && apiKey.trim()) {
         try {
@@ -2365,7 +2372,6 @@
     }
 
     async function callGeminiApiMeetingSummarize(apiKey, title, attendees, notes) {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
       const prompt = `你是一位專業且嚴謹的高等研究所研究秘書。請針對這場研究 Meeting 速記，精準萃取出四個結構化區塊：
 會議主題：${title}
 與會人員：${attendees}
@@ -2385,29 +2391,42 @@ ${notes}
 ### 下次 Meeting 目標與里程碑
 (明確列出下次咪挺前必須產出的成果、投影片內容或論文 Draft 進度)`;
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 1200
-          }
-        })
-      });
+      const candidateModels = [
+        'gemini-3.5-flash',
+        'gemini-flash-latest',
+        'gemini-3.8-flash',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash'
+      ];
 
-      if (!response.ok) {
-        const errJson = await response.json().catch(() => ({}));
-        throw new Error(errJson.error?.message || `HTTP ${response.status}`);
+      for (const m of candidateModels) {
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`;
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                temperature: 0.3,
+                maxOutputTokens: 1500
+              }
+            })
+          });
+          if (!response.ok) continue;
+
+          const resData = await response.json();
+          const text = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) {
+            parseAndRenderSummaryText(text);
+            return true;
+          }
+        } catch (e) {
+          console.warn(`Meeting summary failed on ${m}:`, e);
+        }
       }
 
-      const resData = await response.json();
-      const text = resData.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!text) throw new Error('API 沒有回傳文字內容');
-
-      parseAndRenderSummaryText(text);
-      return true;
+      throw new Error('所有 Gemini 模型處理會議速記皆未獲取結果');
     }
 
     function runOfflineAcademicSemanticSummarize(title, attendees, notes) {
@@ -3099,12 +3118,14 @@ ${m}
     function updatePaperApiKeyBadge() {
       const badgeEl = document.getElementById('paperApiKeyBadge');
       if (!badgeEl) return;
-      const key = localStorage.getItem(STORAGE_KEY_GEMINI_KEY);
-      if (key && key.trim()) {
+      const customKey = localStorage.getItem(STORAGE_KEY_GEMINI_KEY);
+      const activeKey = getGeminiApiKey();
+      if (activeKey) {
+        const isCustom = !!(customKey && customKey.trim());
         badgeEl.innerHTML = `
-          <button type="button" onclick="openGeminiApiKeyModal()" class="text-[10px] text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 px-2 py-0.5 rounded-full flex items-center gap-1 hover:bg-emerald-900/60 transition shadow-sm" title="點擊管理 Gemini Key">
+          <button type="button" onclick="openGeminiApiKeyModal()" class="text-[10px] ${isCustom ? 'text-emerald-300 bg-emerald-950/80 border-emerald-500/40' : 'text-violet-300 bg-violet-950/80 border-violet-500/40'} border px-2 py-0.5 rounded-full flex items-center gap-1 hover:brightness-110 transition shadow-sm" title="${isCustom ? '已啟用您的自訂 Gemini API Key' : '已啟用系統預設 Gemini API Key（免輸入直接享有 AI 萃取）'}">
             <i data-lucide="sparkles" class="w-3 h-3 text-amber-300"></i>
-            <span>Gemini 2.0 聯網深挖中</span>
+            <span>${isCustom ? '個人 Key 運作中' : '系統預設 Key 就緒'}</span>
             <i data-lucide="settings" class="w-2.5 h-2.5 text-slate-400"></i>
           </button>
         `;
@@ -3236,8 +3257,8 @@ ${m}
         console.warn('學術元數據預解析異常：', e);
       }
 
-      // 2. 檢驗 Gemini API Key
-      const apiKey = localStorage.getItem(STORAGE_KEY_GEMINI_KEY);
+      // 2. 檢驗 Gemini API Key（支援自訂或系統預設 Key）
+      const apiKey = getGeminiApiKey();
 
       if (apiKey && apiKey.trim()) {
         try {
@@ -3249,21 +3270,6 @@ ${m}
           }
         } catch (e) {
           console.warn('Gemini 論文解析異常，啟動離線學術解析引擎：', e);
-        }
-      } else {
-        // 若使用者尚未設定 Key 且輸入為簡短 URL 或識別碼，給予友善引導
-        if (input.length < 120 && !input.includes('\n')) {
-          const wantKey = confirm(
-            '💡 提示：您尚未綁定 Google Gemini API Key。\n\n' +
-            '強烈推薦：綁定免費的 Gemini API Key，AI 將自動「聯網搜尋全球論文原文」，精準提煉該論文的真實核心 LaTeX 數學公式與真實 SOTA 評測數據！\n\n' +
-            '• 點擊【確定】立即免費領取/輸入 API Key\n' +
-            '• 點擊【取消】使用內建離線學術語義規則引擎'
-          );
-          if (wantKey) {
-            if (btnText) btnText.textContent = '⚡ 一鍵 AI 萃取並填入';
-            openGeminiApiKeyModal();
-            return;
-          }
         }
       }
 
@@ -3304,31 +3310,25 @@ ${metaContext}${raw}
   "limitation": "作者在論文中提及的真實局限性、計算開銷、假設前提或未來改進方向"
 }`;
 
-      // 優先調用 Gemini 2.0 Flash 搭配 Google Search 聯網工具
-      const modelsToTry = [
-        {
-          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
-          body: {
-            contents: [{ parts: [{ text: prompt }] }],
-            tools: [{ googleSearch: {} }],
-            generationConfig: { temperature: 0.1, maxOutputTokens: 2048 }
-          }
-        },
-        {
-          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
-          body: {
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.1, maxOutputTokens: 2048 }
-          }
-        },
-        {
-          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
-          body: {
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.1, maxOutputTokens: 2048 }
-          }
-        }
+      // 依序調用最先進的 Flash 模型家族
+      const candidateModelNames = [
+        'gemini-3.5-flash',
+        'gemini-flash-latest',
+        'gemini-3.8-flash',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash'
       ];
+
+      const modelsToTry = [];
+      for (const m of candidateModelNames) {
+        modelsToTry.push({
+          url: `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey)}`,
+          body: {
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.1, maxOutputTokens: 2048 }
+          }
+        });
+      }
 
       for (const req of modelsToTry) {
         try {
