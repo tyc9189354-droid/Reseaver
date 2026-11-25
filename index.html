@@ -1519,7 +1519,8 @@
       initGmailSyncOnStartup();
       updateHeaderAccountUI();
       updatePersonalCloudStats();
-      initGoogleIdentityServices();
+      // 安靜預載 Google 憑證服務（triggerPrompt = false，絕不主動彈窗打擾使用者）
+      initGoogleIdentityServices(false);
       window.addEventListener('resize', applyDeviceEnvironment);
 
       document.getElementById('noteInput').addEventListener('keydown', (e) => {
@@ -3740,7 +3741,8 @@ ${raw}
           input.value = localStorage.getItem(STORAGE_KEY_GMAIL) || '';
           setTimeout(() => input.focus(), 50);
         }
-        initGoogleIdentityServices();
+        // 安靜預載 Google 憑證服務（triggerPrompt = false，絕不主動彈窗打擾使用者）
+      initGoogleIdentityServices(false);
       }
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
@@ -3841,12 +3843,12 @@ ${raw}
     // ==========================================
     // 官方 Google 原生帳號選擇器與登入 (Google Identity Services SSO)
     // ==========================================
-    function initGoogleIdentityServices() {
+    function initGoogleIdentityServices(triggerPrompt = false) {
       const clientId = getGoogleClientId();
       if (!clientId) return;
 
       if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
-        setTimeout(initGoogleIdentityServices, 300);
+        setTimeout(() => initGoogleIdentityServices(triggerPrompt), 300);
         return;
       }
 
@@ -3874,12 +3876,16 @@ ${raw}
           if (customBtn) customBtn.classList.add('hidden');
         }
 
-        // 同時喚起 Google 原生 One-Tap 帳號選擇浮窗 (手機底部滑出/電腦右上角彈出)
-        google.accounts.id.prompt((notification) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            console.log('[Google GIS One-Tap Prompt]', notification.getNotDisplayedReason() || notification.getSkippedReason());
-          }
-        });
+        // 核心改進：絕不在頁面載入、更新或重整時主動彈窗打擾
+        // 只有在使用者明確點擊登入 (triggerPrompt === true) 且尚未登入時，才呼叫 prompt()
+        const currentEmail = localStorage.getItem(STORAGE_KEY_GMAIL);
+        if (triggerPrompt && !currentEmail) {
+          google.accounts.id.prompt((notification) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+              console.log('[Google GIS One-Tap Prompt]', notification.getNotDisplayedReason() || notification.getSkippedReason());
+            }
+          });
+        }
       } catch (err) {
         console.warn('[Google GIS Init]', err);
       }
@@ -3916,8 +3922,12 @@ ${raw}
       // 1. 如果已有 Google Client ID 且 Google Identity Services 已就緒，觸發 Google 原生帳號選擇器
       if (clientId) {
         if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-          initGoogleIdentityServices();
-          google.accounts.id.prompt();
+          initGoogleIdentityServices(false);
+          google.accounts.id.prompt((notification) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+              console.log('[Google Prompt]', notification.getNotDisplayedReason() || notification.getSkippedReason());
+            }
+          });
           return;
         }
       }
@@ -3970,7 +3980,8 @@ ${raw}
       showToast('🎉 Google Client ID 儲存成功！正在啟動 Google 原生帳號選擇器...');
 
       // 啟動 Google 原生選擇器並重新開啟登入視窗
-      initGoogleIdentityServices();
+      // 安靜預載 Google 憑證服務（triggerPrompt = false，絕不主動彈窗打擾使用者）
+      initGoogleIdentityServices(false);
       openLoginModal();
     }
 
