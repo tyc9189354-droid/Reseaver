@@ -459,7 +459,9 @@
             <div class="bg-slate-800/60 border border-slate-700/70 rounded-xl p-4">
               <div class="flex items-center justify-between mb-2">
                 <h3 class="text-xs font-bold text-rose-400 flex items-center gap-1.5">
+                  <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
                   <span>⚠️ 二、遭遇問題與卡點 (Challenges & Blockers)</span>
+                  <span class="text-[10px] text-rose-300/70 font-normal">〔Checkbox 檢核清單〕</span>
                 </h3>
                 <span class="text-[10px] text-slate-400 bg-slate-700/60 px-1.5 py-0.5 rounded" id="countBlockers">0 項</span>
               </div>
@@ -469,7 +471,9 @@
             <div class="bg-slate-800/60 border border-slate-700/70 rounded-xl p-4">
               <div class="flex items-center justify-between mb-2">
                 <h3 class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                  <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
                   <span>💬 三、預計與教授討論事項 (Advisor Discussion Points)</span>
+                  <span class="text-[10px] text-amber-300/70 font-normal">〔Checkbox 討論清單〕</span>
                 </h3>
                 <span class="text-[10px] text-slate-400 bg-slate-700/60 px-1.5 py-0.5 rounded" id="countDiscussions">0 項</span>
               </div>
@@ -479,7 +483,9 @@
             <div class="bg-slate-800/60 border border-slate-700/70 rounded-xl p-4">
               <div class="flex items-center justify-between mb-2">
                 <h3 class="text-xs font-bold text-sky-400 flex items-center gap-1.5">
+                  <i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i>
                   <span>📅 四、下週目標與規劃 (Next Steps)</span>
+                  <span class="text-[10px] text-sky-300/70 font-normal">〔Checkbox 待辦與指派時間〕</span>
                 </h3>
                 <span class="text-[10px] text-slate-400 bg-slate-700/60 px-1.5 py-0.5 rounded" id="countNextSteps">0 項</span>
               </div>
@@ -2916,10 +2922,19 @@ ${m}
     }
 
     function importMinutesToWeeklyReport() {
-      let d = document.getElementById('aiSummaryDecisions')?.textContent?.trim() || '';
-      let f = document.getElementById('aiSummaryAdvisorFeedback')?.textContent?.trim() || '';
-      let a = document.getElementById('aiSummaryActionItems')?.textContent?.trim() || '';
-      let m = document.getElementById('aiSummaryNextMilestone')?.textContent?.trim() || '';
+      const getSectionText = (id) => {
+        const el = document.getElementById(id);
+        if (!el) return '';
+        const tc = el.textContent || '';
+        const it = el.innerText || '';
+        if (tc.includes('\n')) return tc.trim();
+        return (it || tc).trim();
+      };
+
+      let d = getSectionText('aiSummaryDecisions');
+      let f = getSectionText('aiSummaryAdvisorFeedback');
+      let a = getSectionText('aiSummaryActionItems');
+      let m = getSectionText('aiSummaryNextMilestone');
 
       const isPlaceholder = (txt) => !txt || txt.includes('尚未萃取');
 
@@ -2930,15 +2945,29 @@ ${m}
         const notes = document.getElementById('minutesNotesInput')?.value.trim() || '';
         if (notes) {
           runOfflineAcademicSemanticSummarize(title, attendees, notes);
-          d = document.getElementById('aiSummaryDecisions')?.textContent?.trim() || '';
-          f = document.getElementById('aiSummaryAdvisorFeedback')?.textContent?.trim() || '';
-          a = document.getElementById('aiSummaryActionItems')?.textContent?.trim() || '';
-          m = document.getElementById('aiSummaryNextMilestone')?.textContent?.trim() || '';
+          d = getSectionText('aiSummaryDecisions');
+          f = getSectionText('aiSummaryAdvisorFeedback');
+          a = getSectionText('aiSummaryActionItems');
+          m = getSectionText('aiSummaryNextMilestone');
         } else {
           alert('請先在速記區輸入會議筆記或完成錄音，方可匯入週報！');
           return;
         }
       }
+
+      const getMinutesAssignedTimeStr = () => {
+        const dtInput = document.getElementById('minutesDateTimeInput')?.value;
+        if (dtInput) {
+          const d = new Date(dtInput);
+          if (!isNaN(d.getTime())) {
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+          }
+        }
+        const now = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      };
 
       const cleanBullets = (txt) => {
         if (!txt || isPlaceholder(txt)) return '';
@@ -2949,12 +2978,54 @@ ${m}
           .join('\n');
       };
 
-      const cleanD = cleanBullets(d);
-      const cleanF = cleanBullets(f);
-      const cleanA = cleanBullets(a);
-      const cleanM = cleanBullets(m);
+      // 將文字轉換為 Checkbox 待辦格式 (- [ ] ...)
+      const cleanCheckboxes = (txt) => {
+        if (!txt || isPlaceholder(txt)) return '';
+        return txt.split('\n')
+          .map(l => l.trim())
+          .filter(Boolean)
+          .map(l => {
+            let s = l.replace(/^[-•*]\s*/, '').replace(/^\d+[\.、]\s*/, '').trim();
+            if (/^\[([ xX])\]\s*/.test(s)) {
+              return `- ${s}`;
+            }
+            return `- [ ] ${s}`;
+          })
+          .join('\n');
+      };
 
-      // 1. 本週推進成果 (What was done) <- 核心決策與主軸推進
+      // 將咪挺指派待辦轉換為 Checkbox 並附帶指派時間標記
+      const cleanActionItemsToCheckboxes = (txt, timeStr) => {
+        if (!txt || isPlaceholder(txt)) return '';
+        return txt.split('\n')
+          .map(l => l.trim())
+          .filter(Boolean)
+          .map(l => {
+            let s = l.replace(/^[-•*]\s*/, '').replace(/^\d+[\.、]\s*/, '').trim();
+            let checked = ' ';
+            if (/^\[([ xX])\]\s*/.test(s)) {
+              const match = s.match(/^\[([ xX])\]\s*(.*)/);
+              checked = match[1];
+              s = match[2];
+            }
+            if (!/指派時間|\d{4}-\d{2}-\d{2}/.test(s)) {
+              return `- [${checked}] [指派時間: ${timeStr}] ${s}`;
+            }
+            return `- [${checked}] ${s}`;
+          })
+          .join('\n');
+      };
+
+      const cleanD = cleanBullets(d);
+      const cleanF = f;
+      const cleanA = a;
+      const cleanM = m;
+      const assignedTimeStr = getMinutesAssignedTimeStr();
+
+      // 先切換至週報頁籤，確保 DOM 節點脫離 display:none 正常渲染換行
+      navigateTab('report');
+
+      // 1. 本週推進成果 (What was done) <- 核心決策與主軸推進 (條列 •)
       const doneEl = document.getElementById('sectionDone');
       if (doneEl && cleanD) {
         let prev = doneEl.innerText.replace(/^- 暫無進展記錄.*$/m, '').trim();
@@ -2962,32 +3033,39 @@ ${m}
         doneEl.innerText = prev ? `${prev}\n\n${injection}` : injection;
       }
 
-      // 2. 遭遇問題與卡點 (Challenges & Blockers) <- 修正原本 bug (sectionIssues -> sectionBlockers)
+      // 2. 遭遇問題與卡點 (Challenges & Blockers) <- 以 Checkbox 方式呈現
       const blockersEl = document.getElementById('sectionBlockers');
       if (blockersEl) {
-        let prev = blockersEl.innerText.replace(/^- 本週無嚴重技術瓶頸.*$/m, '').trim();
+        let prev = blockersEl.innerText.replace(/^- (?:\[ \]\s*)?本週無嚴重技術瓶頸.*$/m, '').trim();
         const challengeLines = f.split('\n').filter(l => /問題|批評|瓶頸|缺乏|修正|調整|防禦|質疑|注意/i.test(l));
         if (challengeLines.length > 0) {
-          const injection = `【咪挺研討遭遇挑戰與指導】\n${cleanBullets(challengeLines.join('\n'))}`;
+          const injection = `【咪挺研討遭遇挑戰與指導】\n${cleanCheckboxes(challengeLines.join('\n'))}`;
+          blockersEl.innerText = prev ? `${prev}\n\n${injection}` : injection;
+        } else if (cleanF && !isPlaceholder(cleanF)) {
+          const injection = `【咪挺研討遭遇挑戰與指導】\n${cleanCheckboxes(cleanF)}`;
           blockersEl.innerText = prev ? `${prev}\n\n${injection}` : injection;
         }
       }
 
-      // 3. 預計與教授討論事項 (Discussion Points) <- 指導教授關鍵回饋與研討追蹤
+      // 3. 預計與教授討論事項 (Discussion Points) <- 以 Checkbox 方式呈現
       const discussionsEl = document.getElementById('sectionDiscussions');
-      if (discussionsEl && cleanF) {
-        let prev = discussionsEl.innerText.replace(/^- 暫無預計提問事項.*$/m, '').trim();
-        const injection = `【指導教授關鍵點評與追蹤議題】\n${cleanF}`;
+      if (discussionsEl && cleanF && !isPlaceholder(cleanF)) {
+        let prev = discussionsEl.innerText.replace(/^- (?:\[ \]\s*)?暫無預計提問事項.*$/m, '').trim();
+        const injection = `【指導教授關鍵點評與追蹤議題】\n${cleanCheckboxes(cleanF)}`;
         discussionsEl.innerText = prev ? `${prev}\n\n${injection}` : injection;
       }
 
-      // 4. 下週目標與規劃 (Next Steps) <- 指派待辦任務與下次里程碑
+      // 4. 下週目標與規劃 (Next Steps) <- 咪挺指派待辦以 Checkbox 呈現且標上指派時間
       const nextStepsEl = document.getElementById('sectionNextSteps');
       if (nextStepsEl && (cleanA || cleanM)) {
-        let prev = nextStepsEl.innerText.replace(/^- 暫無規劃事項.*$/m, '').trim();
+        let prev = nextStepsEl.innerText.replace(/^- (?:\[ \]\s*)?暫無規劃事項.*$/m, '').trim();
         let planInjection = '';
-        if (cleanA) planInjection += `【咪挺指派待辦 Action Items】\n${cleanA}\n`;
-        if (cleanM) planInjection += `【下次咪挺目標與里程碑】\n${cleanM}`;
+        if (cleanA && !isPlaceholder(cleanA)) {
+          planInjection += `【咪挺指派待辦 Action Items】\n${cleanActionItemsToCheckboxes(cleanA, assignedTimeStr)}\n`;
+        }
+        if (cleanM && !isPlaceholder(cleanM)) {
+          planInjection += `【下次咪挺目標與里程碑】\n${cleanCheckboxes(cleanM)}`;
+        }
         nextStepsEl.innerText = prev ? `${prev}\n\n${planInjection.trim()}` : planInjection.trim();
       }
 
@@ -2995,7 +3073,6 @@ ${m}
       saveReportDraft();
       syncReportSidePreviews();
 
-      navigateTab('report');
       showToast('🎉 已將咪挺四大重點（決策主軸、教授點評、待辦任務、下週里程碑）完美整合至週報！');
     }
 
@@ -3343,6 +3420,36 @@ ${m}
           });
         }
       });
+
+      // 支援點擊 Checkbox 即時切換 [ ] 與 [x]
+      ['sectionBlockers', 'sectionDiscussions', 'sectionNextSteps'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('click', () => {
+            const sel = window.getSelection();
+            if (!sel || !sel.rangeCount) return;
+            const range = sel.getRangeAt(0);
+            const node = range.startContainer;
+            if (node && node.nodeType === Node.TEXT_NODE) {
+              const text = node.textContent;
+              const offset = range.startOffset;
+              const regex = /\[([ xX])\]/g;
+              let m;
+              while ((m = regex.exec(text)) !== null) {
+                if (offset >= m.index && offset <= m.index + 3) {
+                  const newChar = m[1] === ' ' ? 'x' : ' ';
+                  const before = text.slice(0, m.index);
+                  const after = text.slice(m.index + 3);
+                  node.textContent = `${before}[${newChar}]${after}`;
+                  saveReportDraft();
+                  syncReportSidePreviews();
+                  break;
+                }
+              }
+            }
+          });
+        }
+      });
     }
 
     function syncReportSidePreviews() {
@@ -3351,7 +3458,7 @@ ${m}
       const sDiscussions = document.getElementById('sectionDiscussions')?.innerText || '';
       const sNextSteps = document.getElementById('sectionNextSteps')?.innerText || '';
 
-      const countLines = (str) => str.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('【') && !l.startsWith('- 暫無') && !l.startsWith('- 本週無')).length;
+      const countLines = (str) => str.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('【') && !l.startsWith('- 暫無') && !l.startsWith('- 本週無') && !l.startsWith('- [ ] 暫無') && !l.startsWith('- [ ] 本週無')).length;
 
       const cDoneEl = document.getElementById('countDone');
       const cBlockersEl = document.getElementById('countBlockers');
@@ -3369,9 +3476,9 @@ ${m}
         const sideBlockers = document.getElementById('sidePreviewBlockers');
         const sideDiscussions = document.getElementById('sidePreviewDiscussions');
         const sideNextSteps = document.getElementById('sidePreviewNextSteps');
-        if (sideBlockers) sideBlockers.innerText = sBlockers || '- 本週無嚴重技術瓶頸';
-        if (sideDiscussions) sideDiscussions.innerText = sDiscussions || '- 暫無預計提問事項';
-        if (sideNextSteps) sideNextSteps.innerText = sNextSteps || '- 暫無規劃事項';
+        if (sideBlockers) sideBlockers.innerText = sBlockers || '- [ ] 本週無嚴重技術瓶頸';
+        if (sideDiscussions) sideDiscussions.innerText = sDiscussions || '- [ ] 暫無預計提問事項';
+        if (sideNextSteps) sideNextSteps.innerText = sNextSteps || '- [ ] 暫無規劃事項';
       }
     }
 
@@ -3405,8 +3512,8 @@ ${m}
       // 從日常打卡與最近咪挺速記中自動整合
       const logs = getStoredLogs();
       const doneItems = logs.filter(l => l.category === 'progress').map(l => `- ${l.content}`);
-      const blockerItems = logs.filter(l => l.category === 'blocker').map(l => `- ${l.content}`);
-      const discussionItems = logs.filter(l => l.category === 'discussion').map(l => `- ${l.content}`);
+      const blockerItems = logs.filter(l => l.category === 'blocker').map(l => `- [ ] ${l.content}`);
+      const discussionItems = logs.filter(l => l.category === 'discussion').map(l => `- [ ] ${l.content}`);
 
       // 自動讀取最近一筆咪挺速記融入下週規劃
       const minutes = getStoredMeetingMinutes();
@@ -3414,23 +3521,47 @@ ${m}
 
       let nextStepsList = [];
       if (latestMinute && latestMinute.summary && latestMinute.summary.actionItems) {
+        let timeStr = '';
+        if (latestMinute.dateTime) {
+          const d = new Date(latestMinute.dateTime);
+          if (!isNaN(d.getTime())) {
+            const pad = (n) => String(n).padStart(2, '0');
+            timeStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+          }
+        }
+        if (!timeStr) {
+          const now = new Date();
+          const pad = (n) => String(n).padStart(2, '0');
+          timeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        }
+
         const lines = latestMinute.summary.actionItems.split('\n').map(l => l.trim()).filter(Boolean);
         lines.forEach(line => {
-          nextStepsList.push(line.startsWith('•') || line.startsWith('-') ? line : `- ${line}`);
+          let clean = line.replace(/^[-•*]\s*/, '').replace(/^\d+[\.、]\s*/, '').trim();
+          let checked = ' ';
+          if (/^\[([ xX])\]\s*/.test(clean)) {
+            const match = clean.match(/^\[([ xX])\]\s*(.*)/);
+            checked = match[1];
+            clean = match[2];
+          }
+          if (!/指派時間|\d{4}-\d{2}-\d{2}/.test(clean)) {
+            clean = `[指派時間: ${timeStr}] ${clean}`;
+          }
+          nextStepsList.push(`- [${checked}] ${clean}`);
         });
       }
       if (nextStepsList.length === 0 && logs.length > 0) {
         nextStepsList = [
-          '- 推進後續實驗驗證與消融實驗對照',
-          '- 彙整數據並繪製進度圖表',
-          '- 依指導教授建議修正目前研究瓶頸'
+          '- [ ] 推進後續實驗驗證與消融實驗對照',
+          '- [ ] 彙整數據並繪製進度圖表',
+          '- [ ] 依指導教授建議修正目前研究瓶頸'
         ];
       }
 
       const strDone = doneItems.length > 0 ? doneItems.join('\n') : '- 暫無進展記錄（請先於【今日動態】新增）';
-      const strBlockers = blockerItems.length > 0 ? blockerItems.join('\n') : '- 本週無嚴重技術瓶頸';
-      const strDiscussions = discussionItems.length > 0 ? discussionItems.join('\n') : '- 暫無預計提問事項';
-      const strNextSteps = nextStepsList.length > 0 ? nextStepsList.join('\n') : '- 暫無規劃事項';
+      const strBlockers = blockerItems.length > 0 ? blockerItems.join('\n') : '- [ ] 本週無嚴重技術瓶頸';
+      const strDiscussions = discussionItems.length > 0 ? discussionItems.join('\n') : '- [ ] 暫無預計提問事項';
+      const strNextSteps = nextStepsList.length > 0 ? nextStepsList.join('\n') : '- [ ] 暫無規劃事項';
 
       // 填入主要報告頁
       if (document.getElementById('sectionDone')) document.getElementById('sectionDone').innerText = strDone;
@@ -3444,14 +3575,14 @@ ${m}
     }
 
     function offlineAcademicPolish() {
-      const polishText = (txt) => {
+      const polishText = (txt, isCheckbox = false) => {
         if (!txt) return '';
         return txt
           .split('\n')
           .map(l => {
             let s = l.trim();
             if (!s) return '';
-            s = s.replace(/\b跑\b(?=實驗|模型|數據|程式)/g, '執行');
+            s = s.replace(/跑(?=實驗|模型|數據|程式)/g, '執行');
             s = s.replace(/調一下/g, '微調');
             s = s.replace(/搞定|弄好/g, '完成驗證');
             s = s.replace(/不知道|不清楚/g, '尚待釐清');
@@ -3459,10 +3590,24 @@ ${m}
             s = s.replace(/差很多/g, '存在顯著落差');
             s = s.replace(/隨便試試/g, '初步探索性評測');
             s = s.replace(/跟.*講/g, '向指導教授報告');
-            if (!s.startsWith('•') && !s.startsWith('-') && !s.startsWith('【') && !s.startsWith('###')) {
-              s = `• ${s}`;
+
+            if (s.startsWith('【') || s.startsWith('###')) return s;
+
+            if (isCheckbox) {
+              if (/^-\s*\[([ xX])\]/.test(s)) {
+                return s;
+              } else if (/^\[([ xX])\]/.test(s)) {
+                return `- ${s}`;
+              } else {
+                s = s.replace(/^[-•*]\s*/, '').replace(/^\d+[\.、]\s*/, '').trim();
+                return `- [ ] ${s}`;
+              }
+            } else {
+              if (!s.startsWith('•') && !s.startsWith('-')) {
+                s = `• ${s}`;
+              }
+              return s;
             }
-            return s;
           })
           .filter(Boolean)
           .join('\n');
@@ -3473,10 +3618,10 @@ ${m}
       const sDiscussions = document.getElementById('sectionDiscussions');
       const sNextSteps = document.getElementById('sectionNextSteps');
 
-      if (sDone) sDone.innerText = polishText(sDone.innerText);
-      if (sBlockers) sBlockers.innerText = polishText(sBlockers.innerText);
-      if (sDiscussions) sDiscussions.innerText = polishText(sDiscussions.innerText);
-      if (sNextSteps) sNextSteps.innerText = polishText(sNextSteps.innerText);
+      if (sDone) sDone.innerText = polishText(sDone.innerText, false);
+      if (sBlockers) sBlockers.innerText = polishText(sBlockers.innerText, true);
+      if (sDiscussions) sDiscussions.innerText = polishText(sDiscussions.innerText, true);
+      if (sNextSteps) sNextSteps.innerText = polishText(sNextSteps.innerText, true);
     }
 
     async function polishWithAI() {
@@ -3494,7 +3639,13 @@ ${m}
 
       if (apiKey && apiKey.trim()) {
         try {
-          const prompt = `你是一位專業且嚴謹的高等研究所學術論文與進度週報專家。請針對以下碩博士研究生的咪挺週報四大區塊進行「學術化、嚴謹化、精準化」繁體中文（台灣學術用語，如「演算法」、「模型」、「消融實驗」）潤飾，修飾口語化贅字，強化條理邏輯，並保持純 Markdown 清單格式。
+          const prompt = `你是一位專業且嚴謹的高等研究所學術論文與進度週報專家。請針對以下碩博士研究生的咪挺週報四大區塊進行「學術化、嚴謹化、精準化」繁體中文（台灣學術用語，如「演算法」、「模型」、「消融實驗」）潤飾，修飾口語化贅字，強化條理邏輯。
+
+【格式規範重要要求】：
+1. 「一、本週推進成果」：保持學術條列清單（以 • 或 - 開頭）。
+2. 「二、遭遇問題與卡點」：必須以 Checkbox 待辦格式呈現（每項以 - [ ] 或 - [x] 開頭）。
+3. 「三、預計與教授討論事項」：必須以 Checkbox 待辦格式呈現（每項以 - [ ] 或 - [x] 開頭）。
+4. 「四、下週目標與規劃」：必須以 Checkbox 待辦格式呈現（每項以 - [ ] 或 - [x] 開頭）。若項目含有指派時間（如 [指派時間: ...]），請務必完整保留時間標記！
 
 【原始週報四大區塊】：
 ### 一、本週推進成果
@@ -3514,13 +3665,13 @@ ${sNextSteps}
 (潤飾後條列清單)
 
 ### 二、遭遇問題與卡點
-(潤飾後條列清單)
+(潤飾後 Checkbox 清單，如 - [ ] ...)
 
 ### 三、預計與教授討論事項
-(潤飾後條列清單)
+(潤飾後 Checkbox 清單，如 - [ ] ...)
 
 ### 四、下週目標與規劃
-(潤飾後條列清單)`;
+(潤飾後 Checkbox 清單，如 - [ ] [指派時間: ...] ...)`;
 
           const candidateModels = ['gemini-3.5-flash-lite', 'gemini-flash-latest', 'gemini-3.5-flash'];
           for (const m of candidateModels) {
