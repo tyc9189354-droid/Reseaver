@@ -461,11 +461,11 @@
                 <h3 class="text-xs font-bold text-rose-400 flex items-center gap-1.5">
                   <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
                   <span>⚠️ 二、遭遇問題與卡點 (Challenges & Blockers)</span>
-                  <span class="text-[10px] text-rose-300/70 font-normal">〔Checkbox 檢核清單〕</span>
+                  <span class="text-[10px] text-rose-300/70 font-normal">〔正常 Checkbox 清單〕</span>
                 </h3>
                 <span class="text-[10px] text-slate-400 bg-slate-700/60 px-1.5 py-0.5 rounded" id="countBlockers">0 項</span>
               </div>
-              <div id="sectionBlockers" contenteditable="true" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed focus:outline-none focus:border-rose-500/50 min-h-[60px] whitespace-pre-wrap"></div>
+              <div id="sectionBlockers" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed min-h-[60px]"></div>
             </div>
 
             <div class="bg-slate-800/60 border border-slate-700/70 rounded-xl p-4">
@@ -473,11 +473,11 @@
                 <h3 class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
                   <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
                   <span>💬 三、預計與教授討論事項 (Advisor Discussion Points)</span>
-                  <span class="text-[10px] text-amber-300/70 font-normal">〔Checkbox 討論清單〕</span>
+                  <span class="text-[10px] text-amber-300/70 font-normal">〔正常 Checkbox 清單〕</span>
                 </h3>
                 <span class="text-[10px] text-slate-400 bg-slate-700/60 px-1.5 py-0.5 rounded" id="countDiscussions">0 項</span>
               </div>
-              <div id="sectionDiscussions" contenteditable="true" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed focus:outline-none focus:border-amber-500/50 min-h-[60px] whitespace-pre-wrap"></div>
+              <div id="sectionDiscussions" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed min-h-[60px]"></div>
             </div>
 
             <div class="bg-slate-800/60 border border-slate-700/70 rounded-xl p-4">
@@ -485,11 +485,11 @@
                 <h3 class="text-xs font-bold text-sky-400 flex items-center gap-1.5">
                   <i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i>
                   <span>📅 四、下週目標與規劃 (Next Steps)</span>
-                  <span class="text-[10px] text-sky-300/70 font-normal">〔Checkbox 待辦與指派時間〕</span>
+                  <span class="text-[10px] text-sky-300/70 font-normal">〔正常 Checkbox 清單 · 標註指派日期〕</span>
                 </h3>
                 <span class="text-[10px] text-slate-400 bg-slate-700/60 px-1.5 py-0.5 rounded" id="countNextSteps">0 項</span>
               </div>
-              <div id="sectionNextSteps" contenteditable="true" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed focus:outline-none focus:border-sky-500/50 min-h-[60px] whitespace-pre-wrap"></div>
+              <div id="sectionNextSteps" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed min-h-[60px]"></div>
             </div>
           </div>
         </div>
@@ -2961,12 +2961,12 @@ ${m}
           const d = new Date(dtInput);
           if (!isNaN(d.getTime())) {
             const pad = (n) => String(n).padStart(2, '0');
-            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
           }
         }
         const now = new Date();
         const pad = (n) => String(n).padStart(2, '0');
-        return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
       };
 
       const cleanBullets = (txt) => {
@@ -2994,7 +2994,7 @@ ${m}
           .join('\n');
       };
 
-      // 將咪挺指派待辦轉換為 Checkbox 並附帶指派時間標記
+      // 將咪挺指派待辦轉換為 Checkbox 並附帶指派日期標記 (YYYY-MM-DD，細節不含時間)
       const cleanActionItemsToCheckboxes = (txt, timeStr) => {
         if (!txt || isPlaceholder(txt)) return '';
         return txt.split('\n')
@@ -3008,7 +3008,9 @@ ${m}
               checked = match[1];
               s = match[2];
             }
-            if (!/指派時間|\d{4}-\d{2}-\d{2}/.test(s)) {
+            // 縮減歷史或已存在的時間標註為純日期 YYYY-MM-DD
+            s = s.replace(/\[(?:指派時間|指派日期):\s*(\d{4}-\d{2}-\d{2})(?:\s+\d{1,2}:\d{2})?\]/g, '[指派時間: $1]');
+            if (!/指派時間|指派日期|\d{4}-\d{2}-\d{2}/.test(s)) {
               return `- [${checked}] [指派時間: ${timeStr}] ${s}`;
             }
             return `- [${checked}] ${s}`;
@@ -3022,7 +3024,7 @@ ${m}
       const cleanM = m;
       const assignedTimeStr = getMinutesAssignedTimeStr();
 
-      // 先切換至週報頁籤，確保 DOM 節點脫離 display:none 正常渲染換行
+      // 先切換至週報頁籤，確保 DOM 節點脫離 display:none 正常渲染
       navigateTab('report');
 
       // 1. 本週推進成果 (What was done) <- 核心決策與主軸推進 (條列 •)
@@ -3033,32 +3035,29 @@ ${m}
         doneEl.innerText = prev ? `${prev}\n\n${injection}` : injection;
       }
 
-      // 2. 遭遇問題與卡點 (Challenges & Blockers) <- 以 Checkbox 方式呈現
-      const blockersEl = document.getElementById('sectionBlockers');
-      if (blockersEl) {
-        let prev = blockersEl.innerText.replace(/^- (?:\[ \]\s*)?本週無嚴重技術瓶頸.*$/m, '').trim();
-        const challengeLines = f.split('\n').filter(l => /問題|批評|瓶頸|缺乏|修正|調整|防禦|質疑|注意/i.test(l));
-        if (challengeLines.length > 0) {
-          const injection = `【咪挺研討遭遇挑戰與指導】\n${cleanCheckboxes(challengeLines.join('\n'))}`;
-          blockersEl.innerText = prev ? `${prev}\n\n${injection}` : injection;
-        } else if (cleanF && !isPlaceholder(cleanF)) {
-          const injection = `【咪挺研討遭遇挑戰與指導】\n${cleanCheckboxes(cleanF)}`;
-          blockersEl.innerText = prev ? `${prev}\n\n${injection}` : injection;
-        }
+      // 2. 遭遇問題與卡點 (Challenges & Blockers) <- 以正常 Checkbox 方式呈現
+      const challengeLines = f.split('\n').filter(l => /問題|批評|瓶頸|缺乏|修正|調整|防禦|質疑|注意/i.test(l));
+      let blockersContent = '';
+      if (challengeLines.length > 0) {
+        blockersContent = `【咪挺研討遭遇挑戰與指導】\n${cleanCheckboxes(challengeLines.join('\n'))}`;
+      } else if (cleanF && !isPlaceholder(cleanF)) {
+        blockersContent = `【咪挺研討遭遇挑戰與指導】\n${cleanCheckboxes(cleanF)}`;
+      }
+      if (blockersContent) {
+        let prev = getSectionMarkdown('sectionBlockers').replace(/^- (?:\[ \]\s*)?本週無嚴重技術瓶頸.*$/m, '').trim();
+        setSectionMarkdown('sectionBlockers', prev ? `${prev}\n\n${blockersContent}` : blockersContent);
       }
 
-      // 3. 預計與教授討論事項 (Discussion Points) <- 以 Checkbox 方式呈現
-      const discussionsEl = document.getElementById('sectionDiscussions');
-      if (discussionsEl && cleanF && !isPlaceholder(cleanF)) {
-        let prev = discussionsEl.innerText.replace(/^- (?:\[ \]\s*)?暫無預計提問事項.*$/m, '').trim();
+      // 3. 預計與教授討論事項 (Discussion Points) <- 以正常 Checkbox 方式呈現
+      if (cleanF && !isPlaceholder(cleanF)) {
+        let prev = getSectionMarkdown('sectionDiscussions').replace(/^- (?:\[ \]\s*)?暫無預計提問事項.*$/m, '').trim();
         const injection = `【指導教授關鍵點評與追蹤議題】\n${cleanCheckboxes(cleanF)}`;
-        discussionsEl.innerText = prev ? `${prev}\n\n${injection}` : injection;
+        setSectionMarkdown('sectionDiscussions', prev ? `${prev}\n\n${injection}` : injection);
       }
 
-      // 4. 下週目標與規劃 (Next Steps) <- 咪挺指派待辦以 Checkbox 呈現且標上指派時間
-      const nextStepsEl = document.getElementById('sectionNextSteps');
-      if (nextStepsEl && (cleanA || cleanM)) {
-        let prev = nextStepsEl.innerText.replace(/^- (?:\[ \]\s*)?暫無規劃事項.*$/m, '').trim();
+      // 4. 下週目標與規劃 (Next Steps) <- 咪挺指派待辦以 Checkbox 呈現且標上指派日期 (純日期 YYYY-MM-DD)
+      if (cleanA || cleanM) {
+        let prev = getSectionMarkdown('sectionNextSteps').replace(/^- (?:\[ \]\s*)?暫無規劃事項.*$/m, '').trim();
         let planInjection = '';
         if (cleanA && !isPlaceholder(cleanA)) {
           planInjection += `【咪挺指派待辦 Action Items】\n${cleanActionItemsToCheckboxes(cleanA, assignedTimeStr)}\n`;
@@ -3066,7 +3065,7 @@ ${m}
         if (cleanM && !isPlaceholder(cleanM)) {
           planInjection += `【下次咪挺目標與里程碑】\n${cleanCheckboxes(cleanM)}`;
         }
-        nextStepsEl.innerText = prev ? `${prev}\n\n${planInjection.trim()}` : planInjection.trim();
+        setSectionMarkdown('sectionNextSteps', prev ? `${prev}\n\n${planInjection.trim()}` : planInjection.trim());
       }
 
       // 儲存週報草稿與同步預覽，防止切換頁籤覆寫
@@ -3399,64 +3398,262 @@ ${m}
       }
     }
 
+    // ==========================================
+    // 正常 Checkbox 清單渲染與管理器 (Checklist Manager)
+    // ==========================================
+    function getSectionMarkdown(sectionId) {
+      const container = document.getElementById(sectionId);
+      if (!container) return '';
+
+      const itemsContainer = container.querySelector('.checklist-items-container');
+      if (!itemsContainer) {
+        return container.innerText ? container.innerText.trim() : '';
+      }
+
+      const rows = itemsContainer.querySelectorAll('.checklist-item, .checklist-header');
+      const lines = [];
+
+      rows.forEach(row => {
+        if (row.classList.contains('checklist-header')) {
+          const hText = row.querySelector('.checklist-header-text')?.textContent?.trim() || row.textContent.trim();
+          if (hText) lines.push(hText);
+        } else {
+          const cb = row.querySelector('.checklist-checkbox');
+          const isChecked = cb ? cb.checked : false;
+          const dateBadge = row.querySelector('.checklist-date-badge');
+          const dateStr = dateBadge ? dateBadge.getAttribute('data-date') : '';
+          const textEl = row.querySelector('.checklist-text');
+          let text = textEl ? textEl.innerText.trim() : '';
+
+          if (text || dateStr) {
+            let prefix = `- [${isChecked ? 'x' : ' '}] `;
+            if (dateStr) {
+              prefix += `[指派時間: ${dateStr}] `;
+            }
+            lines.push(`${prefix}${text}`);
+          }
+        }
+      });
+
+      return lines.join('\n').trim();
+    }
+
+    function setSectionMarkdown(sectionId, markdownStr) {
+      const container = document.getElementById(sectionId);
+      if (!container) return;
+
+      if (sectionId === 'sectionDone') {
+        container.innerText = markdownStr || '';
+        return;
+      }
+
+      renderChecklistSection(sectionId, markdownStr);
+    }
+
+    function renderChecklistSection(sectionId, markdownStr) {
+      const container = document.getElementById(sectionId);
+      if (!container) return;
+
+      const isBlocker = sectionId === 'sectionBlockers';
+      const isDiscussion = sectionId === 'sectionDiscussions';
+      const accentColor = isBlocker 
+        ? 'text-rose-500 focus:ring-rose-500 accent-rose-500' 
+        : (isDiscussion ? 'text-amber-500 focus:ring-amber-500 accent-amber-500' : 'text-sky-500 focus:ring-sky-500 accent-sky-500');
+
+      const lines = (markdownStr || '').split('\n').map(l => l.trim()).filter(Boolean);
+      let html = `<div class="checklist-items-container space-y-2" data-section="${sectionId}">`;
+
+      let hasValidItems = false;
+      lines.forEach(line => {
+        if (/^(?:【|###|##|\*\*)/.test(line)) {
+          html += `
+            <div class="checklist-header text-[11px] font-bold text-slate-400 py-1 border-b border-slate-800/80 mt-2 mb-1 flex items-center justify-between select-none">
+              <span class="checklist-header-text">${escapeHtml(line)}</span>
+            </div>`;
+          return;
+        }
+
+        let isChecked = false;
+        let cleanText = line;
+        if (/^[-*•]?\s*\[([xX])\]/.test(cleanText)) {
+          isChecked = true;
+          cleanText = cleanText.replace(/^[-*•]?\s*\[([xX])\]\s*/, '');
+        } else if (/^[-*•]?\s*\[\s*\]/.test(cleanText)) {
+          isChecked = false;
+          cleanText = cleanText.replace(/^[-*•]?\s*\[\s*\]\s*/, '');
+        } else {
+          cleanText = cleanText.replace(/^[-*•]\s*/, '').replace(/^\d+[\.、]\s*/, '');
+        }
+
+        let dateBadgeHtml = '';
+        const dateMatch = cleanText.match(/\[(?:指派時間|指派日期):\s*(\d{4}-\d{2}-\d{2})(?:\s+\d{1,2}:\d{2})?\]/);
+        if (dateMatch) {
+          const dateStr = dateMatch[1];
+          cleanText = cleanText.replace(/\[(?:指派時間|指派日期):\s*(\d{4}-\d{2}-\d{2})(?:\s+\d{1,2}:\d{2})?\]\s*/, '').trim();
+          dateBadgeHtml = `<span class="checklist-date-badge inline-flex items-center gap-1 text-[10px] text-sky-300 bg-sky-950/80 border border-sky-800/70 px-1.5 py-0.5 rounded shrink-0 select-none font-medium" data-date="${dateStr}">📅 指派: ${dateStr}</span>`;
+        }
+
+        hasValidItems = true;
+        html += `
+          <div class="checklist-item flex items-start gap-2.5 py-1.5 px-2.5 rounded-lg bg-slate-900/50 hover:bg-slate-850 border border-slate-800/70 transition group" data-checked="${isChecked}">
+            <input type="checkbox" class="checklist-checkbox w-4 h-4 rounded bg-slate-950 border-slate-700 ${accentColor} cursor-pointer mt-0.5 shrink-0" ${isChecked ? 'checked' : ''} onchange="onChecklistCheckboxChange(this, '${sectionId}')">
+            ${dateBadgeHtml}
+            <div contenteditable="true" class="checklist-text flex-1 text-xs text-slate-200 outline-none leading-relaxed ${isChecked ? 'line-through text-slate-400 opacity-60' : ''}" oninput="onChecklistTextChange('${sectionId}')" onkeydown="onChecklistKeyDown(event, this, '${sectionId}')" placeholder="請輸入待辦項目...">${escapeHtml(cleanText)}</div>
+            <button type="button" onclick="deleteChecklistRow(this, '${sectionId}')" title="刪除項目" class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-rose-400 text-xs px-1.5 py-0.5 transition shrink-0">✕</button>
+          </div>`;
+      });
+
+      if (!hasValidItems && lines.length === 0) {
+        html += `
+          <div class="checklist-item flex items-start gap-2.5 py-1.5 px-2.5 rounded-lg bg-slate-900/50 hover:bg-slate-850 border border-slate-800/70 transition group" data-checked="false">
+            <input type="checkbox" class="checklist-checkbox w-4 h-4 rounded bg-slate-950 border-slate-700 ${accentColor} cursor-pointer mt-0.5 shrink-0" onchange="onChecklistCheckboxChange(this, '${sectionId}')">
+            <div contenteditable="true" class="checklist-text flex-1 text-xs text-slate-200 outline-none leading-relaxed" oninput="onChecklistTextChange('${sectionId}')" onkeydown="onChecklistKeyDown(event, this, '${sectionId}')" placeholder="請輸入待辦項目..."></div>
+            <button type="button" onclick="deleteChecklistRow(this, '${sectionId}')" title="刪除項目" class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-rose-400 text-xs px-1.5 py-0.5 transition shrink-0">✕</button>
+          </div>`;
+      }
+
+      html += `</div>`;
+
+      // 底部操作區：新增按鈕與提示
+      html += `
+        <div class="mt-2.5 flex items-center justify-between">
+          <button type="button" onclick="addChecklistRow('${sectionId}')" class="text-[11px] text-slate-400 hover:text-slate-200 hover:bg-slate-800/90 px-2.5 py-1 rounded-lg border border-dashed border-slate-700/80 transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>新增待辦項目</span>
+          </button>
+          <span class="text-[10px] text-slate-500 select-none">點擊左側勾選框打勾 · 支援直接打字與 Enter 換行</span>
+        </div>`;
+
+      container.innerHTML = html;
+      if (window.lucide) lucide.createIcons({ root: container });
+    }
+
+    function onChecklistCheckboxChange(checkbox, sectionId) {
+      const row = checkbox.closest('.checklist-item');
+      if (!row) return;
+      const textEl = row.querySelector('.checklist-text');
+      const isChecked = checkbox.checked;
+      row.dataset.checked = isChecked ? 'true' : 'false';
+      if (textEl) {
+        if (isChecked) {
+          textEl.classList.add('line-through', 'text-slate-400', 'opacity-60');
+        } else {
+          textEl.classList.remove('line-through', 'text-slate-400', 'opacity-60');
+        }
+      }
+      saveReportDraft();
+      syncReportSidePreviews();
+    }
+
+    function onChecklistTextChange(sectionId) {
+      saveReportDraft();
+      syncReportSidePreviews();
+    }
+
+    function onChecklistKeyDown(e, el, sectionId) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const row = el.closest('.checklist-item');
+        if (!row) return;
+        const newRow = document.createElement('div');
+        const isBlocker = sectionId === 'sectionBlockers';
+        const isDiscussion = sectionId === 'sectionDiscussions';
+        const accentColor = isBlocker 
+          ? 'text-rose-500 focus:ring-rose-500 accent-rose-500' 
+          : (isDiscussion ? 'text-amber-500 focus:ring-amber-500 accent-amber-500' : 'text-sky-500 focus:ring-sky-500 accent-sky-500');
+
+        newRow.className = 'checklist-item flex items-start gap-2.5 py-1.5 px-2.5 rounded-lg bg-slate-900/50 hover:bg-slate-850 border border-slate-800/70 transition group';
+        newRow.dataset.checked = 'false';
+        newRow.innerHTML = `
+          <input type="checkbox" class="checklist-checkbox w-4 h-4 rounded bg-slate-950 border-slate-700 ${accentColor} cursor-pointer mt-0.5 shrink-0" onchange="onChecklistCheckboxChange(this, '${sectionId}')">
+          <div contenteditable="true" class="checklist-text flex-1 text-xs text-slate-200 outline-none leading-relaxed" oninput="onChecklistTextChange('${sectionId}')" onkeydown="onChecklistKeyDown(event, this, '${sectionId}')" placeholder="請輸入待辦項目..."></div>
+          <button type="button" onclick="deleteChecklistRow(this, '${sectionId}')" title="刪除項目" class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-rose-400 text-xs px-1.5 py-0.5 transition shrink-0">✕</button>
+        `;
+        row.parentNode.insertBefore(newRow, row.nextSibling);
+        const newTextEl = newRow.querySelector('.checklist-text');
+        if (newTextEl) newTextEl.focus();
+        saveReportDraft();
+        syncReportSidePreviews();
+      } else if (e.key === 'Backspace' && el.innerText.trim() === '') {
+        const row = el.closest('.checklist-item');
+        if (row && row.parentNode && row.parentNode.children.length > 1) {
+          e.preventDefault();
+          const prev = row.previousElementSibling;
+          row.remove();
+          if (prev && prev.querySelector('.checklist-text')) {
+            prev.querySelector('.checklist-text').focus();
+          }
+          saveReportDraft();
+          syncReportSidePreviews();
+        }
+      }
+    }
+
+    function addChecklistRow(sectionId) {
+      const container = document.getElementById(sectionId);
+      if (!container) return;
+      const itemsContainer = container.querySelector('.checklist-items-container');
+      if (!itemsContainer) return;
+
+      const isBlocker = sectionId === 'sectionBlockers';
+      const isDiscussion = sectionId === 'sectionDiscussions';
+      const accentColor = isBlocker 
+        ? 'text-rose-500 focus:ring-rose-500 accent-rose-500' 
+        : (isDiscussion ? 'text-amber-500 focus:ring-amber-500 accent-amber-500' : 'text-sky-500 focus:ring-sky-500 accent-sky-500');
+
+      const newRow = document.createElement('div');
+      newRow.className = 'checklist-item flex items-start gap-2.5 py-1.5 px-2.5 rounded-lg bg-slate-900/50 hover:bg-slate-850 border border-slate-800/70 transition group';
+      newRow.dataset.checked = 'false';
+      newRow.innerHTML = `
+        <input type="checkbox" class="checklist-checkbox w-4 h-4 rounded bg-slate-950 border-slate-700 ${accentColor} cursor-pointer mt-0.5 shrink-0" onchange="onChecklistCheckboxChange(this, '${sectionId}')">
+        <div contenteditable="true" class="checklist-text flex-1 text-xs text-slate-200 outline-none leading-relaxed" oninput="onChecklistTextChange('${sectionId}')" onkeydown="onChecklistKeyDown(event, this, '${sectionId}')" placeholder="請輸入待辦項目..."></div>
+        <button type="button" onclick="deleteChecklistRow(this, '${sectionId}')" title="刪除項目" class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-rose-400 text-xs px-1.5 py-0.5 transition shrink-0">✕</button>
+      `;
+      itemsContainer.appendChild(newRow);
+      const newTextEl = newRow.querySelector('.checklist-text');
+      if (newTextEl) newTextEl.focus();
+      saveReportDraft();
+      syncReportSidePreviews();
+    }
+
+    function deleteChecklistRow(button, sectionId) {
+      const row = button.closest('.checklist-item');
+      if (!row) return;
+      const parent = row.parentNode;
+      row.remove();
+      if (parent && parent.querySelectorAll('.checklist-item').length === 0) {
+        addChecklistRow(sectionId);
+      }
+      saveReportDraft();
+      syncReportSidePreviews();
+    }
+
     function saveReportDraft() {
       const draft = {
         done: document.getElementById('sectionDone')?.innerText || '',
-        blockers: document.getElementById('sectionBlockers')?.innerText || '',
-        discussions: document.getElementById('sectionDiscussions')?.innerText || '',
-        nextSteps: document.getElementById('sectionNextSteps')?.innerText || '',
+        blockers: getSectionMarkdown('sectionBlockers'),
+        discussions: getSectionMarkdown('sectionDiscussions'),
+        nextSteps: getSectionMarkdown('sectionNextSteps'),
         updatedAt: new Date().toISOString()
       };
       localStorage.setItem(STORAGE_KEY_REPORT_DRAFT, JSON.stringify(draft));
     }
 
     function setupReportAutoSave() {
-      ['sectionDone', 'sectionBlockers', 'sectionDiscussions', 'sectionNextSteps'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.addEventListener('input', () => {
-            saveReportDraft();
-            syncReportSidePreviews();
-          });
-        }
-      });
-
-      // 支援點擊 Checkbox 即時切換 [ ] 與 [x]
-      ['sectionBlockers', 'sectionDiscussions', 'sectionNextSteps'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.addEventListener('click', () => {
-            const sel = window.getSelection();
-            if (!sel || !sel.rangeCount) return;
-            const range = sel.getRangeAt(0);
-            const node = range.startContainer;
-            if (node && node.nodeType === Node.TEXT_NODE) {
-              const text = node.textContent;
-              const offset = range.startOffset;
-              const regex = /\[([ xX])\]/g;
-              let m;
-              while ((m = regex.exec(text)) !== null) {
-                if (offset >= m.index && offset <= m.index + 3) {
-                  const newChar = m[1] === ' ' ? 'x' : ' ';
-                  const before = text.slice(0, m.index);
-                  const after = text.slice(m.index + 3);
-                  node.textContent = `${before}[${newChar}]${after}`;
-                  saveReportDraft();
-                  syncReportSidePreviews();
-                  break;
-                }
-              }
-            }
-          });
-        }
-      });
+      const sDone = document.getElementById('sectionDone');
+      if (sDone) {
+        sDone.addEventListener('input', () => {
+          saveReportDraft();
+          syncReportSidePreviews();
+        });
+      }
     }
 
     function syncReportSidePreviews() {
       const sDone = document.getElementById('sectionDone')?.innerText || '';
-      const sBlockers = document.getElementById('sectionBlockers')?.innerText || '';
-      const sDiscussions = document.getElementById('sectionDiscussions')?.innerText || '';
-      const sNextSteps = document.getElementById('sectionNextSteps')?.innerText || '';
+      const sBlockers = getSectionMarkdown('sectionBlockers');
+      const sDiscussions = getSectionMarkdown('sectionDiscussions');
+      const sNextSteps = getSectionMarkdown('sectionNextSteps');
 
       const countLines = (str) => str.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('【') && !l.startsWith('- 暫無') && !l.startsWith('- 本週無') && !l.startsWith('- [ ] 暫無') && !l.startsWith('- [ ] 本週無')).length;
 
@@ -3501,9 +3698,9 @@ ${m}
         const savedDraft = getStoredReportDraft();
         if (savedDraft && (savedDraft.done || savedDraft.blockers || savedDraft.discussions || savedDraft.nextSteps)) {
           if (document.getElementById('sectionDone')) document.getElementById('sectionDone').innerText = savedDraft.done;
-          if (document.getElementById('sectionBlockers')) document.getElementById('sectionBlockers').innerText = savedDraft.blockers;
-          if (document.getElementById('sectionDiscussions')) document.getElementById('sectionDiscussions').innerText = savedDraft.discussions;
-          if (document.getElementById('sectionNextSteps')) document.getElementById('sectionNextSteps').innerText = savedDraft.nextSteps;
+          setSectionMarkdown('sectionBlockers', savedDraft.blockers);
+          setSectionMarkdown('sectionDiscussions', savedDraft.discussions);
+          setSectionMarkdown('sectionNextSteps', savedDraft.nextSteps);
           syncReportSidePreviews();
           return;
         }
@@ -3526,13 +3723,13 @@ ${m}
           const d = new Date(latestMinute.dateTime);
           if (!isNaN(d.getTime())) {
             const pad = (n) => String(n).padStart(2, '0');
-            timeStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            timeStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
           }
         }
         if (!timeStr) {
           const now = new Date();
           const pad = (n) => String(n).padStart(2, '0');
-          timeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+          timeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
         }
 
         const lines = latestMinute.summary.actionItems.split('\n').map(l => l.trim()).filter(Boolean);
@@ -3544,7 +3741,8 @@ ${m}
             checked = match[1];
             clean = match[2];
           }
-          if (!/指派時間|\d{4}-\d{2}-\d{2}/.test(clean)) {
+          clean = clean.replace(/\[(?:指派時間|指派日期):\s*(\d{4}-\d{2}-\d{2})(?:\s+\d{1,2}:\d{2})?\]/g, '[指派時間: $1]');
+          if (!/指派時間|指派日期|\d{4}-\d{2}-\d{2}/.test(clean)) {
             clean = `[指派時間: ${timeStr}] ${clean}`;
           }
           nextStepsList.push(`- [${checked}] ${clean}`);
@@ -3565,9 +3763,9 @@ ${m}
 
       // 填入主要報告頁
       if (document.getElementById('sectionDone')) document.getElementById('sectionDone').innerText = strDone;
-      if (document.getElementById('sectionBlockers')) document.getElementById('sectionBlockers').innerText = strBlockers;
-      if (document.getElementById('sectionDiscussions')) document.getElementById('sectionDiscussions').innerText = strDiscussions;
-      if (document.getElementById('sectionNextSteps')) document.getElementById('sectionNextSteps').innerText = strNextSteps;
+      setSectionMarkdown('sectionBlockers', strBlockers);
+      setSectionMarkdown('sectionDiscussions', strDiscussions);
+      setSectionMarkdown('sectionNextSteps', strNextSteps);
 
       saveReportDraft();
       syncReportSidePreviews();
@@ -3614,21 +3812,20 @@ ${m}
       };
 
       const sDone = document.getElementById('sectionDone');
-      const sBlockers = document.getElementById('sectionBlockers');
-      const sDiscussions = document.getElementById('sectionDiscussions');
-      const sNextSteps = document.getElementById('sectionNextSteps');
-
       if (sDone) sDone.innerText = polishText(sDone.innerText, false);
-      if (sBlockers) sBlockers.innerText = polishText(sBlockers.innerText, true);
-      if (sDiscussions) sDiscussions.innerText = polishText(sDiscussions.innerText, true);
-      if (sNextSteps) sNextSteps.innerText = polishText(sNextSteps.innerText, true);
+      setSectionMarkdown('sectionBlockers', polishText(getSectionMarkdown('sectionBlockers'), true));
+      setSectionMarkdown('sectionDiscussions', polishText(getSectionMarkdown('sectionDiscussions'), true));
+      setSectionMarkdown('sectionNextSteps', polishText(getSectionMarkdown('sectionNextSteps'), true));
+
+      saveReportDraft();
+      syncReportSidePreviews();
     }
 
     async function polishWithAI() {
       const sDone = document.getElementById('sectionDone')?.innerText.trim() || '';
-      const sBlockers = document.getElementById('sectionBlockers')?.innerText.trim() || '';
-      const sDiscussions = document.getElementById('sectionDiscussions')?.innerText.trim() || '';
-      const sNextSteps = document.getElementById('sectionNextSteps')?.innerText.trim() || '';
+      const sBlockers = getSectionMarkdown('sectionBlockers');
+      const sDiscussions = getSectionMarkdown('sectionDiscussions');
+      const sNextSteps = getSectionMarkdown('sectionNextSteps');
 
       if (!sDone && !sBlockers && !sDiscussions && !sNextSteps) {
         return showToast('目前尚無週報內容可供潤飾！');
@@ -3645,7 +3842,7 @@ ${m}
 1. 「一、本週推進成果」：保持學術條列清單（以 • 或 - 開頭）。
 2. 「二、遭遇問題與卡點」：必須以 Checkbox 待辦格式呈現（每項以 - [ ] 或 - [x] 開頭）。
 3. 「三、預計與教授討論事項」：必須以 Checkbox 待辦格式呈現（每項以 - [ ] 或 - [x] 開頭）。
-4. 「四、下週目標與規劃」：必須以 Checkbox 待辦格式呈現（每項以 - [ ] 或 - [x] 開頭）。若項目含有指派時間（如 [指派時間: ...]），請務必完整保留時間標記！
+4. 「四、下週目標與規劃」：必須以 Checkbox 待辦格式呈現（每項以 - [ ] 或 - [x] 開頭）。若項目含有指派時間（如 [指派時間: YYYY-MM-DD]），請務必完整保留日期標記！
 
 【原始週報四大區塊】：
 ### 一、本週推進成果
@@ -3671,7 +3868,7 @@ ${sNextSteps}
 (潤飾後 Checkbox 清單，如 - [ ] ...)
 
 ### 四、下週目標與規劃
-(潤飾後 Checkbox 清單，如 - [ ] [指派時間: ...] ...)`;
+(潤飾後 Checkbox 清單，如 - [ ] [指派時間: YYYY-MM-DD] ...)`;
 
           const candidateModels = ['gemini-3.5-flash-lite', 'gemini-flash-latest', 'gemini-3.5-flash'];
           for (const m of candidateModels) {
@@ -3693,10 +3890,10 @@ ${sNextSteps}
                 const pDiscussions = extractSectionText(fullText, '三、預計與教授討論事項', '四、下週目標與規劃');
                 const pNextSteps = extractSectionText(fullText, '四、下週目標與規劃', null);
 
-                if (pDone) document.getElementById('sectionDone').innerText = pDone;
-                if (pBlockers) document.getElementById('sectionBlockers').innerText = pBlockers;
-                if (pDiscussions) document.getElementById('sectionDiscussions').innerText = pDiscussions;
-                if (pNextSteps) document.getElementById('sectionNextSteps').innerText = pNextSteps;
+                if (pDone && document.getElementById('sectionDone')) document.getElementById('sectionDone').innerText = pDone;
+                if (pBlockers) setSectionMarkdown('sectionBlockers', pBlockers);
+                if (pDiscussions) setSectionMarkdown('sectionDiscussions', pDiscussions);
+                if (pNextSteps) setSectionMarkdown('sectionNextSteps', pNextSteps);
 
                 saveReportDraft();
                 syncReportSidePreviews();
@@ -3726,7 +3923,7 @@ ${sNextSteps}
       const info = activeMeeting ? getDetailedCountdown(activeMeeting.targetTime, activeMeeting.repeatWeekly) : null;
       const targetStr = info ? info.formattedDate : '本週';
 
-      return `# ${meetingTitle} 週報 - Reseaver\n\n> 目標會議時間：${targetStr}\n\n## 一、本週推進成果 (What was done)\n${document.getElementById('sectionDone').innerText}\n\n## 二、遭遇問題與卡點 (Challenges & Blockers)\n${document.getElementById('sectionBlockers').innerText}\n\n## 三、預計與教授討論事項 (Discussion Points)\n${document.getElementById('sectionDiscussions').innerText}\n\n## 四、下週目標與規劃 (Next Steps)\n${document.getElementById('sectionNextSteps').innerText}\n\n---\n*Generated by Reseaver*`;
+      return `# ${meetingTitle} 週報 - Reseaver\n\n> 目標會議時間：${targetStr}\n\n## 一、本週推進成果 (What was done)\n${document.getElementById('sectionDone').innerText}\n\n## 二、遭遇問題與卡點 (Challenges & Blockers)\n${getSectionMarkdown('sectionBlockers')}\n\n## 三、預計與教授討論事項 (Discussion Points)\n${getSectionMarkdown('sectionDiscussions')}\n\n## 四、下週目標與規劃 (Next Steps)\n${getSectionMarkdown('sectionNextSteps')}\n\n---\n*Generated by Reseaver*`;
     }
 
     function copyReportMarkdown() {
