@@ -1372,6 +1372,97 @@
     </div>
   </div>
 
+  <!-- MODAL: 論文膠囊完整 4 維度快照詳情 (PaperCapsule Detail Modal) -->
+  <div id="paperDetailModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-750 rounded-3xl w-full max-w-2xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+      <div class="flex justify-between items-start pb-3 border-b border-slate-800">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span id="detailVenueYear" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">-</span>
+            <span class="text-xs text-slate-400">論文膠囊 4 維度學術快照</span>
+          </div>
+          <h3 id="detailTitle" class="text-base sm:text-lg font-extrabold text-white leading-snug">-</h3>
+          <p id="detailAuthors" class="text-xs text-slate-400">-</p>
+        </div>
+        <button onclick="closePaperDetailModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- 4 維度內容完整呈現 -->
+      <div class="space-y-3.5 text-xs">
+        <!-- 1. 🎯 核心探討問題 -->
+        <div class="bg-slate-850 bg-slate-800/80 border border-slate-750 rounded-2xl p-3.5 space-y-1.5 shadow-sm">
+          <div class="flex items-center justify-between text-sky-400 font-bold text-xs">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="target" class="w-4 h-4"></i>
+              <span>🎯 核心探討問題 (Target Problem)</span>
+            </span>
+          </div>
+          <p id="detailProblem" class="text-slate-200 text-xs leading-relaxed whitespace-pre-wrap">-</p>
+        </div>
+
+        <!-- 2. ⚙️ 核心架構與關鍵數學表達 -->
+        <div class="bg-slate-850 bg-slate-800/80 border border-slate-750 rounded-2xl p-3.5 space-y-1.5 shadow-sm">
+          <div class="flex items-center justify-between text-emerald-400 font-bold text-xs">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="cpu" class="w-4 h-4"></i>
+              <span>⚙️ 核心架構與關鍵數學表達 (Core Method & Math)</span>
+            </span>
+            <button type="button" onclick="copyDetailMath()" class="text-[11px] text-slate-400 hover:text-emerald-300 flex items-center gap-1 transition">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              <span>複製數學式</span>
+            </button>
+          </div>
+          <p id="detailMethod" class="text-slate-100 text-xs leading-relaxed font-sans whitespace-pre-wrap bg-slate-900/60 p-2.5 rounded-xl border border-slate-750">-</p>
+        </div>
+
+        <!-- 3. 📈 關鍵成果與數據 -->
+        <div class="bg-slate-850 bg-slate-800/80 border border-slate-750 rounded-2xl p-3.5 space-y-1.5 shadow-sm">
+          <div class="flex items-center justify-between text-amber-400 font-bold text-xs">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="trending-up" class="w-4 h-4"></i>
+              <span>📈 關鍵成果與數據 (Key Findings & Metrics)</span>
+            </span>
+          </div>
+          <p id="detailFinding" class="text-slate-200 text-xs leading-relaxed whitespace-pre-wrap">-</p>
+        </div>
+
+        <!-- 4. ⚠️ 局限性與未來方向 -->
+        <div class="bg-slate-850 bg-slate-800/80 border border-slate-750 rounded-2xl p-3.5 space-y-1.5 shadow-sm">
+          <div class="flex items-center justify-between text-rose-400 font-bold text-xs">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+              <span>⚠️ 局限性與未來方向 (Limitations & Future Work)</span>
+            </span>
+          </div>
+          <p id="detailLimitation" class="text-slate-300 text-xs leading-relaxed whitespace-pre-wrap">-</p>
+        </div>
+      </div>
+
+      <!-- 底部按鈕列 -->
+      <div class="pt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-800">
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="copyPaperMarkdown()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>複製完整快照 (Markdown)</span>
+          </button>
+          <button type="button" id="detailFlashcardBtn" class="px-3 py-1.5 bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 border border-violet-500/40 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+            <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+            <span>翻卡複習</span>
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" id="detailDeleteBtn" class="px-3 py-1.5 bg-rose-950/60 hover:bg-rose-900 border border-rose-500/30 text-rose-300 hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>刪除膠囊</span>
+          </button>
+          <button type="button" onclick="closePaperDetailModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium">關閉</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: 新增實驗記錄 / 踩坑日誌 -->
   <div id="newLabLogModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-3 max-h-[90vh] overflow-y-auto">
@@ -3504,31 +3595,38 @@ ${sNextSteps}
     // 模組三：PaperCapsule 論文膠囊與翻卡記憶
     // ==========================================
 
-    // 將 LaTeX 語法全面轉換為自然易讀的純文字數學表達（消除 \text, \frac, \pi, $ 等標籤）
+    // 將 LaTeX 語法全面轉換為自然易讀的純文字數學表達（徹底消除 \text, \frac, \left, \begin, $, 反斜線等標籤）
     function cleanLatexToReadableMath(text) {
       if (!text || typeof text !== 'string') return '';
       let s = text;
 
-      // 1. 分數轉換: \frac{a}{b} -> (a / b)
-      s = s.replace(/\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}/g, '($1 / $2)');
+      // 0. 清除 LaTeX 環境標籤 (\begin{equation}, \end{align*}, \begin{cases} 等)
+      s = s.replace(/\\(?:begin|end)\s*\{[a-zA-Z0-9*]+\}/g, '');
+
+      // 0.5 清理 \left, \right 與轉義括號
+      s = s.replace(/\\left\s*\\([{}])/g, '$1')
+           .replace(/\\right\s*\\([{}])/g, '$1')
+           .replace(/\\left\s*([(\[{|.]|\\[{}])/g, '$1')
+           .replace(/\\right\s*([)\]}|.]|\\[{}])/g, '$1')
+           .replace(/\\left|\\right/g, '');
+
+      // 1. 遞迴展開分數: \frac{a}{b} -> (a / b) (最多 5 層巢狀保護)
+      for (let i = 0; i < 5; i++) {
+        s = s.replace(/\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}/g, '($1 / $2)');
+      }
       s = s.replace(/\\frac\s*([a-zA-Z0-9])\s*([a-zA-Z0-9])/g, '($1 / $2)');
 
       // 1.5 根號轉換: \sqrt{x} -> √(x), \sqrt[n]{x} -> ⁿ√(x)
       s = s.replace(/\\sqrt\s*\[([^\]]+)\]\s*\{([^{}]+)\}/g, '$1√($2)');
       s = s.replace(/\\sqrt\s*\{([^{}]+)\}/g, '√($1)');
 
-      // 2. 文字與字體包裹標籤: \text{...}, \mathbf{...}, \mathcal{...}, \boldsymbol{...}
-      s = s.replace(/\\(?:text|mathrm|mathbf|mathit|mathsf|operatorname|mathcal|boldsymbol|bm)\s*\{([^{}]+)\}/g, '$1');
-      s = s.replace(/\\(?:text|mathrm|mathbf|mathit|mathsf|operatorname|mathcal|boldsymbol|bm)\s+([a-zA-Z0-9])/g, '$1');
-      s = s.replace(/\\mathbb\{R\}\^\{([^{}]+)\}/g, 'ℝ^($1)')
-           .replace(/\\mathbb\{R\}/g, 'ℝ')
-           .replace(/\\mathbb\{Z\}\^\{([^{}]+)\}/g, 'ℤ^($1)')
-           .replace(/\\mathbb\{Z\}/g, 'ℤ')
-           .replace(/\\mathbb\{N\}/g, 'ℕ')
-           .replace(/\\mathbb\{C\}/g, 'ℂ')
-           .replace(/\\mathbb\{Q\}/g, 'ℚ');
+      // 2. 遞迴清除文字與字體包裹標籤: \text{...}, \mathbf{...}, \mathcal{...}, \boldsymbol{...}, \mathbb{...}
+      for (let i = 0; i < 5; i++) {
+        s = s.replace(/\\(?:text|mathrm|mathbf|mathit|mathsf|operatorname|mathcal|boldsymbol|bm|mathbb)\s*\{([^{}]+)\}/g, '$1');
+      }
+      s = s.replace(/\\(?:text|mathrm|mathbf|mathit|mathsf|operatorname|mathcal|boldsymbol|bm|mathbb)\s+([a-zA-Z0-9])/g, '$1');
 
-      // 3. 希臘字母轉換
+      // 3. 希臘字母轉換 (涵蓋常見大小寫)
       const greekMap = {
         'alpha': 'α', 'beta': 'β', 'gamma': 'γ', 'Gamma': 'Γ',
         'delta': 'δ', 'Delta': 'Δ', 'epsilon': 'ε', 'varepsilon': 'ε',
@@ -3543,29 +3641,33 @@ ${sNextSteps}
         s = s.replace(new RegExp('\\\\' + k + '(?![a-zA-Z])', 'g'), v);
       }
 
-      // 4. 數學運算子與關係符號
+      // 4. 數學運算子、關係符號、集合符號與省略號 (含 \gg -> >>, \ll -> <<, \approx, \cdot 等)
       const opMap = {
+        'gg': '>>', 'll': '<<',
         'leftarrow': '←', 'rightarrow': '→', 'leftrightarrow': '↔',
         'Leftarrow': '⇐', 'Rightarrow': '⇒', 'Leftrightarrow': '⇔',
         'gets': '←', 'to': '→', 'mapsto': '↦',
         'times': '×', 'cdot': '·', 'pm': '±', 'mp': '∓', 'div': '÷',
         'leq': '≤', 'le': '≤', 'geq': '≥', 'ge': '≥', 'neq': '≠', 'ne': '≠',
-        'approx': '≈', 'equiv': '≡', 'sim': '~', 'propto': '∝',
-        'in': '∈', 'notin': '∉', 'subset': '⊂', 'subseteq': '⊆',
+        'approx': '≈', 'equiv': '≡', 'sim': '~', 'propto': '∝', 'simeq': '≃', 'cong': '≅',
+        'in': '∈', 'notin': '∉', 'subset': '⊂', 'subseteq': '⊆', 'supset': '⊃', 'supseteq': '⊇',
         'cup': '∪', 'cap': '∩', 'forall': '∀', 'exists': '∃',
         'nabla': '∇', 'partial': '∂', 'infty': '∞', 'emptyset': '∅',
         'sum': '∑', 'prod': '∏', 'int': '∫', 'min': 'min', 'max': 'max', 'arg': 'arg',
+        'argmin': 'arg min', 'argmax': 'arg max', 'ln': 'ln', 'log': 'log', 'exp': 'exp',
         'odot': '⊙', 'otimes': '⊗', 'oplus': '⊕', 'circ': '∘', 'bullet': '•',
         'dagger': '†', 'ell': 'ℓ', 'lVert': '‖', 'rVert': '‖', 'langle': '⟨', 'rangle': '⟩',
-        'left\\(': '(', 'right\\)': ')', 'left\\[': '[', 'right\\]': ']',
-        'left\\{': '{', 'right\\}': '}', '\\{': '{', '\\}': '}',
-        'quad': ' ', 'qquad': '  '
+        'dots': '…', 'cdots': '…', 'ldots': '…', 'vdots': '⋮', 'ddots': '⋱',
+        'quad': ' ', 'qquad': '  ', ',': ' ', ';': ' ', '!': ''
       };
       for (const [k, v] of Object.entries(opMap)) {
         s = s.replace(new RegExp('\\\\' + k + '(?![a-zA-Z])', 'g'), v);
       }
 
-      // 5. 常見下標與上標字元自然化
+      // 5. 標點與特殊括號轉義
+      s = s.replace(/\\\{/g, '{').replace(/\\\}/g, '}');
+
+      // 6. 常見下標與上標字元自然化
       const subMap = {
         '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
         '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
@@ -3574,24 +3676,25 @@ ${sNextSteps}
       };
       s = s.replace(/_\{([0-9ijkmnptruvx])\}/g, (m, c) => subMap[c] || ('_' + c));
       s = s.replace(/_([0-9ijkmnptruvx])(?![a-zA-Z0-9])/g, (m, c) => subMap[c] || ('_' + c));
-      s = s.replace(/_\{([^{}]+)\}/g, '_$1');
+      s = s.replace(/_\{([^{}]+)\}/g, '_($1)');
       s = s.replace(/\^\{([0-9])\}/g, (m, c) => c === '2' ? '²' : (c === '3' ? '³' : ('^' + c)));
       s = s.replace(/\^([0-9])(?![0-9])/g, (m, c) => c === '2' ? '²' : (c === '3' ? '³' : ('^' + c)));
       s = s.replace(/\^\{T\}/g, 'ᵀ');
+      s = s.replace(/\^T(?![a-zA-Z0-9])/g, 'ᵀ');
       s = s.replace(/\^\{([^{}]+)\}/g, '^($1)');
 
-      // 6. 移除 $ 符號與 LaTeX 行內/區塊界定符
+      // 7. 移除 $ 符號與 LaTeX 行內/區塊界定符
       s = s.replace(/\$\$([\s\S]*?)\$\$/g, '$1');
       s = s.replace(/\$([^\$]+)\$/g, '$1');
       s = s.replace(/\\\[([\s\S]*?)\\\]/g, '$1');
       s = s.replace(/\\\(([\s\S]*?)\\\)/g, '$1');
+      s = s.replace(/\$/g, '');
 
-      // 7. 清理殘留反斜線與多餘標記
-      s = s.replace(/\\,/g, ' ');
+      // 8. 清理殘留反斜線
       s = s.replace(/\\([a-zA-Z]+)/g, '$1');
       s = s.replace(/\\/g, '');
 
-      // 8. 壓縮多餘空白
+      // 9. 壓縮多餘空白
       s = s.replace(/[ \t]+/g, ' ');
 
       return s.trim();
@@ -3604,6 +3707,100 @@ ${sNextSteps}
       localStorage.setItem(STORAGE_KEY_PAPERS, JSON.stringify(papers));
       renderPapers();
       triggerPersonalCloudSync();
+    }
+
+    let currentDetailPaperIndex = -1;
+
+    function openPaperDetailModal(idx) {
+      const papers = getStoredPapers();
+      if (!papers[idx]) return;
+      currentDetailPaperIndex = idx;
+      const p = papers[idx];
+
+      const venueEl = document.getElementById('detailVenueYear');
+      if (venueEl) venueEl.textContent = p.venue || String(p.year || '2026');
+      const titleEl = document.getElementById('detailTitle');
+      if (titleEl) titleEl.textContent = cleanLatexToReadableMath(p.title);
+      const authorsEl = document.getElementById('detailAuthors');
+      if (authorsEl) authorsEl.textContent = p.authors || '作者未記載';
+      const probEl = document.getElementById('detailProblem');
+      if (probEl) probEl.textContent = cleanLatexToReadableMath(p.targetProblem);
+      const methodEl = document.getElementById('detailMethod');
+      if (methodEl) methodEl.textContent = cleanLatexToReadableMath(p.coreMethod);
+      const findEl = document.getElementById('detailFinding');
+      if (findEl) findEl.textContent = cleanLatexToReadableMath(p.keyFinding || '暫無實驗數據記載');
+      const limitEl = document.getElementById('detailLimitation');
+      if (limitEl) limitEl.textContent = cleanLatexToReadableMath(p.limitation || '無顯著局限性');
+
+      const flashcardBtn = document.getElementById('detailFlashcardBtn');
+      if (flashcardBtn) {
+        flashcardBtn.onclick = () => {
+          closePaperDetailModal();
+          startSinglePaperFlashcard(idx);
+        };
+      }
+      const deleteBtn = document.getElementById('detailDeleteBtn');
+      if (deleteBtn) {
+        deleteBtn.onclick = () => {
+          deletePaperCapsule(idx);
+          closePaperDetailModal();
+        };
+      }
+
+      document.getElementById('paperDetailModal').classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closePaperDetailModal() {
+      const modal = document.getElementById('paperDetailModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function copyDetailMath() {
+      const txt = document.getElementById('detailMethod')?.textContent || '';
+      if (!txt) return;
+      navigator.clipboard.writeText(txt).then(() => {
+        showToast('📋 已複製核心數學式到剪貼簿！');
+      }).catch(() => {
+        showToast('複製失敗');
+      });
+    }
+
+    function copyPaperMarkdown() {
+      const papers = getStoredPapers();
+      if (currentDetailPaperIndex === -1 || !papers[currentDetailPaperIndex]) return;
+      const p = papers[currentDetailPaperIndex];
+      const md = `### 📄 ${cleanLatexToReadableMath(p.title)}
+- **作者**：${p.authors}
+- **發表來源**：${p.venue || p.year}
+
+#### 🎯 核心探討問題 (Target Problem)
+${cleanLatexToReadableMath(p.targetProblem)}
+
+#### ⚙️ 核心架構與關鍵數學表達 (Core Method & Math)
+${cleanLatexToReadableMath(p.coreMethod)}
+
+#### 📈 關鍵成果與數據 (Key Findings & Metrics)
+${cleanLatexToReadableMath(p.keyFinding || '詳見全文實驗')}
+
+#### ⚠️ 局限性與未來方向 (Limitations & Future Work)
+${cleanLatexToReadableMath(p.limitation || '無顯著局限性')}
+`;
+      navigator.clipboard.writeText(md).then(() => {
+        showToast('📋 已複製完整論文膠囊 Markdown 快照！');
+      }).catch(() => {
+        showToast('複製失敗');
+      });
+    }
+
+    function deletePaperCapsule(idx) {
+      const papers = getStoredPapers();
+      if (!papers[idx]) return;
+      const title = papers[idx].title || '此篇論文';
+      if (!confirm(`確定要刪除論文膠囊《${title}》嗎？`)) return;
+      papers.splice(idx, 1);
+      savePapers(papers);
+      showToast('🗑️ 已刪除論文膠囊！');
     }
 
     function renderPapers() {
@@ -3630,33 +3827,54 @@ ${sNextSteps}
       }
 
       container.innerHTML = papers.map((p, idx) => `
-        <div class="bg-slate-850 bg-slate-800/70 border border-slate-700/70 rounded-2xl p-4 hover:border-violet-500/40 transition flex flex-col justify-between">
+        <div class="bg-slate-850 bg-slate-800/70 border border-slate-750 hover:border-violet-500/40 rounded-2xl p-4 transition flex flex-col justify-between shadow-md space-y-3">
           <div>
             <div class="flex items-start justify-between gap-2 mb-2">
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">${p.venue || p.year}</span>
-              <button onclick="startSinglePaperFlashcard(${idx})" class="p-1.5 text-violet-400 hover:bg-violet-500/20 rounded-lg text-xs flex items-center gap-1 flex-shrink-0" title="進入翻卡">
-                <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-                <span class="text-[10px] font-bold">翻卡</span>
-              </button>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">${escapeHtml(p.venue || String(p.year || '2026'))}</span>
+              <div class="flex items-center gap-1">
+                <button onclick="openPaperDetailModal(${idx})" class="p-1.5 text-sky-400 hover:bg-sky-500/20 rounded-lg text-xs flex items-center gap-0.5 flex-shrink-0" title="查看 4 維度完整細節">
+                  <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                  <span class="text-[10px] font-bold">詳情</span>
+                </button>
+                <button onclick="startSinglePaperFlashcard(${idx})" class="p-1.5 text-violet-400 hover:bg-violet-500/20 rounded-lg text-xs flex items-center gap-0.5 flex-shrink-0" title="進入翻卡">
+                  <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                  <span class="text-[10px] font-bold">翻卡</span>
+                </button>
+                <button onclick="deletePaperCapsule(${idx})" class="p-1.5 text-rose-400 hover:bg-rose-500/20 rounded-lg text-xs flex items-center flex-shrink-0" title="刪除膠囊">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
             </div>
-            <h4 class="text-xs font-bold text-white leading-snug">${escapeHtml(cleanLatexToReadableMath(p.title))}</h4>
-            <p class="text-[11px] text-slate-400 mt-0.5 mb-2">${escapeHtml(p.authors)}</p>
+            <h4 class="text-xs sm:text-sm font-bold text-white leading-snug cursor-pointer hover:text-violet-300 transition" onclick="openPaperDetailModal(${idx})">${escapeHtml(cleanLatexToReadableMath(p.title))}</h4>
+            <p class="text-[11px] text-slate-400 mt-1">${escapeHtml(p.authors)}</p>
           </div>
 
-          <div class="space-y-1.5 mt-2 pt-2 border-t border-slate-700/50 text-[11px]">
-            <div class="bg-slate-900/60 p-2 rounded-lg">
-              <span class="text-[9px] font-bold text-sky-400 block mb-0.5">🎯 問題</span>
-              <p class="text-slate-300 line-clamp-2">${escapeHtml(cleanLatexToReadableMath(p.targetProblem))}</p>
+          <!-- 4 維度完整呈現 -->
+          <div class="space-y-2 pt-2 border-t border-slate-700/50 text-[11px]">
+            <!-- 1. 🎯 核心探討問題 -->
+            <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-750">
+              <span class="text-[9px] font-bold text-sky-400 block mb-0.5">🎯 核心探討問題 (Target Problem)</span>
+              <p class="text-slate-300 line-clamp-3 leading-relaxed">${escapeHtml(cleanLatexToReadableMath(p.targetProblem))}</p>
             </div>
-            <div class="bg-slate-900/60 p-2 rounded-lg">
-              <span class="text-[9px] font-bold text-emerald-400 block mb-0.5">⚙️ 核心架構與數學表達</span>
-              <p class="text-slate-200 text-xs leading-relaxed font-sans">${escapeHtml(cleanLatexToReadableMath(p.coreMethod))}</p>
+            <!-- 2. ⚙️ 核心架構與數學表達 -->
+            <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-750">
+              <span class="text-[9px] font-bold text-emerald-400 block mb-0.5">⚙️ 核心架構與關鍵數學表達 (Core Method & Math)</span>
+              <p class="text-slate-200 text-xs leading-relaxed font-sans whitespace-pre-wrap">${escapeHtml(cleanLatexToReadableMath(p.coreMethod))}</p>
+            </div>
+            <!-- 3. 📈 關鍵成果與數據 -->
+            <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-750">
+              <span class="text-[9px] font-bold text-amber-400 block mb-0.5">📈 關鍵成果與數據 (Key Findings & Metrics)</span>
+              <p class="text-slate-200 text-xs leading-relaxed whitespace-pre-wrap">${escapeHtml(cleanLatexToReadableMath(p.keyFinding || '暫無實驗數據記載'))}</p>
+            </div>
+            <!-- 4. ⚠️ 局限性與未來方向 -->
+            <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-750">
+              <span class="text-[9px] font-bold text-rose-400 block mb-0.5">⚠️ 局限性與未來方向 (Limitations & Future Work)</span>
+              <p class="text-slate-300 text-xs leading-relaxed whitespace-pre-wrap">${escapeHtml(cleanLatexToReadableMath(p.limitation || '無顯著局限性'))}</p>
             </div>
           </div>
         </div>
       `).join('');
       lucide.createIcons();
-      renderMathSafely(container);
     }
 
     function startFlashcardMode() {
@@ -3679,7 +3897,6 @@ ${sNextSteps}
       const inner = document.getElementById('flashcardInner');
       if (isFlipped) {
         inner.classList.add('rotate-y-180');
-        renderMathSafely(document.getElementById('flashcardBack'));
       } else {
         inner.classList.remove('rotate-y-180');
       }
@@ -3697,10 +3914,8 @@ ${sNextSteps}
       document.getElementById('fcAuthors').textContent = p.authors;
       document.getElementById('fcProblem').textContent = cleanLatexToReadableMath(p.targetProblem);
       document.getElementById('fcMethod').textContent = cleanLatexToReadableMath(p.coreMethod);
-      document.getElementById('fcFinding').textContent = cleanLatexToReadableMath(p.keyFinding);
-      document.getElementById('fcLimitation').textContent = cleanLatexToReadableMath(p.limitation);
-
-      renderMathSafely(document.getElementById('flashcardModal'));
+      document.getElementById('fcFinding').textContent = cleanLatexToReadableMath(p.keyFinding || '暫無實驗數據記載');
+      document.getElementById('fcLimitation').textContent = cleanLatexToReadableMath(p.limitation || '無顯著局限性');
     }
     function gradeFlashcard(rating) {
       const papers = getStoredPapers();
