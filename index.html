@@ -1052,8 +1052,8 @@
   <!-- ========================================== -->
   <!-- MODAL: Google Gemini API Key 設定視窗 -->
   <!-- ========================================== -->
-  <div id="geminiApiKeyModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-sm sm:max-w-md p-6 shadow-2xl space-y-4 relative">
+  <div id="geminiApiKeyModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 hidden" style="z-index: 9999;">
+    <div class="bg-slate-900 border border-slate-750 rounded-3xl w-full max-w-sm sm:max-w-md p-6 shadow-2xl space-y-4 relative">
       <button onclick="closeGeminiApiKeyModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg transition">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
@@ -1069,8 +1069,8 @@
       </div>
 
       <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-3.5 space-y-2 text-xs text-slate-300">
-        <p>貼上您的 Google AI Studio API Key，即可啟用「AI 聯網深挖」能力：自動搜尋全球論文真實官方發表、提煉真實核心 LaTeX 數學公式與 SOTA 實驗指標！</p>
-        <p class="text-[11px] text-slate-400">若未設定，系統亦支援內建高階學術語義規則引擎與 DOI 跨庫解析，本地安全運行。</p>
+        <p>系統已預設共用 API Key（為維護共用額度，共用 Key 限制每分鐘最多使用 1 次）。</p>
+        <p class="text-[11px] text-amber-300">💡 強烈推薦綁定「個人專屬免費 Key」：每位使用者每日享有獨立 1,500 次呼叫額度，完全不受每分鐘 1 次的頻率限制！</p>
       </div>
 
       <form onsubmit="handleSaveGeminiApiKey(event)" class="space-y-3">
@@ -1483,6 +1483,37 @@
       const customKey = localStorage.getItem(STORAGE_KEY_GEMINI_KEY);
       if (customKey && customKey.trim()) return customKey.trim();
       return DEFAULT_GEMINI_API_KEY;
+    }
+
+    // 系統預設共用 Key 頻率防護（若未綁定個人 Key，每分鐘限用 1 次）
+    const STORAGE_KEY_SHARED_AI_TIMESTAMP = 'reseaver_shared_ai_last_call';
+
+    function checkSharedAiRateLimit() {
+      const customKey = localStorage.getItem(STORAGE_KEY_GEMINI_KEY);
+      // 若已設定個人專屬 Key，完全無頻率限制
+      if (customKey && customKey.trim()) {
+        return { allowed: true, remainingSec: 0, isCustom: true };
+      }
+
+      const lastCall = parseInt(localStorage.getItem(STORAGE_KEY_SHARED_AI_TIMESTAMP) || '0', 10);
+      const now = Date.now();
+      const cooldownMs = 60 * 1000; // 60 秒冷卻
+      const elapsed = now - lastCall;
+
+      if (elapsed < cooldownMs) {
+        const remainingSec = Math.ceil((cooldownMs - elapsed) / 1000);
+        return { allowed: false, remainingSec, isCustom: false };
+      }
+
+      return { allowed: true, remainingSec: 0, isCustom: false };
+    }
+
+    function recordSharedAiUsage() {
+      const customKey = localStorage.getItem(STORAGE_KEY_GEMINI_KEY);
+      // 僅在調用系統預設共用 Key 時計入時間戳
+      if (!customKey || !customKey.trim()) {
+        localStorage.setItem(STORAGE_KEY_SHARED_AI_TIMESTAMP, Date.now().toString());
+      }
     }
 
     let currentTab = 'today';
@@ -2351,12 +2382,29 @@
       const btnText = document.getElementById('triggerAiSummaryBtnText');
       if (btnText) btnText.textContent = '⚡ AI 分析整理中...';
 
+      // 檢查共用金鑰頻率限制（未綁定個人 Key 每分鐘限用 1 次）
+      const rateCheck = checkSharedAiRateLimit();
+      if (!rateCheck.allowed) {
+        if (btnText) btnText.textContent = '一鍵 AI 智能重點整理';
+        const wantPersonalKey = confirm(
+          `⏳ 系統預設共用 Key 為了維護全體額度，每分鐘限用 1 次（還需等待 ${rateCheck.remainingSec} 秒）。\n\n` +
+          `💡 提示：您可以免費綁定「個人專屬 Gemini Key」，即可享受完全無限制、免等待的專屬額度！\n\n` +
+          `• 點擊【確定】立即免費領取/設定個人 Key\n` +
+          `• 點擊【取消】稍候再試`
+        );
+        if (wantPersonalKey) {
+          openGeminiApiKeyModal();
+        }
+        return;
+      }
+
       const apiKey = getGeminiApiKey();
 
       if (apiKey && apiKey.trim()) {
         try {
           const success = await callGeminiApiMeetingSummarize(apiKey.trim(), title, attendees, notes);
           if (success) {
+            recordSharedAiUsage();
             if (btnText) btnText.textContent = '一鍵 AI 智能重點整理';
             showToast('✨ Gemini AI 智能重點整理完成！');
             return;
@@ -2719,7 +2767,10 @@ ${m}
     function openGeminiApiKeyModal() {
       const input = document.getElementById('geminiApiKeyInput');
       if (input) input.value = localStorage.getItem(STORAGE_KEY_GEMINI_KEY) || '';
-      document.getElementById('geminiApiKeyModal').classList.remove('hidden');
+      const modal = document.getElementById('geminiApiKeyModal');
+      modal.classList.remove('hidden');
+      // 確保永遠在所有視窗與遮罩的最上層 (z-index: 9999)
+      modal.style.zIndex = '9999';
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
     function closeGeminiApiKeyModal() {
@@ -3119,24 +3170,15 @@ ${m}
       const badgeEl = document.getElementById('paperApiKeyBadge');
       if (!badgeEl) return;
       const customKey = localStorage.getItem(STORAGE_KEY_GEMINI_KEY);
-      const activeKey = getGeminiApiKey();
-      if (activeKey) {
-        const isCustom = !!(customKey && customKey.trim());
-        badgeEl.innerHTML = `
-          <button type="button" onclick="openGeminiApiKeyModal()" class="text-[10px] ${isCustom ? 'text-emerald-300 bg-emerald-950/80 border-emerald-500/40' : 'text-violet-300 bg-violet-950/80 border-violet-500/40'} border px-2 py-0.5 rounded-full flex items-center gap-1 hover:brightness-110 transition shadow-sm" title="${isCustom ? '已啟用您的自訂 Gemini API Key' : '已啟用系統預設 Gemini API Key（免輸入直接享有 AI 萃取）'}">
-            <i data-lucide="sparkles" class="w-3 h-3 text-amber-300"></i>
-            <span>${isCustom ? '個人 Key 運作中' : '系統預設 Key 就緒'}</span>
-            <i data-lucide="settings" class="w-2.5 h-2.5 text-slate-400"></i>
-          </button>
-        `;
-      } else {
-        badgeEl.innerHTML = `
-          <button type="button" onclick="openGeminiApiKeyModal()" class="text-[10px] text-amber-300 bg-amber-950/80 border border-amber-500/40 px-2 py-0.5 rounded-full flex items-center gap-1 hover:bg-amber-900/60 transition shadow-sm" title="推薦綁定：啟用 AI 聯網自動檢索真實論文公式與 SOTA 數據">
-            <i data-lucide="key" class="w-3 h-3 text-amber-300"></i>
-            <span>綁定免費 Gemini Key (極致精準)</span>
-          </button>
-        `;
-      }
+      const isCustom = !!(customKey && customKey.trim());
+      
+      badgeEl.innerHTML = `
+        <button type="button" onclick="openGeminiApiKeyModal()" class="text-[10px] ${isCustom ? 'text-emerald-300 bg-emerald-950/80 border-emerald-500/40' : 'text-amber-300 bg-amber-950/80 border-amber-500/40'} border px-2 py-0.5 rounded-full flex items-center gap-1 hover:brightness-110 transition shadow-sm" title="${isCustom ? '已啟用您的個人專屬 Gemini Key（無頻率限制）' : '已啟用系統預設共用 Key（每分鐘限 1 次，點擊可綁定個人 Key 解除限制）'}">
+          <i data-lucide="sparkles" class="w-3 h-3 ${isCustom ? 'text-emerald-300' : 'text-amber-300'}"></i>
+          <span>${isCustom ? '個人 Key (無限速)' : '預設 Key (每分限 1 次)'}</span>
+          <i data-lucide="settings" class="w-2.5 h-2.5 text-slate-400"></i>
+        </button>
+      `;
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
@@ -3257,13 +3299,33 @@ ${m}
         console.warn('學術元數據預解析異常：', e);
       }
 
-      // 2. 檢驗 Gemini API Key（支援自訂或系統預設 Key）
+      // 2. 檢驗共用金鑰頻率防護（若未綁定個人 Key，每分鐘限用 1 次）
+      const rateCheck = checkSharedAiRateLimit();
+      if (!rateCheck.allowed) {
+        if (btnText) btnText.textContent = '⚡ 一鍵 AI 萃取並填入';
+        const wantPersonalKey = confirm(
+          `⏳ 系統預設共用 Key 為了保護全體額度，每分鐘限用 1 次（還需等待 ${rateCheck.remainingSec} 秒）。\n\n` +
+          `💡 提示：您可以免費綁定「個人專屬 Gemini Key」，即可享受完全無限制、免等待的專屬額度！\n\n` +
+          `• 點擊【確定】立即免費領取/設定個人 Key\n` +
+          `• 點擊【取消】使用內建離線學術語義引擎`
+        );
+        if (wantPersonalKey) {
+          openGeminiApiKeyModal();
+          return;
+        }
+        await runOfflinePaperExtract(input, resolvedMeta);
+        showToast('⚡ 已透過內建高階學術語義引擎提煉完成！');
+        return;
+      }
+
+      // 3. 取得 API Key（支援個人自訂或系統預設 Key）
       const apiKey = getGeminiApiKey();
 
       if (apiKey && apiKey.trim()) {
         try {
           const success = await callGeminiPaperExtract(apiKey.trim(), input, resolvedMeta);
           if (success) {
+            recordSharedAiUsage();
             if (btnText) btnText.textContent = '⚡ 一鍵 AI 萃取並填入';
             showToast('🎉 已透過 Gemini 聯網 AI 成功提煉真實論文架構與數學公式！');
             return;
@@ -3273,7 +3335,7 @@ ${m}
         }
       }
 
-      // 3. 離線高保真學術語義提煉（絕不編造虛假範本）
+      // 4. 離線高保真學術語義提煉（絕不編造虛假範本）
       await runOfflinePaperExtract(input, resolvedMeta);
       if (btnText) btnText.textContent = '⚡ 一鍵 AI 萃取並填入';
       showToast('⚡ 已透過內建高階學術語義引擎提煉完成！');
