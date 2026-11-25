@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Reseaver - 研究救星 (Web & Mobile)</title>
   
   <!-- PWA & Mobile Meta Tags -->
@@ -2882,7 +2885,33 @@ ${notes}
       const mEl = document.getElementById('aiSummaryNextMilestone');
       if (dEl) dEl.textContent = decisions;
       if (fEl) fEl.textContent = feedback;
-      if (aEl) aEl.textContent = actionItems;
+      if (aEl) {
+        if (!actionItems || actionItems.includes('尚未萃取')) {
+          aEl.innerHTML = actionItems || '尚未萃取';
+        } else {
+          const lines = actionItems.split('\n').map(l => l.trim()).filter(Boolean);
+          let html = `<div class="space-y-1.5">`;
+          lines.forEach(line => {
+            let isChecked = false;
+            let clean = line;
+            if (/^[-*•]?\s*\[([xX])\]/.test(clean)) {
+              isChecked = true;
+              clean = clean.replace(/^[-*•]?\s*\[([xX])\]\s*/, '');
+            } else if (/^[-*•]?\s*\[\s*\]/.test(clean)) {
+              clean = clean.replace(/^[-*•]?\s*\[\s*\]\s*/, '');
+            } else {
+              clean = clean.replace(/^[-*•]\s*/, '').replace(/^\d+[\.、]\s*/, '');
+            }
+            html += `
+              <label class="flex items-start gap-2 p-1.5 rounded-lg bg-slate-950/40 hover:bg-slate-800/60 border border-slate-800/50 transition cursor-pointer select-none group">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="this.nextElementSibling.classList.toggle('line-through', this.checked); this.nextElementSibling.classList.toggle('opacity-60', this.checked);" class="w-3.5 h-3.5 rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0 cursor-pointer mt-0.5 shrink-0">
+                <span class="text-xs text-slate-300 leading-relaxed ${isChecked ? 'line-through opacity-60' : ''}">${escapeHtml(clean)}</span>
+              </label>`;
+          });
+          html += `</div>`;
+          aEl.innerHTML = html;
+        }
+      }
       if (mEl) mEl.textContent = milestone;
     }
 
@@ -2925,6 +2954,12 @@ ${m}
       const getSectionText = (id) => {
         const el = document.getElementById(id);
         if (!el) return '';
+        if (id === 'aiSummaryActionItems') {
+          const spans = el.querySelectorAll('label span');
+          if (spans.length > 0) {
+            return Array.from(spans).map(s => s.innerText.trim()).filter(Boolean).join('\n');
+          }
+        }
         const tc = el.textContent || '';
         const it = el.innerText || '';
         if (tc.includes('\n')) return tc.trim();
@@ -6246,6 +6281,11 @@ ${metaContext}${raw}
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./service-worker.js').then((reg) => {
+          // 當視窗聚焦或回到分頁時，主動檢查伺服器是否有最新 Service Worker
+          window.addEventListener('focus', () => {
+            reg.update().catch(() => {});
+          });
+
           reg.addEventListener('updatefound', () => {
             newWorker = reg.installing;
             if (!newWorker) return;

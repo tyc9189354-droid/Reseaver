@@ -1,5 +1,5 @@
 // Reseaver Service Worker with Over-The-Air (OTA) Live Sync
-const CACHE_VERSION = 'reseaver-v1.2.8';
+const CACHE_VERSION = 'reseaver-v1.2.9';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -9,11 +9,19 @@ const ASSETS_TO_CACHE = [
   './icons/icon.svg',
 ];
 
-// 安裝階段：快取基本資源並強制進入等待啟用
+// 安裝階段：快取基本資源並強制進入等待啟用（使用 no-cache 防止被瀏覽器 HTTP 快取綁架）
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      return Promise.all(
+        ASSETS_TO_CACHE.map((url) => {
+          return fetch(new Request(url, { cache: 'no-cache' }))
+            .then((res) => {
+              if (res && res.status === 200) return cache.put(url, res);
+            })
+            .catch(() => {});
+        })
+      );
     })
   );
   // 核心：跳過等待，立刻啟用最新版
@@ -38,17 +46,17 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 攔截請求：採用 Network-First (網路優先) 策略確保手機端隨時獲得最新代碼
+// 攔截請求：採用 Network-First (網路優先) 策略確保隨時獲得最新代碼
 self.addEventListener('fetch', (event) => {
   const request = event.request;
 
   // 只處理 GET 請求
   if (request.method !== 'GET') return;
 
-  // 如果是 HTML 頁面，優先從網路獲取最新版，失敗才讀取離線快取
+  // 如果是 HTML 頁面，優先強制從網路獲取最新版，失敗才讀取離線快取
   if (request.mode === 'navigate' || request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(
-      fetch(request)
+      fetch(new Request(request.url, { cache: 'no-cache' }))
         .then((response) => {
           if (response && response.status === 200) {
             const responseClone = response.clone();
