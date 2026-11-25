@@ -3570,6 +3570,7 @@ ${m}
 3. 核心數學公式 (coreMethod)：請務必提取該篇論文真正提出之關鍵創新公式（使用標準 LaTeX 格式如 $W = W_0 + \\frac{\\alpha}{r}BA$、BFV 同態加密或分散式密鑰計算式，並逐一清晰說明變數物理含義）。若該論文為純系統架構/軟體工程論文無公式，請精闢總結系統架構機制，絕不可硬套虛假的最佳化公式！
 4. 關鍵數據與結論 (keyFinding)：請務必回傳論文中真實報告的 Benchmark 數據、提升幅度、參數量或消融實驗結論（例如精確的百分比、提升倍數或評測分數）。
 5. 局限性 (limitation)：請忠實摘錄作者於文中探討之真實限制、計算開銷、假設前提或未來改進方向。
+6. 【重要格式規範】：請務必回傳嚴格純 JSON 格式。在包含 LaTeX 數學公式時，請將反斜線以雙反斜線轉義（例如使用 \\\\text, \\\\pi, \\\\mu, \\\\alpha, \\\\frac），確保完全相容標準 JSON 格式。
 
 論文資料：
 """
@@ -3619,16 +3620,8 @@ ${metaContext}${raw}
           const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
           if (!rawText) continue;
 
-          let parsed = null;
-          try {
-            const cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
-            parsed = JSON.parse(cleaned);
-          } catch (err) {
-            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-            if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
-          }
-
-          if (parsed && (parsed.title || parsed.coreMethod)) {
+          const parsed = parseAcademicJsonSafely(rawText);
+          if (parsed && (parsed.title || parsed.coreMethod || parsed.targetProblem)) {
             fillPaperCapsuleForm(parsed);
             return true;
           }
@@ -3638,6 +3631,55 @@ ${metaContext}${raw}
       }
 
       throw new Error('所有 Gemini 模型解析均未獲取有效學術 JSON 結果');
+    }
+
+    // 三層防護的高容錯學術 JSON 解析器（自動修復 LaTeX 反斜線與破損引號）
+    function parseAcademicJsonSafely(rawText) {
+      if (!rawText || typeof rawText !== 'string') return null;
+
+      // 1. 標準原生 JSON.parse
+      try {
+        const cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          return JSON.parse(jsonMatch[0]);
+        }
+      } catch (e) {
+        // 標準解析失敗（通常因包含 LaTeX 反斜線如 \text, \pi, \mu 等導致）
+      }
+
+      // 2. 自動轉義 LaTeX 反斜線修復
+      try {
+        const cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          // 將未跳脫的 LaTeX 反斜線如 \text, \pi, \mu, \alpha, \sum 等轉義為 \\
+          const sanitized = jsonMatch[0].replace(/\\([a-zA-Z_{}])/g, '\\\\$1');
+          return JSON.parse(sanitized);
+        }
+      } catch (e) {
+        // 轉義修復仍失敗時，進入第 3 層正則語義提取
+      }
+
+      // 3. 語義欄位抽取回退（即使整段 JSON 格式破損，仍能完整提取所有學術欄位）
+      try {
+        const result = {};
+        const fields = ['title', 'authors', 'venue', 'targetProblem', 'coreMethod', 'keyFinding', 'limitation'];
+        for (const field of fields) {
+          const regex = new RegExp(`"${field}"\\s*:\\s*"([\\s\\S]*?)(?="\\s*,\\s*"[a-zA-Z]+|"\\s*\\})`, 'i');
+          const m = rawText.match(regex);
+          if (m && m[1]) {
+            result[field] = m[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+          }
+        }
+        if (result.title || result.coreMethod || result.targetProblem) {
+          return result;
+        }
+      } catch (e) {
+        console.warn('[Regex field extractor error]', e);
+      }
+
+      return null;
     }
 
     async function runOfflinePaperExtract(raw, resolvedMeta = null) {
