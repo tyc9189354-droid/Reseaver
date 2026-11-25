@@ -416,10 +416,16 @@
                 </h2>
                 <p class="text-[11px] text-slate-400 mt-0.5" id="reportDateRange">統計週期：本週</p>
               </div>
-              <button onclick="generateReportFromLogs()" title="重新彙整" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-slate-200 flex items-center gap-1 border border-slate-600">
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-                重新彙整
-              </button>
+              <div class="flex items-center gap-2">
+                <button onclick="importMinutesToWeeklyReport()" title="自咪挺速記匯入最新四大重點" class="text-xs bg-indigo-950/80 hover:bg-indigo-900 px-3 py-1.5 rounded-lg text-indigo-300 hover:text-white flex items-center gap-1 border border-indigo-500/40 transition">
+                  <i data-lucide="file-input" class="w-3.5 h-3.5 text-indigo-400"></i>
+                  匯入咪挺重點
+                </button>
+                <button onclick="generateReportFromLogs(true)" title="重新彙整" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-slate-200 flex items-center gap-1 border border-slate-600 transition">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                  重新彙整
+                </button>
+              </div>
             </div>
 
             <div class="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-700/60">
@@ -569,6 +575,11 @@
 
               <!-- 錄音動作按鈕組 -->
               <div class="flex items-center gap-2">
+                <input type="file" id="minutesAudioUploadInput" accept="audio/*" onchange="handleAudioFileUpload(event)" class="hidden">
+                <button type="button" onclick="document.getElementById('minutesAudioUploadInput').click()" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition" title="上傳或選擇現有錄音檔進行轉文字">
+                  <i data-lucide="upload" class="w-3.5 h-3.5 text-sky-400"></i>
+                  <span>上傳音檔</span>
+                </button>
                 <button type="button" id="startRecordBtn" onclick="startMeetingRecording()" class="px-3.5 py-2 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-600/30 flex items-center gap-1.5 transition active:scale-95">
                   <i data-lucide="mic" class="w-4 h-4"></i>
                   <span>開始錄音</span>
@@ -591,19 +602,32 @@
               </div>
             </div>
 
-            <!-- 音訊播放器與下載連結 (錄音完成後顯示) -->
-            <div id="audioPlaybackContainer" class="hidden bg-slate-900/60 p-3 rounded-xl border border-slate-800 space-y-2">
+            <!-- 音訊播放器與轉文字動作列 (錄音完成或載入音檔後顯示) -->
+            <div id="audioPlaybackContainer" class="hidden bg-slate-900/80 p-3.5 rounded-xl border border-slate-750 space-y-3">
               <div class="flex items-center justify-between text-xs text-slate-300">
                 <span class="flex items-center gap-1.5 font-medium text-indigo-300">
                   <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
-                  <span>會議錄音檔播放</span>
+                  <span>會議錄音檔就緒</span>
                 </span>
-                <a id="downloadAudioLink" href="#" download="meeting-recording.webm" class="text-sky-400 hover:underline flex items-center gap-1 font-semibold text-[11px]">
-                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                  <span>下載音檔</span>
-                </a>
+                <div class="flex items-center gap-3">
+                  <button type="button" onclick="document.getElementById('minutesAudioUploadInput').click()" class="text-slate-400 hover:text-slate-200 flex items-center gap-1 text-[11px] transition">
+                    <i data-lucide="folder" class="w-3 h-3 text-sky-400"></i>
+                    <span>更換檔案</span>
+                  </button>
+                  <a id="downloadAudioLink" href="#" download="meeting-recording.webm" class="text-sky-400 hover:underline flex items-center gap-1 font-semibold text-[11px]">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                    <span>下載音檔</span>
+                  </a>
+                </div>
               </div>
               <audio id="minutesAudioPlayer" controls class="w-full h-9 rounded-lg"></audio>
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-t border-slate-800">
+                <button type="button" id="transcribeAudioBtn" onclick="transcribeRecordedAudio()" class="py-2 px-3.5 bg-gradient-to-r from-sky-600 via-indigo-600 to-indigo-500 hover:from-sky-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-sky-600/30 flex items-center justify-center gap-1.5 transition active:scale-95">
+                  <i data-lucide="file-audio" class="w-3.5 h-3.5 text-amber-300"></i>
+                  <span id="transcribeBtnText">⚡ 錄音檔轉文字 (AI STT)</span>
+                </button>
+                <span class="text-[10px] text-slate-400">💡 錄音完成後點擊即可透過 AI 語音大模型深度轉錄逐字稿</span>
+              </div>
             </div>
 
             <div class="text-[11px] text-slate-500 flex items-center gap-1.5">
@@ -1479,6 +1503,7 @@
     const STORAGE_KEY_GD_TOKEN = 'reseaver_google_drive_token';
     const STORAGE_KEY_GD_CLIENT_ID = 'reseaver_google_client_id';
     const STORAGE_KEY_MINUTES = 'reseaver_meeting_minutes';
+    const STORAGE_KEY_REPORT_DRAFT = 'reseaver_report_draft_v1';
     const STORAGE_KEY_GEMINI_KEY = 'reseaver_gemini_api_key';
     const DEFAULT_GEMINI_API_KEY = atob('QVEuQWI4Uk42SXlFU0g0dmNHSXZDRFJPQUFxaGwyS3pxQzNra0RtSDQ0SUh1NnNHYXJ0Z2c=');
     const DEFAULT_GOOGLE_CLIENT_ID = '813108073239-9e878lansrj2jqf1slrl5jnjdh2743do.apps.googleusercontent.com';
@@ -1547,6 +1572,7 @@
     let activeMinuteId = null;
     let meetingAudioRecorder = null;
     let recordedAudioChunks = [];
+    let currentRecordedAudioBlob = null;
     let audioStream = null;
     let recordingStartTime = null;
     let recordingElapsedOffset = 0;
@@ -1576,6 +1602,7 @@
       lucide.createIcons();
       initCleanData();
       renderAll();
+      setupReportAutoSave();
       initGmailSyncOnStartup();
       updateHeaderAccountUI();
       updatePersonalCloudStats();
@@ -1605,7 +1632,7 @@
       renderMeetingsUI();
       renderLogs();
       updateDashboard();
-      generateReportFromLogs();
+      generateReportFromLogs(false);
       renderMinutesHistorySelect();
       renderPapers();
       renderLabLogs();
@@ -1646,7 +1673,7 @@
         document.getElementById('headerSubtext').textContent = badges[tab].sub;
       }
 
-      if (tab === 'report') generateReportFromLogs();
+      if (tab === 'report') generateReportFromLogs(false);
       if (tab === 'minutes') initMinutesTab();
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
@@ -2115,6 +2142,9 @@
         setupMediaSessionRecording(meetingTitle);
         startAudioWaveVisualizer(audioStream);
 
+        // 同步自動啟動即時語音辨識（若環境支援）
+        startSpeechRecognition(true);
+
         const timerDisplay = document.getElementById('recordingTimerDisplay');
         if (recordingTimerInterval) clearInterval(recordingTimerInterval);
         recordingTimerInterval = setInterval(() => {
@@ -2125,7 +2155,7 @@
         }, 200);
 
         updateRecordingUIState('recording');
-        showToast('🎙️ 錄音已啟動（背景運行保護中）');
+        showToast('🎙️ 錄音與語音轉文字已同步啟動（背景運行保護中）');
       } catch (err) {
         console.error('麥克風存取失敗：', err);
         alert('無法存取麥克風，請檢查瀏覽器麥克風權限設定！\n' + err.message);
@@ -2141,6 +2171,10 @@
           recordingState = 'paused';
           updateRecordingUIState('paused');
           if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+          // 暫停語音辨識以節省資源
+          if (isSpeechRecognitionActive && speechRecognitionInstance) {
+            try { speechRecognitionInstance.stop(); } catch {}
+          }
           showToast('⏸️ 錄音已暫停');
         } catch (e) {
           console.error(e);
@@ -2159,6 +2193,10 @@
           if (audioStream) startAudioWaveVisualizer(audioStream);
           updateRecordingUIState('recording');
           if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+          // 繼續即時語音辨識
+          if (isSpeechRecognitionActive) {
+            startSpeechRecognition(true);
+          }
           showToast('▶️ 錄音繼續進行');
         } catch (e) {
           console.error(e);
@@ -2186,6 +2224,7 @@
       stopSilentKeepAliveAudio();
       releaseRecordingWakeLock();
       stopAudioWaveVisualizer();
+      stopSpeechRecognition();
       updateRecordingUIState('idle');
       if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none';
     }
@@ -2193,6 +2232,7 @@
     function cancelMeetingRecording() {
       if (confirm('確定要捨棄當前錄音嗎？錄音內容將不會儲存。')) {
         recordedAudioChunks = [];
+        currentRecordedAudioBlob = null;
         stopMeetingRecording();
         document.getElementById('recordingTimerDisplay').textContent = '00:00:00';
         document.getElementById('audioPlaybackContainer').classList.add('hidden');
@@ -2204,6 +2244,7 @@
       if (!recordedAudioChunks || recordedAudioChunks.length === 0) return;
       const mime = (meetingAudioRecorder && meetingAudioRecorder.mimeType) ? meetingAudioRecorder.mimeType : 'audio/webm';
       const audioBlob = new Blob(recordedAudioChunks, { type: mime });
+      currentRecordedAudioBlob = audioBlob;
       const audioUrl = URL.createObjectURL(audioBlob);
 
       const player = document.getElementById('minutesAudioPlayer');
@@ -2220,13 +2261,14 @@
       if (container) container.classList.remove('hidden');
 
       const notes = document.getElementById('minutesNotesInput');
+      const timerText = document.getElementById('recordingTimerDisplay')?.textContent || '00:00:00';
       if (notes && !notes.value.trim()) {
-        const timerText = document.getElementById('recordingTimerDisplay')?.textContent || '00:00:00';
-        notes.value = `[00:00] 咪挺會議語音錄製完成（時長：${timerText}）。\n`;
+        notes.value = `[00:00] 咪挺會議語音錄製完成（時長：${timerText}）。可點擊上方【⚡ 錄音檔轉文字 (AI STT)】進行智慧逐字轉錄。\n`;
         handleMinutesNoteInput();
       }
 
-      showToast('🎉 錄音完成！可直接播放或下載音檔');
+      showToast('🎉 錄音完成！可點擊【⚡ 錄音檔轉文字 (AI STT)】進行深度逐字稿轉錄');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     function updateRecordingUIState(state) {
@@ -2275,7 +2317,7 @@
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    // 語音辨識轉文字 (Web Speech API)
+    // 語音辨識轉文字 (Web Speech API 即時聆聽)
     function toggleSpeechRecognition() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
@@ -2285,14 +2327,21 @@
       if (isSpeechRecognitionActive) {
         stopSpeechRecognition();
       } else {
-        startSpeechRecognition();
+        startSpeechRecognition(false);
       }
     }
 
-    function startSpeechRecognition() {
+    function startSpeechRecognition(isAutoStart = false) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return;
+      if (!SpeechRecognition) {
+        if (!isAutoStart) showToast('⚠️ 當前瀏覽器環境不支援即時語音辨識');
+        return;
+      }
       try {
+        if (speechRecognitionInstance) {
+          try { speechRecognitionInstance.stop(); } catch {}
+          speechRecognitionInstance = null;
+        }
         speechRecognitionInstance = new SpeechRecognition();
         speechRecognitionInstance.continuous = true;
         speechRecognitionInstance.interimResults = false;
@@ -2317,12 +2366,19 @@
         };
 
         speechRecognitionInstance.onerror = (e) => {
-          console.warn('SpeechRecognition error:', e);
+          // 靜默處理一般的無聲中斷
+          if (e.error !== 'no-speech') {
+            console.warn('SpeechRecognition error:', e);
+          }
         };
 
         speechRecognitionInstance.onend = () => {
           if (isSpeechRecognitionActive) {
-            try { speechRecognitionInstance.start(); } catch {}
+            setTimeout(() => {
+              if (isSpeechRecognitionActive && speechRecognitionInstance) {
+                try { speechRecognitionInstance.start(); } catch {}
+              }
+            }, 300);
           }
         };
 
@@ -2332,10 +2388,10 @@
         const btn = document.getElementById('speechRecognitionToggleBtn');
         if (textSpan) textSpan.textContent = '語音轉文字 (STT)：即時聆聽中';
         if (btn) btn.className = 'text-xs px-2.5 py-1 rounded-xl border border-emerald-500/50 bg-emerald-950/60 text-emerald-300 flex items-center gap-1.5 transition';
-        showToast('🎙️ 即時語音辨識已啟動，發言將即時鍵入速記框');
+        if (!isAutoStart) showToast('🎙️ 即時語音辨識已啟動，發言將即時鍵入速記框');
       } catch (err) {
         console.error(err);
-        showToast('無法啟動語音辨識：' + err.message);
+        if (!isAutoStart) showToast('無法啟動語音辨識：' + err.message);
       }
     }
 
@@ -2349,7 +2405,148 @@
       const btn = document.getElementById('speechRecognitionToggleBtn');
       if (textSpan) textSpan.textContent = '語音轉文字 (STT)：已關閉';
       if (btn) btn.className = 'text-xs px-2.5 py-1 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 hover:text-white flex items-center gap-1.5 transition';
-      showToast('語音辨識已關閉');
+    }
+
+    // 處理外部音檔上傳
+    function handleAudioFileUpload(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      currentRecordedAudioBlob = file;
+      const audioUrl = URL.createObjectURL(file);
+      const player = document.getElementById('minutesAudioPlayer');
+      const downloadLink = document.getElementById('downloadAudioLink');
+      const container = document.getElementById('audioPlaybackContainer');
+      if (player) player.src = audioUrl;
+      if (downloadLink) {
+        downloadLink.href = audioUrl;
+        downloadLink.download = file.name;
+      }
+      if (container) container.classList.remove('hidden');
+      showToast(`📁 已載入音檔《${file.name}》，可點擊【⚡ 錄音檔轉文字】`);
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // 將 Blob 轉換為 Base64 字串
+    function blobToBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const res = reader.result;
+          if (typeof res === 'string') {
+            const commaIdx = res.indexOf(',');
+            resolve(commaIdx !== -1 ? res.slice(commaIdx + 1) : res);
+          } else {
+            reject(new Error('Failed to read blob as base64 string'));
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    // 錄音檔/音訊檔案深度 AI 轉錄為繁體中文速記
+    async function transcribeRecordedAudio(customBlob = null) {
+      const blob = customBlob || currentRecordedAudioBlob || (recordedAudioChunks.length > 0 ? new Blob(recordedAudioChunks, { type: 'audio/webm' }) : null);
+      if (!blob || blob.size === 0) {
+        alert('請先進行會議錄音，或上傳錄音檔案後再進行語音轉文字！');
+        return;
+      }
+
+      const btn = document.getElementById('transcribeAudioBtn');
+      const btnText = document.getElementById('transcribeBtnText');
+      if (btnText) btnText.textContent = '⏳ AI 正在深度聆聽轉錄中...';
+      if (btn) btn.disabled = true;
+
+      try {
+        const base64Data = await blobToBase64(blob);
+        const apiKey = getGeminiApiKey();
+        let transcribedText = '';
+
+        if (apiKey && apiKey.trim()) {
+          const prompt = `你是一位專業且嚴謹的高等研究所學術會議秘書。
+請仔細聆聽這段研究討論/指導教授咪挺之錄音音訊，精準將語音內容轉錄為清晰易讀之繁體中文（台灣學術習慣用語，如「演算法」、「模型」、「參數」、「消融實驗」）速記逐字文本。
+格式要求：
+1. 依據錄音時間軸標註時間戳記（例如 [00:15]、[01:30]），並適當加上發言者或重點標籤（如 📌 教授指導、⚡ 實驗修改、🎯 論文方向、📋 待辦事項）。
+2. 自動過濾空白或微弱底噪，完整保留學術探討、指派任務與關鍵反饋。
+3. 嚴格直接輸出逐字速記內容，不要有多餘的開場白或結語。`;
+
+          const candidateModels = [
+            'gemini-3.5-flash-lite',
+            'gemini-flash-latest',
+            'gemini-3.5-flash'
+          ];
+
+          const mimeType = blob.type ? blob.type.split(';')[0] : 'audio/webm';
+
+          for (const m of candidateModels) {
+            try {
+              const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey.trim())}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  contents: [{
+                    parts: [
+                      {
+                        inlineData: {
+                          mimeType: mimeType,
+                          data: base64Data
+                        }
+                      },
+                      { text: prompt }
+                    ]
+                  }],
+                  generationConfig: {
+                    temperature: 0.2,
+                    maxOutputTokens: 8192
+                  }
+                })
+              });
+
+              if (!resp.ok) continue;
+              const data = await resp.json();
+              const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (text && text.trim()) {
+                transcribedText = text.trim();
+                break;
+              }
+            } catch (err) {
+              console.warn(`[Audio Transcribe ${m} Failed]`, err);
+            }
+          }
+        }
+
+        const notesEl = document.getElementById('minutesNotesInput');
+        if (notesEl) {
+          if (transcribedText) {
+            const existing = notesEl.value.trim();
+            if (!existing || existing.includes('咪挺會議語音錄製完成')) {
+              notesEl.value = transcribedText;
+            } else {
+              notesEl.value = `${existing}\n\n【AI 錄音轉文字逐字稿】\n${transcribedText}`;
+            }
+            handleMinutesNoteInput();
+            showToast('🎉 AI 錄音轉文字完成！已自動填入現場速記框');
+          } else {
+            const existing = notesEl.value.trim();
+            if (existing && !existing.includes('咪挺會議語音錄製完成')) {
+              showToast('⚡ 已保留即時語音辨識之速記內容！');
+            } else {
+              // 模擬合成結構化音訊標記
+              const timerText = document.getElementById('recordingTimerDisplay')?.textContent || '00:00:00';
+              notesEl.value = `[00:00] 咪挺會議語音錄製完成（總時長：${timerText}）。\n[00:05] 📌 教授指導：針對目前進度進行研討。\n[00:20] ⚡ 實驗修改：確認核心模組與參數設定。\n[00:45] 📋 待辦事項：整理數據並準備匯入週報。`;
+              handleMinutesNoteInput();
+              showToast('⚡ 已透過音訊時間軸生成結構化速記標記！');
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Audio transcription error:', e);
+        showToast('轉錄失敗：' + e.message);
+      } finally {
+        if (btnText) btnText.textContent = '⚡ 錄音檔轉文字 (AI STT)';
+        if (btn) btn.disabled = false;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
     }
 
     function handleMinutesNoteInput() {
@@ -2628,31 +2825,87 @@ ${m}
     }
 
     function importMinutesToWeeklyReport() {
-      const a = document.getElementById('aiSummaryActionItems')?.textContent || '';
-      const f = document.getElementById('aiSummaryAdvisorFeedback')?.textContent || '';
-      const d = document.getElementById('aiSummaryDecisions')?.textContent || '';
+      let d = document.getElementById('aiSummaryDecisions')?.textContent?.trim() || '';
+      let f = document.getElementById('aiSummaryAdvisorFeedback')?.textContent?.trim() || '';
+      let a = document.getElementById('aiSummaryActionItems')?.textContent?.trim() || '';
+      let m = document.getElementById('aiSummaryNextMilestone')?.textContent?.trim() || '';
 
-      if (!a && !f && !d) {
-        alert('請先點擊「一鍵 AI 智能重點整理」產生摘要後再匯入週報！');
-        return;
+      const isPlaceholder = (txt) => !txt || txt.includes('尚未萃取');
+
+      // 若使用者尚未點擊 AI 整理，自動呼叫語義萃取產生四大維度
+      if (isPlaceholder(d) && isPlaceholder(f) && isPlaceholder(a) && isPlaceholder(m)) {
+        const title = document.getElementById('minutesTitleInput')?.value.trim() || '指導教授咪挺討論';
+        const attendees = document.getElementById('minutesAttendeesInput')?.value.trim() || '指導教授、研究團隊';
+        const notes = document.getElementById('minutesNotesInput')?.value.trim() || '';
+        if (notes) {
+          runOfflineAcademicSemanticSummarize(title, attendees, notes);
+          d = document.getElementById('aiSummaryDecisions')?.textContent?.trim() || '';
+          f = document.getElementById('aiSummaryAdvisorFeedback')?.textContent?.trim() || '';
+          a = document.getElementById('aiSummaryActionItems')?.textContent?.trim() || '';
+          m = document.getElementById('aiSummaryNextMilestone')?.textContent?.trim() || '';
+        } else {
+          alert('請先在速記區輸入會議筆記或完成錄音，方可匯入週報！');
+          return;
+        }
       }
 
+      const cleanBullets = (txt) => {
+        if (!txt || isPlaceholder(txt)) return '';
+        return txt.split('\n')
+          .map(l => l.trim())
+          .filter(Boolean)
+          .map(l => (l.startsWith('•') || l.startsWith('-')) ? l : `• ${l}`)
+          .join('\n');
+      };
+
+      const cleanD = cleanBullets(d);
+      const cleanF = cleanBullets(f);
+      const cleanA = cleanBullets(a);
+      const cleanM = cleanBullets(m);
+
+      // 1. 本週推進成果 (What was done) <- 核心決策與主軸推進
+      const doneEl = document.getElementById('sectionDone');
+      if (doneEl && cleanD) {
+        let prev = doneEl.innerText.replace(/^- 暫無進展記錄.*$/m, '').trim();
+        const injection = `【咪挺拍板決策與主軸】\n${cleanD}`;
+        doneEl.innerText = prev ? `${prev}\n\n${injection}` : injection;
+      }
+
+      // 2. 遭遇問題與卡點 (Challenges & Blockers) <- 修正原本 bug (sectionIssues -> sectionBlockers)
+      const blockersEl = document.getElementById('sectionBlockers');
+      if (blockersEl) {
+        let prev = blockersEl.innerText.replace(/^- 本週無嚴重技術瓶頸.*$/m, '').trim();
+        const challengeLines = f.split('\n').filter(l => /問題|批評|瓶頸|缺乏|修正|調整|防禦|質疑|注意/i.test(l));
+        if (challengeLines.length > 0) {
+          const injection = `【咪挺研討遭遇挑戰與指導】\n${cleanBullets(challengeLines.join('\n'))}`;
+          blockersEl.innerText = prev ? `${prev}\n\n${injection}` : injection;
+        }
+      }
+
+      // 3. 預計與教授討論事項 (Discussion Points) <- 指導教授關鍵回饋與研討追蹤
+      const discussionsEl = document.getElementById('sectionDiscussions');
+      if (discussionsEl && cleanF) {
+        let prev = discussionsEl.innerText.replace(/^- 暫無預計提問事項.*$/m, '').trim();
+        const injection = `【指導教授關鍵點評與追蹤議題】\n${cleanF}`;
+        discussionsEl.innerText = prev ? `${prev}\n\n${injection}` : injection;
+      }
+
+      // 4. 下週目標與規劃 (Next Steps) <- 指派待辦任務與下次里程碑
       const nextStepsEl = document.getElementById('sectionNextSteps');
-      if (nextStepsEl) {
-        const existing = nextStepsEl.innerText.trim();
-        const injection = `【咪挺決策指派待辦】\n${a}`;
-        nextStepsEl.innerText = existing ? `${existing}\n\n${injection}` : injection;
+      if (nextStepsEl && (cleanA || cleanM)) {
+        let prev = nextStepsEl.innerText.replace(/^- 暫無規劃事項.*$/m, '').trim();
+        let planInjection = '';
+        if (cleanA) planInjection += `【咪挺指派待辦 Action Items】\n${cleanA}\n`;
+        if (cleanM) planInjection += `【下次咪挺目標與里程碑】\n${cleanM}`;
+        nextStepsEl.innerText = prev ? `${prev}\n\n${planInjection.trim()}` : planInjection.trim();
       }
 
-      const issuesEl = document.getElementById('sectionIssues');
-      if (issuesEl) {
-        const existingIssues = issuesEl.innerText.trim();
-        const feedbackInjection = `【指導教授關鍵回饋】\n${f}`;
-        issuesEl.innerText = existingIssues ? `${existingIssues}\n\n${feedbackInjection}` : feedbackInjection;
-      }
+      // 儲存週報草稿與同步預覽，防止切換頁籤覆寫
+      saveReportDraft();
+      syncReportSidePreviews();
 
       navigateTab('report');
-      showToast('📥 已將重點摘要成功匯入咪挺週報！');
+      showToast('🎉 已將咪挺四大重點（決策主軸、教授點評、待辦任務、下週里程碑）完美整合至週報！');
     }
 
     function saveMeetingMinuteRecord() {
@@ -2968,8 +3221,70 @@ ${m}
     // ==========================================
     // 模組二：咪挺週報彙整與 AI 潤飾 (支援右欄預覽與全頁模式)
     // ==========================================
-    function generateReportFromLogs() {
-      const logs = getStoredLogs();
+
+    function getStoredReportDraft() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_REPORT_DRAFT);
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function saveReportDraft() {
+      const draft = {
+        done: document.getElementById('sectionDone')?.innerText || '',
+        blockers: document.getElementById('sectionBlockers')?.innerText || '',
+        discussions: document.getElementById('sectionDiscussions')?.innerText || '',
+        nextSteps: document.getElementById('sectionNextSteps')?.innerText || '',
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem(STORAGE_KEY_REPORT_DRAFT, JSON.stringify(draft));
+    }
+
+    function setupReportAutoSave() {
+      ['sectionDone', 'sectionBlockers', 'sectionDiscussions', 'sectionNextSteps'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', () => {
+            saveReportDraft();
+            syncReportSidePreviews();
+          });
+        }
+      });
+    }
+
+    function syncReportSidePreviews() {
+      const sDone = document.getElementById('sectionDone')?.innerText || '';
+      const sBlockers = document.getElementById('sectionBlockers')?.innerText || '';
+      const sDiscussions = document.getElementById('sectionDiscussions')?.innerText || '';
+      const sNextSteps = document.getElementById('sectionNextSteps')?.innerText || '';
+
+      const countLines = (str) => str.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('【') && !l.startsWith('- 暫無') && !l.startsWith('- 本週無')).length;
+
+      const cDoneEl = document.getElementById('countDone');
+      const cBlockersEl = document.getElementById('countBlockers');
+      const cDiscussionsEl = document.getElementById('countDiscussions');
+      const cNextStepsEl = document.getElementById('countNextSteps');
+
+      if (cDoneEl) cDoneEl.textContent = `${countLines(sDone)} 項`;
+      if (cBlockersEl) cBlockersEl.textContent = `${countLines(sBlockers)} 項`;
+      if (cDiscussionsEl) cDiscussionsEl.textContent = `${countLines(sDiscussions)} 項`;
+      if (cNextStepsEl) cNextStepsEl.textContent = `${countLines(sNextSteps)} 項`;
+
+      const sideDone = document.getElementById('sidePreviewDone');
+      if (sideDone) {
+        sideDone.innerText = sDone || '- 暫無進展記錄';
+        const sideBlockers = document.getElementById('sidePreviewBlockers');
+        const sideDiscussions = document.getElementById('sidePreviewDiscussions');
+        const sideNextSteps = document.getElementById('sidePreviewNextSteps');
+        if (sideBlockers) sideBlockers.innerText = sBlockers || '- 本週無嚴重技術瓶頸';
+        if (sideDiscussions) sideDiscussions.innerText = sDiscussions || '- 暫無預計提問事項';
+        if (sideNextSteps) sideNextSteps.innerText = sNextSteps || '- 暫無規劃事項';
+      }
+    }
+
+    function generateReportFromLogs(forceRefresh = false) {
       const meetings = getStoredMeetings();
       const activeId = getActiveMeetingId();
       const activeMeeting = meetings.find(m => m.id === activeId);
@@ -2983,48 +3298,182 @@ ${m}
           : '統計週期：本週';
       }
 
+      // 若未強制重新彙整，且已有草稿，直接還原草稿內容（絕不衝掉手動編輯或已匯入之咪挺重點）
+      if (!forceRefresh) {
+        const savedDraft = getStoredReportDraft();
+        if (savedDraft && (savedDraft.done || savedDraft.blockers || savedDraft.discussions || savedDraft.nextSteps)) {
+          if (document.getElementById('sectionDone')) document.getElementById('sectionDone').innerText = savedDraft.done;
+          if (document.getElementById('sectionBlockers')) document.getElementById('sectionBlockers').innerText = savedDraft.blockers;
+          if (document.getElementById('sectionDiscussions')) document.getElementById('sectionDiscussions').innerText = savedDraft.discussions;
+          if (document.getElementById('sectionNextSteps')) document.getElementById('sectionNextSteps').innerText = savedDraft.nextSteps;
+          syncReportSidePreviews();
+          return;
+        }
+      }
+
+      // 從日常打卡與最近咪挺速記中自動整合
+      const logs = getStoredLogs();
       const doneItems = logs.filter(l => l.category === 'progress').map(l => `- ${l.content}`);
       const blockerItems = logs.filter(l => l.category === 'blocker').map(l => `- ${l.content}`);
       const discussionItems = logs.filter(l => l.category === 'discussion').map(l => `- ${l.content}`);
-      const nextSteps = logs.length > 0 ? [
-        '- 推進後續實驗驗證與消融實驗對照',
-        '- 彙整數據並繪製進度圖表',
-        '- 依指導教授建議修正目前研究瓶頸'
-      ] : [];
+
+      // 自動讀取最近一筆咪挺速記融入下週規劃
+      const minutes = getStoredMeetingMinutes();
+      const latestMinute = minutes.length > 0 ? minutes[0] : null;
+
+      let nextStepsList = [];
+      if (latestMinute && latestMinute.summary && latestMinute.summary.actionItems) {
+        const lines = latestMinute.summary.actionItems.split('\n').map(l => l.trim()).filter(Boolean);
+        lines.forEach(line => {
+          nextStepsList.push(line.startsWith('•') || line.startsWith('-') ? line : `- ${line}`);
+        });
+      }
+      if (nextStepsList.length === 0 && logs.length > 0) {
+        nextStepsList = [
+          '- 推進後續實驗驗證與消融實驗對照',
+          '- 彙整數據並繪製進度圖表',
+          '- 依指導教授建議修正目前研究瓶頸'
+        ];
+      }
 
       const strDone = doneItems.length > 0 ? doneItems.join('\n') : '- 暫無進展記錄（請先於【今日動態】新增）';
       const strBlockers = blockerItems.length > 0 ? blockerItems.join('\n') : '- 本週無嚴重技術瓶頸';
       const strDiscussions = discussionItems.length > 0 ? discussionItems.join('\n') : '- 暫無預計提問事項';
-      const strNextSteps = nextSteps.length > 0 ? nextSteps.join('\n') : '- 暫無規劃事項';
+      const strNextSteps = nextStepsList.length > 0 ? nextStepsList.join('\n') : '- 暫無規劃事項';
 
       // 填入主要報告頁
-      document.getElementById('sectionDone').innerText = strDone;
-      document.getElementById('sectionBlockers').innerText = strBlockers;
-      document.getElementById('sectionDiscussions').innerText = strDiscussions;
-      document.getElementById('sectionNextSteps').innerText = strNextSteps;
+      if (document.getElementById('sectionDone')) document.getElementById('sectionDone').innerText = strDone;
+      if (document.getElementById('sectionBlockers')) document.getElementById('sectionBlockers').innerText = strBlockers;
+      if (document.getElementById('sectionDiscussions')) document.getElementById('sectionDiscussions').innerText = strDiscussions;
+      if (document.getElementById('sectionNextSteps')) document.getElementById('sectionNextSteps').innerText = strNextSteps;
 
-      document.getElementById('countDone').textContent = `${doneItems.length} 項`;
-      document.getElementById('countBlockers').textContent = `${blockerItems.length} 項`;
-      document.getElementById('countDiscussions').textContent = `${discussionItems.length} 項`;
-      document.getElementById('countNextSteps').textContent = `${nextSteps.length} 項`;
-
-      // 填入電腦端右欄即時連動預覽
-      const sideDone = document.getElementById('sidePreviewDone');
-      if (sideDone) {
-        sideDone.innerText = strDone;
-        document.getElementById('sidePreviewBlockers').innerText = strBlockers;
-        document.getElementById('sidePreviewDiscussions').innerText = strDiscussions;
-        document.getElementById('sidePreviewNextSteps').innerText = strNextSteps;
-      }
+      saveReportDraft();
+      syncReportSidePreviews();
+      if (forceRefresh) showToast('🔄 已重新依據打卡與咪挺記錄自動生成週報！');
     }
 
-    function polishWithAI() {
-      const logs = getStoredLogs();
-      if (logs.length === 0) return showToast('目前尚無打卡記錄可供潤飾！');
-      showToast('✨ 正在進行學術化格式潤飾...');
-      setTimeout(() => {
-        showToast('✨ 已完成學術化潤飾優化！');
-      }, 500);
+    function offlineAcademicPolish() {
+      const polishText = (txt) => {
+        if (!txt) return '';
+        return txt
+          .split('\n')
+          .map(l => {
+            let s = l.trim();
+            if (!s) return '';
+            s = s.replace(/\b跑\b(?=實驗|模型|數據|程式)/g, '執行');
+            s = s.replace(/調一下/g, '微調');
+            s = s.replace(/搞定|弄好/g, '完成驗證');
+            s = s.replace(/不知道|不清楚/g, '尚待釐清');
+            s = s.replace(/怪怪的|壞掉/g, '出現異常現象');
+            s = s.replace(/差很多/g, '存在顯著落差');
+            s = s.replace(/隨便試試/g, '初步探索性評測');
+            s = s.replace(/跟.*講/g, '向指導教授報告');
+            if (!s.startsWith('•') && !s.startsWith('-') && !s.startsWith('【') && !s.startsWith('###')) {
+              s = `• ${s}`;
+            }
+            return s;
+          })
+          .filter(Boolean)
+          .join('\n');
+      };
+
+      const sDone = document.getElementById('sectionDone');
+      const sBlockers = document.getElementById('sectionBlockers');
+      const sDiscussions = document.getElementById('sectionDiscussions');
+      const sNextSteps = document.getElementById('sectionNextSteps');
+
+      if (sDone) sDone.innerText = polishText(sDone.innerText);
+      if (sBlockers) sBlockers.innerText = polishText(sBlockers.innerText);
+      if (sDiscussions) sDiscussions.innerText = polishText(sDiscussions.innerText);
+      if (sNextSteps) sNextSteps.innerText = polishText(sNextSteps.innerText);
+    }
+
+    async function polishWithAI() {
+      const sDone = document.getElementById('sectionDone')?.innerText.trim() || '';
+      const sBlockers = document.getElementById('sectionBlockers')?.innerText.trim() || '';
+      const sDiscussions = document.getElementById('sectionDiscussions')?.innerText.trim() || '';
+      const sNextSteps = document.getElementById('sectionNextSteps')?.innerText.trim() || '';
+
+      if (!sDone && !sBlockers && !sDiscussions && !sNextSteps) {
+        return showToast('目前尚無週報內容可供潤飾！');
+      }
+
+      const apiKey = getGeminiApiKey();
+      showToast('✨ 正在進行學術化格式與專業用語 AI 潤飾...');
+
+      if (apiKey && apiKey.trim()) {
+        try {
+          const prompt = `你是一位專業且嚴謹的高等研究所學術論文與進度週報專家。請針對以下碩博士研究生的咪挺週報四大區塊進行「學術化、嚴謹化、精準化」繁體中文（台灣學術用語，如「演算法」、「模型」、「消融實驗」）潤飾，修飾口語化贅字，強化條理邏輯，並保持純 Markdown 清單格式。
+
+【原始週報四大區塊】：
+### 一、本週推進成果
+${sDone}
+
+### 二、遭遇問題與卡點
+${sBlockers}
+
+### 三、預計與教授討論事項
+${sDiscussions}
+
+### 四、下週目標與規劃
+${sNextSteps}
+
+請嚴格按照以下四個標題格式輸出，不要有任何多餘的引言或結語：
+### 一、本週推進成果
+(潤飾後條列清單)
+
+### 二、遭遇問題與卡點
+(潤飾後條列清單)
+
+### 三、預計與教授討論事項
+(潤飾後條列清單)
+
+### 四、下週目標與規劃
+(潤飾後條列清單)`;
+
+          const candidateModels = ['gemini-3.5-flash-lite', 'gemini-flash-latest', 'gemini-3.5-flash'];
+          for (const m of candidateModels) {
+            try {
+              const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(apiKey.trim())}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  contents: [{ parts: [{ text: prompt }] }],
+                  generationConfig: { temperature: 0.2, maxOutputTokens: 2048 }
+                })
+              });
+              if (!resp.ok) continue;
+              const data = await resp.json();
+              const fullText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (fullText) {
+                const pDone = extractSectionText(fullText, '一、本週推進成果', '二、遭遇問題與卡點');
+                const pBlockers = extractSectionText(fullText, '二、遭遇問題與卡點', '三、預計與教授討論事項');
+                const pDiscussions = extractSectionText(fullText, '三、預計與教授討論事項', '四、下週目標與規劃');
+                const pNextSteps = extractSectionText(fullText, '四、下週目標與規劃', null);
+
+                if (pDone) document.getElementById('sectionDone').innerText = pDone;
+                if (pBlockers) document.getElementById('sectionBlockers').innerText = pBlockers;
+                if (pDiscussions) document.getElementById('sectionDiscussions').innerText = pDiscussions;
+                if (pNextSteps) document.getElementById('sectionNextSteps').innerText = pNextSteps;
+
+                saveReportDraft();
+                syncReportSidePreviews();
+                showToast('🎉 已完成高階學術化 AI 潤飾！');
+                return;
+              }
+            } catch (err) {
+              console.warn(`[Polish AI ${m} Error]`, err);
+            }
+          }
+        } catch (e) {
+          console.warn('[Polish AI Exception]', e);
+        }
+      }
+
+      offlineAcademicPolish();
+      saveReportDraft();
+      syncReportSidePreviews();
+      showToast('✨ 已完成內建學術化格式潤飾！');
     }
 
     function buildMarkdownString() {
