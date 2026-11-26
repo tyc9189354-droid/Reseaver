@@ -1,4 +1,4 @@
-export type LogCategory = 'progress' | 'blocker' | 'discussion' | 'idea';
+export type LogCategory = 'progress' | 'blocker' | 'discussion' | 'idea' | 'admin';
 
 export interface LogEntry {
   id: string;
@@ -14,6 +14,7 @@ export interface WeeklyReportSections {
   blockers: string[];
   discussionPoints: string[];
   nextSteps: string[];
+  adminTasks?: string[]; // 實驗室行政與專案進度 (NEW)
 }
 
 export interface WeeklyReport {
@@ -25,6 +26,19 @@ export interface WeeklyReport {
   sections: WeeklyReportSections;
   rawMarkdown: string;
   status: 'draft' | 'finalized';
+  includeAdmin?: boolean;
+}
+
+// --- 會議指派 Action Item 雙軌結構 ---
+export type ActionItemType = 'research' | 'admin';
+
+export interface MeetingActionItem {
+  id: string;
+  text: string;
+  type: ActionItemType; // 'research' 論文研究 vs 'admin' 實驗室行政
+  priority?: 'high' | 'normal';
+  completed: boolean;
+  assignedDate?: string;
 }
 
 // --- Meeting 設定 (多組 Meeting 管理) ---
@@ -59,8 +73,8 @@ export interface PaperCapsule {
   };
 }
 
-// --- LabLog (實驗日誌與避坑) ---
-export type LabLogType = 'run' | 'gotcha';
+// --- LabLog (實驗日誌、避坑與行政 SOP) ---
+export type LabLogType = 'run' | 'gotcha' | 'sop';
 
 export interface LabLogEntry {
   id: string;
@@ -80,4 +94,7 @@ export interface LabLogEntry {
   symptom?: string;
   rootCause?: string;
   solution?: string;
+  // 行政 SOP 模式擴充欄位 (NEW)
+  sopSteps?: string[];
+  sopNotes?: string;
 }

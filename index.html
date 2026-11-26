@@ -125,23 +125,23 @@
         <nav class="space-y-1.5 text-xs font-semibold">
           <button onclick="navigateTab('today')" id="side-today" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sky-400 bg-sky-500/10 border border-sky-500/20 transition">
             <i data-lucide="check-square" class="w-4 h-4"></i>
-            <span>今日動態 (LabPulse)</span>
+            <span>今日動態</span>
           </button>
           <button onclick="navigateTab('report')" id="side-report" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition">
             <i data-lucide="file-text" class="w-4 h-4"></i>
-            <span>咪挺週報 (Meeting Report)</span>
+            <span>咪挺週報</span>
           </button>
           <button onclick="navigateTab('minutes')" id="side-minutes" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition">
             <i data-lucide="mic" class="w-4 h-4"></i>
-            <span>咪挺摘要 (Meeting Minutes)</span>
+            <span>咪挺摘要</span>
           </button>
           <button onclick="navigateTab('papers')" id="side-papers" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition">
             <i data-lucide="book-open" class="w-4 h-4"></i>
-            <span>論文膠囊 (PaperCapsule)</span>
+            <span>論文膠囊</span>
           </button>
           <button onclick="navigateTab('lablog')" id="side-lablog" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition">
             <i data-lucide="flask-conical" class="w-4 h-4"></i>
-            <span>實驗踩坑 (LabLog)</span>
+            <span>實驗踩坑</span>
           </button>
         </nav>
       </div>
@@ -182,7 +182,7 @@
           <div>
             <h1 class="text-sm lg:text-base font-bold tracking-tight text-white flex items-center gap-1.5">
               <span id="headerViewTitle">Reseaver 研究救星</span>
-              <span id="headerModuleBadge" class="text-[10px] bg-sky-500/20 text-sky-400 font-semibold px-2 py-0.5 rounded-full border border-sky-500/30">LabPulse</span>
+              <span id="headerModuleBadge" class="text-[10px] bg-sky-500/20 text-sky-400 font-semibold px-2 py-0.5 rounded-full border border-sky-500/30">今日動態</span>
             </h1>
             <p class="text-[11px] text-slate-400" id="headerSubtext">
               研究生日常速記 · 自動週報
@@ -298,24 +298,27 @@
                 </div>
 
                 <!-- 類型選擇器 -->
-                <div class="grid grid-cols-4 gap-1.5 mb-2.5">
-                  <button type="button" onclick="selectCategory('progress')" id="catBtn-progress" class="cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
+                <div class="grid grid-cols-5 gap-1 sm:gap-1.5 mb-2.5">
+                  <button type="button" onclick="selectCategory('progress')" id="catBtn-progress" class="cat-pill py-1.5 px-1 sm:px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
                     🚀 進展
                   </button>
-                  <button type="button" onclick="selectCategory('blocker')" id="catBtn-blocker" class="cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700 hover:border-rose-500/30">
+                  <button type="button" onclick="selectCategory('blocker')" id="catBtn-blocker" class="cat-pill py-1.5 px-1 sm:px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700 hover:border-rose-500/30">
                     🛑 卡點
                   </button>
-                  <button type="button" onclick="selectCategory('discussion')" id="catBtn-discussion" class="cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700 hover:border-amber-500/30">
+                  <button type="button" onclick="selectCategory('discussion')" id="catBtn-discussion" class="cat-pill py-1.5 px-1 sm:px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700 hover:border-amber-500/30">
                     ❓ 提綱
                   </button>
-                  <button type="button" onclick="selectCategory('idea')" id="catBtn-idea" class="cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700 hover:border-sky-500/30">
+                  <button type="button" onclick="selectCategory('idea')" id="catBtn-idea" class="cat-pill py-1.5 px-1 sm:px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700 hover:border-sky-500/30">
                     💡 靈感
+                  </button>
+                  <button type="button" onclick="selectCategory('admin')" id="catBtn-admin" class="cat-pill py-1.5 px-1 sm:px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700 hover:border-purple-500/30" title="實驗室行政、報帳、採購與計畫交代">
+                    💼 行政
                   </button>
                 </div>
 
                 <!-- 輸入框 -->
                 <div class="relative">
-                  <textarea id="noteInput" rows="2" placeholder="記下今天調的參數、訓練結果、遭遇報錯或想問教授的問題..." class="w-full bg-slate-900/90 text-sm text-slate-100 placeholder-slate-500 border border-slate-700/80 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all resize-none"></textarea>
+                  <textarea id="noteInput" rows="2" placeholder="記下今天調的參數、訓練結果、卡點，或完成的報帳、採購與計畫行政交辦..." class="w-full bg-slate-900/90 text-sm text-slate-100 placeholder-slate-500 border border-slate-700/80 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all resize-none"></textarea>
                 </div>
 
                 <!-- 標籤選擇 & 儲存按鈕 -->
@@ -325,7 +328,10 @@
                     <button onclick="toggleTag('#實驗調參')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition flex-shrink-0">#實驗調參</button>
                     <button onclick="toggleTag('#論文速讀')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition flex-shrink-0">#論文速讀</button>
                     <button onclick="toggleTag('#Bug排除')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition flex-shrink-0">#Bug排除</button>
-                    <button onclick="toggleTag('#架構設計')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition flex-shrink-0">#架構設計</button>
+                    <button onclick="toggleTag('#報帳核銷')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-purple-900/40 text-purple-300 hover:bg-purple-800/60 border border-purple-500/30 transition flex-shrink-0">#報帳核銷</button>
+                    <button onclick="toggleTag('#計畫管考')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-purple-900/40 text-purple-300 hover:bg-purple-800/60 border border-purple-500/30 transition flex-shrink-0">#計畫管考</button>
+                    <button onclick="toggleTag('#設備採購')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-purple-900/40 text-purple-300 hover:bg-purple-800/60 border border-purple-500/30 transition flex-shrink-0">#設備採購</button>
+                    <button onclick="toggleTag('#伺服器管理')" class="tag-chip text-[11px] px-2 py-0.5 rounded-md bg-purple-900/40 text-purple-300 hover:bg-purple-800/60 border border-purple-500/30 transition flex-shrink-0">#伺服器管理</button>
                   </div>
                   
                   <button onclick="saveCurrentNote()" class="bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-medium text-xs px-4 py-1.5 rounded-xl shadow-md shadow-sky-600/30 flex items-center gap-1 transition-all">
@@ -346,6 +352,7 @@
                   <button onclick="filterLogs('progress')" id="filterBtn-progress" class="filter-pill text-[11px] px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200">進展</button>
                   <button onclick="filterLogs('blocker')" id="filterBtn-blocker" class="filter-pill text-[11px] px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200">卡點</button>
                   <button onclick="filterLogs('discussion')" id="filterBtn-discussion" class="filter-pill text-[11px] px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200">提綱</button>
+                  <button onclick="filterLogs('admin')" id="filterBtn-admin" class="filter-pill text-[11px] px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200">行政</button>
                 </div>
               </div>
 
@@ -371,7 +378,7 @@
                   </div>
                 </div>
 
-                <!-- 4 區塊預覽縮略 -->
+                <!-- 5 區塊預覽縮略 -->
                 <div class="space-y-2.5 text-xs max-h-[calc(100vh-22rem)] overflow-y-auto pr-1">
                   <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
                     <span class="text-[10px] font-bold text-emerald-400 block mb-1">一、本週成果 (Done)</span>
@@ -388,6 +395,10 @@
                   <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
                     <span class="text-[10px] font-bold text-sky-400 block mb-1">四、下週規劃 (Next Steps)</span>
                     <div id="sidePreviewNextSteps" class="text-slate-300 text-[11px] whitespace-pre-wrap leading-relaxed">- 暫無規劃</div>
+                  </div>
+                  <div id="sidePreviewAdminContainer" class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                    <span class="text-[10px] font-bold text-purple-400 block mb-1">五、行政與專案 (Admin)</span>
+                    <div id="sidePreviewAdmin" class="text-slate-300 text-[11px] whitespace-pre-wrap leading-relaxed">- 尚無行政記錄</div>
                   </div>
                 </div>
 
@@ -417,7 +428,13 @@
                   <i data-lucide="file-check-2" class="w-4 h-4 text-emerald-400"></i>
                   Advisor Meeting 週報草稿
                 </h2>
-                <p class="text-[11px] text-slate-400 mt-0.5" id="reportDateRange">統計週期：本週</p>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <p class="text-[11px] text-slate-400" id="reportDateRange">統計週期：本週</p>
+                  <label class="flex items-center gap-1.5 text-[11px] text-purple-300 cursor-pointer select-none bg-purple-950/40 border border-purple-500/30 px-2 py-0.5 rounded-md hover:bg-purple-900/40 transition">
+                    <input type="checkbox" id="includeAdminReportToggle" checked onchange="toggleIncludeAdminReport(this.checked)" class="w-3.5 h-3.5 rounded bg-slate-900 border-slate-700 text-purple-600 focus:ring-0 cursor-pointer">
+                    <span>納入實驗室行政貢獻 (第五板塊)</span>
+                  </label>
+                </div>
               </div>
               <div class="flex items-center gap-2">
                 <button onclick="importMinutesToWeeklyReport()" title="自咪挺速記匯入最新四大重點" class="text-xs bg-indigo-950/80 hover:bg-indigo-900 px-3 py-1.5 rounded-lg text-indigo-300 hover:text-white flex items-center gap-1 border border-indigo-500/40 transition">
@@ -493,6 +510,18 @@
                 <span class="text-[10px] text-slate-400 bg-slate-700/60 px-1.5 py-0.5 rounded" id="countNextSteps">0 項</span>
               </div>
               <div id="sectionNextSteps" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed min-h-[60px]"></div>
+            </div>
+
+            <div id="sectionAdminContainer" class="bg-slate-800/60 border border-purple-500/30 rounded-xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-bold text-purple-400 flex items-center gap-1.5">
+                  <i data-lucide="briefcase" class="w-3.5 h-3.5 text-purple-400"></i>
+                  <span>💼 五、實驗室行政與專案貢獻 (Lab Administration & Projects)</span>
+                  <span class="text-[10px] text-purple-300/70 font-normal">〔正常 Checkbox 清單 · 報帳/採購/伺服器/計畫〕</span>
+                </h3>
+                <span class="text-[10px] text-slate-400 bg-slate-700/60 px-1.5 py-0.5 rounded" id="countAdminTasks">0 項</span>
+              </div>
+              <div id="sectionAdminTasks" class="bg-slate-900/60 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 leading-relaxed min-h-[60px]"></div>
             </div>
           </div>
         </div>
@@ -778,7 +807,7 @@
           <div class="bg-gradient-to-br from-violet-950/60 via-slate-800 to-indigo-950/40 border border-violet-500/30 rounded-2xl p-4 lg:p-5 shadow-lg">
             <div class="flex justify-between items-start mb-3">
               <div>
-                <span class="text-[11px] font-medium uppercase tracking-wider text-violet-400">PaperCapsule 記憶卡庫</span>
+                <span class="text-[11px] font-medium uppercase tracking-wider text-violet-400">論文記憶卡庫</span>
                 <div class="flex items-baseline gap-2 mt-0.5">
                   <span id="paperTotalCount" class="text-3xl font-extrabold text-white tracking-tight">0</span>
                   <span class="text-xs text-slate-300 font-medium">篇精讀文獻</span>
@@ -820,7 +849,7 @@
           <div class="bg-gradient-to-br from-emerald-950/50 via-slate-800 to-teal-950/40 border border-emerald-500/20 rounded-2xl p-4 lg:p-5 shadow-lg">
             <div class="flex justify-between items-start mb-3">
               <div>
-                <span class="text-[11px] font-medium uppercase tracking-wider text-emerald-400">LabLog 實驗避坑知識庫</span>
+                <span class="text-[11px] font-medium uppercase tracking-wider text-emerald-400">實驗避坑知識庫</span>
                 <div class="flex items-baseline gap-2 mt-0.5">
                   <span id="labLogTotalCount" class="text-3xl font-extrabold text-white tracking-tight">0</span>
                   <span class="text-xs text-slate-300 font-medium">筆記錄 (快照 & 避坑)</span>
@@ -832,11 +861,12 @@
               </button>
             </div>
 
-            <!-- 類型切換 (Run Snapshot vs Gotchas) -->
-            <div class="flex bg-slate-900/80 p-1 rounded-xl border border-slate-700/60 mt-1 max-w-sm">
+            <!-- 類型切換 (Run Snapshot vs Gotchas vs SOP) -->
+            <div class="flex bg-slate-900/80 p-1 rounded-xl border border-slate-700/60 mt-1 max-w-md">
               <button onclick="filterLabLogs('all')" id="labFilter-all" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-white bg-emerald-600 shadow-sm transition">全部</button>
               <button onclick="filterLabLogs('run')" id="labFilter-run" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition">🧪 實驗快照</button>
               <button onclick="filterLabLogs('gotcha')" id="labFilter-gotcha" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition">🪲 踩坑避雷</button>
+              <button onclick="filterLabLogs('sop')" id="labFilter-sop" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition">📌 行政 SOP</button>
             </div>
           </div>
 
@@ -1229,7 +1259,7 @@
     <div class="w-full max-w-md flex justify-between items-center mb-4">
       <div class="flex items-center gap-2 text-violet-400 text-xs font-bold">
         <i data-lucide="layers" class="w-4 h-4"></i>
-        <span>PaperCapsule 翻卡記憶</span>
+        <span>論文膠囊 翻卡記憶</span>
         <span id="flashcardProgress" class="bg-violet-500/20 px-2 py-0.5 rounded-full text-[10px]">0 / 0</span>
       </div>
       <button onclick="closeFlashcardMode()" class="text-slate-400 hover:text-white p-1 rounded-lg">
@@ -1485,15 +1515,16 @@
         </button>
       </div>
 
-      <div class="flex bg-slate-800 p-1 rounded-xl">
+      <div class="flex bg-slate-800 p-1 rounded-xl gap-1">
         <button type="button" onclick="selectLabLogType('run')" id="llTypeBtn-run" class="flex-1 py-1 text-xs font-semibold rounded-lg bg-emerald-600 text-white shadow-sm">🧪 實驗 Run 快照</button>
-        <button type="button" onclick="selectLabLogType('gotcha')" id="llTypeBtn-gotcha" class="flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white">🪲 踩坑避雷 Gotcha</button>
+        <button type="button" onclick="selectLabLogType('gotcha')" id="llTypeBtn-gotcha" class="flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white">🪲 踩坑避雷</button>
+        <button type="button" onclick="selectLabLogType('sop')" id="llTypeBtn-sop" class="flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white">📌 行政 SOP</button>
       </div>
 
       <div class="space-y-2 text-xs">
         <div>
           <label class="block text-slate-400 mb-1">標題 / 描述</label>
-          <input id="llTitle" type="text" placeholder="例：ResNet-50 對比實驗 或 CUDA OOM 報錯解決" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+          <input id="llTitle" type="text" placeholder="例：ResNet-50 對比實驗 或 國科會經費核銷流程" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
         <div id="llRunFields" class="space-y-2">
           <div class="grid grid-cols-2 gap-2">
@@ -1519,6 +1550,16 @@
           <div>
             <label class="block text-slate-400 mb-1">⚡ 一行秒殺解法 (Solution)</label>
             <textarea id="llSolution" rows="2" placeholder="例：設定 persistent_workers=True 或 del variable" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 resize-none"></textarea>
+          </div>
+        </div>
+        <div id="llSopFields" class="space-y-2 hidden">
+          <div>
+            <label class="block text-slate-400 mb-1">標準作業流程 SOP 步驟 (每行一步驟)</label>
+            <textarea id="llSopSteps" rows="3" placeholder="例：1. 登入校務經費核銷系統填寫黏存單&#10;2. 發票貼於單據正面並由受款人簽章&#10;3. 送至系辦公室與會計室收件" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 resize-none focus:outline-none focus:border-purple-500"></textarea>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">關鍵備註 / 統編 / 聯絡窗口 (Notes)</label>
+            <input id="llSopNotes" type="text" placeholder="例：學校統編：03744671，請款截止日為每月 25 號" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-purple-500">
           </div>
         </div>
       </div>
@@ -1744,11 +1785,11 @@
       currentTab = tab;
       const tabs = ['today', 'report', 'minutes', 'papers', 'lablog'];
       const badges = {
-        today: { title: '今日動態', name: 'LabPulse', sub: '研究生日常速記 · 自動週報' },
-        report: { title: '咪挺週報', name: 'Meeting 週報', sub: '四大標準區塊 · AI 潤飾匯出' },
-        minutes: { title: '咪挺摘要', name: 'MeetingMinutes', sub: '錄音與打字速記 · 背景持續錄音 · AI 重點整理' },
-        papers: { title: '論文膠囊', name: 'PaperCapsule', sub: '四維度文獻卡 · 間隔記憶複習' },
-        lablog: { title: '實驗踩坑', name: 'LabLog', sub: '實驗 Run 快照 · 避坑知識庫' }
+        today: { title: '今日動態', name: '今日動態', sub: '研究生日常速記 · 自動週報' },
+        report: { title: '咪挺週報', name: '咪挺週報', sub: '四大標準區塊 · AI 潤飾匯出' },
+        minutes: { title: '咪挺摘要', name: '咪挺摘要', sub: '錄音與打字速記 · 背景持續錄音 · AI 重點整理' },
+        papers: { title: '論文膠囊', name: '論文膠囊', sub: '四維度文獻卡 · 間隔記憶複習' },
+        lablog: { title: '實驗踩坑', name: '實驗踩坑', sub: '實驗 Run 快照 · 避坑知識庫' }
       };
 
       tabs.forEach(t => {
@@ -2753,7 +2794,7 @@ ${notes}
 (條列指導教授提出最核心的犀利問題、批評、改進建議與防禦思路)
 
 ### 指派待辦 Action Items 清單
-(條列指派給學生/研究員具體要完成的工作，標註優先順序，例如 [高優先] 補做對比實驗)
+(請務必自動分類為「【🎯 論文與研究待辦】」與「【💼 實驗室行政指派】」雙軌清單，每項條列指出具體任務與優先序。若無特定行政事務則列「無」)
 
 ### 下次 Meeting 目標與里程碑
 (明確列出下次咪挺前必須產出的成果、投影片內容或論文 Draft 進度)`;
@@ -2801,19 +2842,24 @@ ${notes}
 
       const decisions = [];
       const feedbacks = [];
-      const actionItems = [];
+      const researchActionItems = [];
+      const adminActionItems = [];
       const milestones = [];
 
       lines.forEach(line => {
         const clean = line.replace(/^\[\d+:\d+(?::\d+)?\]\s*/, '').trim();
         if (!clean) return;
 
+        const isAdmin = /報帳|發票|收據|核銷|經費|國科會|產學|計畫|系辦|會計|採購|伺服器|Slurm|口試|迎新|公文|請款|薪資|總務|行政/i.test(clean);
+
         if (/📌|教授|老師|指導|顧問|點評|建議/.test(clean)) {
           feedbacks.push(clean.replace(/^(?:📌\s*教授指導[：:]?|👨‍🏫\s*指導建議[：:]?)/, '').trim());
+        } else if (isAdmin) {
+          adminActionItems.push(clean.replace(/^(?:💼\s*行政[：:]?|📋\s*待辦事項[：:]?)/, '').trim());
         } else if (/⚡|實驗|修改|調整|參數|bug|跑|模型|訓練|loss|batch|epoch/i.test(clean)) {
-          actionItems.push(`[高優先] ${clean.replace(/^(?:⚡\s*實驗修改[：:]?)/, '').trim()}`);
+          researchActionItems.push(`[高優先] ${clean.replace(/^(?:⚡\s*實驗修改[：:]?)/, '').trim()}`);
         } else if (/📋|待辦|todo|下週|完成|整理|繳交|提交/i.test(clean)) {
-          actionItems.push(clean.replace(/^(?:📋\s*待辦事項[：:]?)/, '').trim());
+          researchActionItems.push(clean.replace(/^(?:📋\s*待辦事項[：:]?)/, '').trim());
         } else if (/🎯|決定|採用|拍板|方向|論文|架構|主軸|題目|結論/i.test(clean)) {
           decisions.push(clean.replace(/^(?:🎯\s*論文方向[：:]?)/, '').trim());
         } else if (/📅|下次|里程碑|截止|deadline|目標|預計/i.test(clean)) {
@@ -2822,7 +2868,7 @@ ${notes}
           feedbacks.push(`探討問題：${clean.replace(/^(?:❓\s*提問研討[：:]?)/, '').trim()}`);
         } else {
           if (/寫|修改|圖表|實驗|測|跑/.test(clean)) {
-            actionItems.push(clean);
+            researchActionItems.push(clean);
           } else {
             decisions.push(clean);
           }
@@ -2835,18 +2881,26 @@ ${notes}
       if (feedbacks.length === 0) {
         feedbacks.push('指導教授指示：實驗結果需補足最新的相關 SOTA Baseline 做顯著性比對，增強論文防禦力。');
       }
-      if (actionItems.length === 0) {
-        actionItems.push('1. 完成目前模組的超參數調優與消融實驗 (Ablation Study)。');
-        actionItems.push('2. 整理實驗折線圖與表格，準備匯入下次會議投影片。');
+      if (researchActionItems.length === 0) {
+        researchActionItems.push('完成目前模組的超參數調優與消融實驗 (Ablation Study)。');
+        researchActionItems.push('整理實驗折線圖與表格，準備匯入下次會議投影片。');
       }
       if (milestones.length === 0) {
         milestones.push('下次 Meeting 前提交完整的實驗對比數據與論文第二章 Draft。');
       }
 
+      const formattedActionLines = [];
+      formattedActionLines.push('【🎯 論文與研究待辦】');
+      researchActionItems.forEach(a => formattedActionLines.push(`- [ ] ${a}`));
+      if (adminActionItems.length > 0) {
+        formattedActionLines.push('【💼 實驗室行政指派】');
+        adminActionItems.forEach(a => formattedActionLines.push(`- [ ] ${a}`));
+      }
+
       renderSummarySections(
         decisions.map(d => `• ${d}`).join('\n'),
         feedbacks.map(f => `• ${f}`).join('\n'),
-        actionItems.map(a => `• ${a}`).join('\n'),
+        formattedActionLines.join('\n'),
         milestones.map(m => `• ${m}`).join('\n')
       );
     }
@@ -2891,7 +2945,19 @@ ${notes}
         } else {
           const lines = actionItems.split('\n').map(l => l.trim()).filter(Boolean);
           let html = `<div class="space-y-1.5">`;
+          let currentTrack = 'research';
+
           lines.forEach(line => {
+            if (/^(?:【|###|##|\*\*)/.test(line)) {
+              const isAdminHeader = line.includes('行政');
+              currentTrack = isAdminHeader ? 'admin' : 'research';
+              html += `
+                <div class="text-[11px] font-bold ${isAdminHeader ? 'text-purple-300 bg-purple-950/40 border-purple-800/60' : 'text-sky-300 bg-sky-950/40 border-sky-800/60'} px-2.5 py-1 rounded-lg border mt-2.5 mb-1.5 flex items-center gap-1.5 select-none">
+                  <span>${escapeHtml(line)}</span>
+                </div>`;
+              return;
+            }
+
             let isChecked = false;
             let clean = line;
             if (/^[-*•]?\s*\[([xX])\]/.test(clean)) {
@@ -2902,9 +2968,16 @@ ${notes}
             } else {
               clean = clean.replace(/^[-*•]\s*/, '').replace(/^\d+[\.、]\s*/, '');
             }
+
+            const isAdmin = currentTrack === 'admin' || /報帳|發票|收據|核銷|經費|國科會|產學|計畫|系辦|會計|採購|伺服器|Slurm|口試|迎新|公文|請款|薪資|總務|行政/i.test(clean);
+            const badgeClass = isAdmin ? 'bg-purple-500/20 text-purple-300 border-purple-500/30' : 'bg-sky-500/20 text-sky-300 border-sky-500/30';
+            const badgeLabel = isAdmin ? '行政' : '研究';
+            const accentClass = isAdmin ? 'text-purple-500 accent-purple-500' : 'text-sky-500 accent-sky-500';
+
             html += `
               <label class="flex items-start gap-2 p-1.5 rounded-lg bg-slate-950/40 hover:bg-slate-800/60 border border-slate-800/50 transition cursor-pointer select-none group">
-                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="this.nextElementSibling.classList.toggle('line-through', this.checked); this.nextElementSibling.classList.toggle('opacity-60', this.checked);" class="w-3.5 h-3.5 rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0 cursor-pointer mt-0.5 shrink-0">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="this.nextElementSibling.nextElementSibling.classList.toggle('line-through', this.checked); this.nextElementSibling.nextElementSibling.classList.toggle('opacity-60', this.checked);" class="w-3.5 h-3.5 rounded bg-slate-900 border-slate-700 ${accentClass} focus:ring-0 cursor-pointer mt-0.5 shrink-0">
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded border ${badgeClass} shrink-0 mt-0.5">${badgeLabel}</span>
                 <span class="text-xs text-slate-300 leading-relaxed ${isChecked ? 'line-through opacity-60' : ''}">${escapeHtml(clean)}</span>
               </label>`;
           });
@@ -3095,19 +3168,35 @@ ${m}
         let prev = getSectionMarkdown('sectionNextSteps').replace(/^- (?:\[ \]\s*)?暫無規劃事項.*$/m, '').trim();
         let planInjection = '';
         if (cleanA && !isPlaceholder(cleanA)) {
-          planInjection += `【咪挺指派待辦 Action Items】\n${cleanActionItemsToCheckboxes(cleanA, assignedTimeStr)}\n`;
+          // 篩選出純研究待辦
+          const researchLines = cleanA.split('\n').filter(l => !/【💼|報帳|發票|收據|核銷|經費|國科會|產學|計畫|系辦|會計|採購|伺服器|Slurm|口試|迎新|公文|請款|薪資|總務/i.test(l)).join('\n');
+          if (researchLines.trim()) {
+            planInjection += `【咪挺研究待辦 Action Items】\n${cleanActionItemsToCheckboxes(researchLines, assignedTimeStr)}\n`;
+          }
         }
         if (cleanM && !isPlaceholder(cleanM)) {
           planInjection += `【下次咪挺目標與里程碑】\n${cleanCheckboxes(cleanM)}`;
         }
-        setSectionMarkdown('sectionNextSteps', prev ? `${prev}\n\n${planInjection.trim()}` : planInjection.trim());
+        if (planInjection.trim()) {
+          setSectionMarkdown('sectionNextSteps', prev ? `${prev}\n\n${planInjection.trim()}` : planInjection.trim());
+        }
+      }
+
+      // 5. 實驗室行政與專案貢獻 (Admin Tasks) <- 咪挺指派行政交辦
+      if (cleanA && !isPlaceholder(cleanA)) {
+        const adminLines = cleanA.split('\n').filter(l => /報帳|發票|收據|核銷|經費|國科會|產學|計畫|系辦|會計|採購|伺服器|Slurm|口試|迎新|公文|請款|薪資|總務|行政/i.test(l) && !l.startsWith('【🎯')).join('\n');
+        if (adminLines.trim()) {
+          let prev = getSectionMarkdown('sectionAdminTasks').replace(/^- (?:\[ \]\s*)?本週無重大實驗室行政.*$/m, '').trim();
+          const adminInjection = `【咪挺交辦行政任務】\n${cleanActionItemsToCheckboxes(adminLines, assignedTimeStr)}`;
+          setSectionMarkdown('sectionAdminTasks', prev ? `${prev}\n\n${adminInjection.trim()}` : adminInjection.trim());
+        }
       }
 
       // 儲存週報草稿與同步預覽，防止切換頁籤覆寫
       saveReportDraft();
       syncReportSidePreviews();
 
-      showToast('🎉 已將咪挺四大重點（決策主軸、教授點評、待辦任務、下週里程碑）完美整合至週報！');
+      showToast('🎉 已將咪挺重點（研究決策、點評、待辦任務、行政交辦與下週里程碑）完美整合至週報！');
     }
 
     function saveMeetingMinuteRecord() {
@@ -3301,17 +3390,20 @@ ${m}
 
     function selectCategory(cat) {
       currentCategory = cat;
-      const cats = ['progress', 'blocker', 'discussion', 'idea'];
+      const cats = ['progress', 'blocker', 'discussion', 'idea', 'admin'];
       const styles = {
         progress: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
         blocker: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
         discussion: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-        idea: 'bg-sky-500/20 text-sky-300 border-sky-500/40'
+        idea: 'bg-sky-500/20 text-sky-300 border-sky-500/40',
+        admin: 'bg-purple-500/20 text-purple-300 border-purple-500/40'
       };
       cats.forEach(c => {
-        document.getElementById(`catBtn-${c}`).className = 'cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700';
+        const el = document.getElementById(`catBtn-${c}`);
+        if (el) el.className = 'cat-pill py-1.5 px-1 sm:px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all bg-slate-800 text-slate-400 border-slate-700';
       });
-      document.getElementById(`catBtn-${cat}`).className = `cat-pill py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all ${styles[cat]}`;
+      const activeEl = document.getElementById(`catBtn-${cat}`);
+      if (activeEl) activeEl.className = `cat-pill py-1.5 px-1 sm:px-2 rounded-lg text-[11px] font-medium border flex items-center justify-center gap-1 transition-all ${styles[cat]}`;
     }
 
     function toggleTag(tag) {
@@ -3352,10 +3444,13 @@ ${m}
 
     function filterLogs(category) {
       currentFilter = category;
-      ['all', 'progress', 'blocker', 'discussion'].forEach(c => {
-        document.getElementById(`filterBtn-${c}`).className = c === category 
-          ? 'filter-pill text-[11px] px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30'
-          : 'filter-pill text-[11px] px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200';
+      ['all', 'progress', 'blocker', 'discussion', 'admin'].forEach(c => {
+        const btn = document.getElementById(`filterBtn-${c}`);
+        if (btn) {
+          btn.className = c === category 
+            ? 'filter-pill text-[11px] px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-400 font-semibold border border-sky-500/30'
+            : 'filter-pill text-[11px] px-2 py-0.5 rounded-md text-slate-400 hover:text-slate-200';
+        }
       });
       renderLogs();
     }
@@ -3384,7 +3479,8 @@ ${m}
         progress: { label: '進展', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
         blocker: { label: '卡點', color: 'bg-rose-500/10 text-rose-400 border-rose-500/30' },
         discussion: { label: '提綱', color: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
-        idea: { label: '靈感', color: 'bg-sky-500/10 text-sky-400 border-sky-500/30' }
+        idea: { label: '靈感', color: 'bg-sky-500/10 text-sky-400 border-sky-500/30' },
+        admin: { label: '行政', color: 'bg-purple-500/10 text-purple-300 border-purple-500/30' }
       };
 
       container.innerHTML = filtered.map(item => {
@@ -3431,6 +3527,18 @@ ${m}
       } catch {
         return null;
       }
+    }
+
+    const STORAGE_KEY_INCLUDE_ADMIN = 'reseaver_include_admin_report';
+
+    function getIncludeAdminReport() {
+      const v = localStorage.getItem(STORAGE_KEY_INCLUDE_ADMIN);
+      return v === null ? true : (v === 'true');
+    }
+
+    function toggleIncludeAdminReport(checked) {
+      localStorage.setItem(STORAGE_KEY_INCLUDE_ADMIN, checked ? 'true' : 'false');
+      syncReportSidePreviews();
     }
 
     // ==========================================
@@ -3491,9 +3599,10 @@ ${m}
 
       const isBlocker = sectionId === 'sectionBlockers';
       const isDiscussion = sectionId === 'sectionDiscussions';
+      const isAdmin = sectionId === 'sectionAdminTasks';
       const accentColor = isBlocker 
         ? 'text-rose-500 focus:ring-rose-500 accent-rose-500' 
-        : (isDiscussion ? 'text-amber-500 focus:ring-amber-500 accent-amber-500' : 'text-sky-500 focus:ring-sky-500 accent-sky-500');
+        : (isDiscussion ? 'text-amber-500 focus:ring-amber-500 accent-amber-500' : (isAdmin ? 'text-purple-500 focus:ring-purple-500 accent-purple-500' : 'text-sky-500 focus:ring-sky-500 accent-sky-500'));
 
       const lines = (markdownStr || '').split('\n').map(l => l.trim()).filter(Boolean);
       let html = `<div class="checklist-items-container space-y-2" data-section="${sectionId}">`;
@@ -3593,9 +3702,10 @@ ${m}
         const newRow = document.createElement('div');
         const isBlocker = sectionId === 'sectionBlockers';
         const isDiscussion = sectionId === 'sectionDiscussions';
+        const isAdmin = sectionId === 'sectionAdminTasks';
         const accentColor = isBlocker 
           ? 'text-rose-500 focus:ring-rose-500 accent-rose-500' 
-          : (isDiscussion ? 'text-amber-500 focus:ring-amber-500 accent-amber-500' : 'text-sky-500 focus:ring-sky-500 accent-sky-500');
+          : (isDiscussion ? 'text-amber-500 focus:ring-amber-500 accent-amber-500' : (isAdmin ? 'text-purple-500 focus:ring-purple-500 accent-purple-500' : 'text-sky-500 focus:ring-sky-500 accent-sky-500'));
 
         newRow.className = 'checklist-item flex items-start gap-2.5 py-1.5 px-2.5 rounded-lg bg-slate-900/50 hover:bg-slate-850 border border-slate-800/70 transition group';
         newRow.dataset.checked = 'false';
@@ -3632,9 +3742,10 @@ ${m}
 
       const isBlocker = sectionId === 'sectionBlockers';
       const isDiscussion = sectionId === 'sectionDiscussions';
+      const isAdmin = sectionId === 'sectionAdminTasks';
       const accentColor = isBlocker 
         ? 'text-rose-500 focus:ring-rose-500 accent-rose-500' 
-        : (isDiscussion ? 'text-amber-500 focus:ring-amber-500 accent-amber-500' : 'text-sky-500 focus:ring-sky-500 accent-sky-500');
+        : (isDiscussion ? 'text-amber-500 focus:ring-amber-500 accent-amber-500' : (isAdmin ? 'text-purple-500 focus:ring-purple-500 accent-purple-500' : 'text-sky-500 focus:ring-sky-500 accent-sky-500'));
 
       const newRow = document.createElement('div');
       newRow.className = 'checklist-item flex items-start gap-2.5 py-1.5 px-2.5 rounded-lg bg-slate-900/50 hover:bg-slate-850 border border-slate-800/70 transition group';
@@ -3669,6 +3780,7 @@ ${m}
         blockers: getSectionMarkdown('sectionBlockers'),
         discussions: getSectionMarkdown('sectionDiscussions'),
         nextSteps: getSectionMarkdown('sectionNextSteps'),
+        adminTasks: getSectionMarkdown('sectionAdminTasks'),
         updatedAt: new Date().toISOString()
       };
       localStorage.setItem(STORAGE_KEY_REPORT_DRAFT, JSON.stringify(draft));
@@ -3689,6 +3801,7 @@ ${m}
       const sBlockers = getSectionMarkdown('sectionBlockers');
       const sDiscussions = getSectionMarkdown('sectionDiscussions');
       const sNextSteps = getSectionMarkdown('sectionNextSteps');
+      const sAdmin = getSectionMarkdown('sectionAdminTasks');
 
       const countLines = (str) => str.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('【') && !l.startsWith('- 暫無') && !l.startsWith('- 本週無') && !l.startsWith('- [ ] 暫無') && !l.startsWith('- [ ] 本週無')).length;
 
@@ -3696,11 +3809,26 @@ ${m}
       const cBlockersEl = document.getElementById('countBlockers');
       const cDiscussionsEl = document.getElementById('countDiscussions');
       const cNextStepsEl = document.getElementById('countNextSteps');
+      const cAdminEl = document.getElementById('countAdminTasks');
 
       if (cDoneEl) cDoneEl.textContent = `${countLines(sDone)} 項`;
       if (cBlockersEl) cBlockersEl.textContent = `${countLines(sBlockers)} 項`;
       if (cDiscussionsEl) cDiscussionsEl.textContent = `${countLines(sDiscussions)} 項`;
       if (cNextStepsEl) cNextStepsEl.textContent = `${countLines(sNextSteps)} 項`;
+      if (cAdminEl) cAdminEl.textContent = `${countLines(sAdmin)} 項`;
+
+      const isIncludeAdmin = getIncludeAdminReport();
+      const adminToggle = document.getElementById('includeAdminReportToggle');
+      if (adminToggle) adminToggle.checked = isIncludeAdmin;
+
+      const adminSecContainer = document.getElementById('sectionAdminContainer');
+      if (adminSecContainer) {
+        adminSecContainer.classList.toggle('hidden', !isIncludeAdmin);
+      }
+      const sideAdminContainer = document.getElementById('sidePreviewAdminContainer');
+      if (sideAdminContainer) {
+        sideAdminContainer.classList.toggle('hidden', !isIncludeAdmin);
+      }
 
       const sideDone = document.getElementById('sidePreviewDone');
       if (sideDone) {
@@ -3708,9 +3836,11 @@ ${m}
         const sideBlockers = document.getElementById('sidePreviewBlockers');
         const sideDiscussions = document.getElementById('sidePreviewDiscussions');
         const sideNextSteps = document.getElementById('sidePreviewNextSteps');
+        const sideAdmin = document.getElementById('sidePreviewAdmin');
         if (sideBlockers) sideBlockers.innerText = sBlockers || '- [ ] 本週無嚴重技術瓶頸';
         if (sideDiscussions) sideDiscussions.innerText = sDiscussions || '- [ ] 暫無預計提問事項';
         if (sideNextSteps) sideNextSteps.innerText = sNextSteps || '- [ ] 暫無規劃事項';
+        if (sideAdmin) sideAdmin.innerText = sAdmin || '- [ ] 暫無行政專案記錄';
       }
     }
 
@@ -3731,11 +3861,12 @@ ${m}
       // 若未強制重新彙整，且已有草稿，直接還原草稿內容（絕不衝掉手動編輯或已匯入之咪挺重點）
       if (!forceRefresh) {
         const savedDraft = getStoredReportDraft();
-        if (savedDraft && (savedDraft.done || savedDraft.blockers || savedDraft.discussions || savedDraft.nextSteps)) {
+        if (savedDraft && (savedDraft.done || savedDraft.blockers || savedDraft.discussions || savedDraft.nextSteps || savedDraft.adminTasks)) {
           if (document.getElementById('sectionDone')) document.getElementById('sectionDone').innerText = savedDraft.done;
           setSectionMarkdown('sectionBlockers', savedDraft.blockers);
           setSectionMarkdown('sectionDiscussions', savedDraft.discussions);
           setSectionMarkdown('sectionNextSteps', savedDraft.nextSteps);
+          setSectionMarkdown('sectionAdminTasks', savedDraft.adminTasks || '');
           syncReportSidePreviews();
           return;
         }
@@ -3746,6 +3877,7 @@ ${m}
       const doneItems = logs.filter(l => l.category === 'progress').map(l => `- ${l.content}`);
       const blockerItems = logs.filter(l => l.category === 'blocker').map(l => `- [ ] ${l.content}`);
       const discussionItems = logs.filter(l => l.category === 'discussion').map(l => `- [ ] ${l.content}`);
+      const adminItems = logs.filter(l => l.category === 'admin').map(l => `- [x] ${l.content}`);
 
       // 自動讀取最近一筆咪挺速記融入下週規劃
       const minutes = getStoredMeetingMinutes();
@@ -3795,12 +3927,14 @@ ${m}
       const strBlockers = blockerItems.length > 0 ? blockerItems.join('\n') : '- [ ] 本週無嚴重技術瓶頸';
       const strDiscussions = discussionItems.length > 0 ? discussionItems.join('\n') : '- [ ] 暫無預計提問事項';
       const strNextSteps = nextStepsList.length > 0 ? nextStepsList.join('\n') : '- [ ] 暫無規劃事項';
+      const strAdmin = adminItems.length > 0 ? adminItems.join('\n') : '- [ ] 本週無重大實驗室行政或專案交辦';
 
       // 填入主要報告頁
       if (document.getElementById('sectionDone')) document.getElementById('sectionDone').innerText = strDone;
       setSectionMarkdown('sectionBlockers', strBlockers);
       setSectionMarkdown('sectionDiscussions', strDiscussions);
       setSectionMarkdown('sectionNextSteps', strNextSteps);
+      setSectionMarkdown('sectionAdminTasks', strAdmin);
 
       saveReportDraft();
       syncReportSidePreviews();
@@ -3851,6 +3985,7 @@ ${m}
       setSectionMarkdown('sectionBlockers', polishText(getSectionMarkdown('sectionBlockers'), true));
       setSectionMarkdown('sectionDiscussions', polishText(getSectionMarkdown('sectionDiscussions'), true));
       setSectionMarkdown('sectionNextSteps', polishText(getSectionMarkdown('sectionNextSteps'), true));
+      setSectionMarkdown('sectionAdminTasks', polishText(getSectionMarkdown('sectionAdminTasks'), true));
 
       saveReportDraft();
       syncReportSidePreviews();
@@ -3861,8 +3996,10 @@ ${m}
       const sBlockers = getSectionMarkdown('sectionBlockers');
       const sDiscussions = getSectionMarkdown('sectionDiscussions');
       const sNextSteps = getSectionMarkdown('sectionNextSteps');
+      const sAdmin = getSectionMarkdown('sectionAdminTasks');
+      const isIncludeAdmin = getIncludeAdminReport();
 
-      if (!sDone && !sBlockers && !sDiscussions && !sNextSteps) {
+      if (!sDone && !sBlockers && !sDiscussions && !sNextSteps && !sAdmin) {
         return showToast('目前尚無週報內容可供潤飾！');
       }
 
@@ -3871,15 +4008,26 @@ ${m}
 
       if (apiKey && apiKey.trim()) {
         try {
-          const prompt = `你是一位專業且嚴謹的高等研究所學術論文與進度週報專家。請針對以下碩博士研究生的咪挺週報四大區塊進行「學術化、嚴謹化、精準化」繁體中文（台灣學術用語，如「演算法」、「模型」、「消融實驗」）潤飾，修飾口語化贅字，強化條理邏輯。
+          const adminPromptPart = (isIncludeAdmin && sAdmin) ? `
+5. 「五、實驗室行政與專案貢獻」：必須以 Checkbox 待辦格式呈現（每項以 - [ ] 或 - [x] 開頭），涵蓋報帳核銷、設備採購、伺服器或計畫管考交付。` : '';
+          const adminInputPart = (isIncludeAdmin && sAdmin) ? `
+
+### 五、實驗室行政與專案貢獻
+${sAdmin}` : '';
+          const adminOutputPart = (isIncludeAdmin && sAdmin) ? `
+
+### 五、實驗室行政與專案貢獻
+(潤飾後 Checkbox 清單，如 - [ ] ... 或 - [x] ...)` : '';
+
+          const prompt = `你是一位專業且嚴謹的高等研究所學術論文與進度週報專家。請針對以下碩博士研究生的咪挺週報區塊進行「學術化、嚴謹化、精準化」繁體中文（台灣學術用語與實驗室標準）潤飾，修飾口語化贅字，強化條理邏輯。
 
 【格式規範重要要求】：
 1. 「一、本週推進成果」：保持學術條列清單（以 • 或 - 開頭）。
 2. 「二、遭遇問題與卡點」：必須以 Checkbox 待辦格式呈現（每項以 - [ ] 或 - [x] 開頭）。
 3. 「三、預計與教授討論事項」：必須以 Checkbox 待辦格式呈現（每項以 - [ ] 或 - [x] 開頭）。
-4. 「四、下週目標與規劃」：必須以 Checkbox 待辦格式呈現（每項以 - [ ] 或 - [x] 開頭）。若項目含有指派時間（如 [指派時間: YYYY-MM-DD]），請務必完整保留日期標記！
+4. 「四、下週目標與規劃」：必須以 Checkbox 待辦格式呈現（每項以 - [ ] 或 - [x] 開頭）。若項目含有指派時間（如 [指派時間: YYYY-MM-DD]），請務必完整保留日期標記！${adminPromptPart}
 
-【原始週報四大區塊】：
+【原始週報區塊】：
 ### 一、本週推進成果
 ${sDone}
 
@@ -3890,9 +4038,9 @@ ${sBlockers}
 ${sDiscussions}
 
 ### 四、下週目標與規劃
-${sNextSteps}
+${sNextSteps}${adminInputPart}
 
-請嚴格按照以下四個標題格式輸出，不要有任何多餘的引言或結語：
+請嚴格按照標題格式輸出，不要有任何多餘的引言或結語：
 ### 一、本週推進成果
 (潤飾後條列清單)
 
@@ -3903,7 +4051,7 @@ ${sNextSteps}
 (潤飾後 Checkbox 清單，如 - [ ] ...)
 
 ### 四、下週目標與規劃
-(潤飾後 Checkbox 清單，如 - [ ] [指派時間: YYYY-MM-DD] ...)`;
+(潤飾後 Checkbox 清單，如 - [ ] [指派時間: YYYY-MM-DD] ...)${adminOutputPart}`;
 
           const candidateModels = ['gemini-3.5-flash-lite', 'gemini-flash-latest', 'gemini-3.5-flash'];
           for (const m of candidateModels) {
@@ -3923,12 +4071,14 @@ ${sNextSteps}
                 const pDone = extractSectionText(fullText, '一、本週推進成果', '二、遭遇問題與卡點');
                 const pBlockers = extractSectionText(fullText, '二、遭遇問題與卡點', '三、預計與教授討論事項');
                 const pDiscussions = extractSectionText(fullText, '三、預計與教授討論事項', '四、下週目標與規劃');
-                const pNextSteps = extractSectionText(fullText, '四、下週目標與規劃', null);
+                const pNextSteps = extractSectionText(fullText, '四、下週目標與規劃', (isIncludeAdmin && sAdmin) ? '五、實驗室行政與專案貢獻' : null);
+                const pAdmin = (isIncludeAdmin && sAdmin) ? extractSectionText(fullText, '五、實驗室行政與專案貢獻', null) : '';
 
                 if (pDone && document.getElementById('sectionDone')) document.getElementById('sectionDone').innerText = pDone;
                 if (pBlockers) setSectionMarkdown('sectionBlockers', pBlockers);
                 if (pDiscussions) setSectionMarkdown('sectionDiscussions', pDiscussions);
                 if (pNextSteps) setSectionMarkdown('sectionNextSteps', pNextSteps);
+                if (pAdmin) setSectionMarkdown('sectionAdminTasks', pAdmin);
 
                 saveReportDraft();
                 syncReportSidePreviews();
@@ -3958,7 +4108,17 @@ ${sNextSteps}
       const info = activeMeeting ? getDetailedCountdown(activeMeeting.targetTime, activeMeeting.repeatWeekly) : null;
       const targetStr = info ? info.formattedDate : '本週';
 
-      return `# ${meetingTitle} 週報 - Reseaver\n\n> 目標會議時間：${targetStr}\n\n## 一、本週推進成果 (What was done)\n${document.getElementById('sectionDone').innerText}\n\n## 二、遭遇問題與卡點 (Challenges & Blockers)\n${getSectionMarkdown('sectionBlockers')}\n\n## 三、預計與教授討論事項 (Discussion Points)\n${getSectionMarkdown('sectionDiscussions')}\n\n## 四、下週目標與規劃 (Next Steps)\n${getSectionMarkdown('sectionNextSteps')}\n\n---\n*Generated by Reseaver*`;
+      let md = `# ${meetingTitle} 週報 - Reseaver\n\n> 目標會議時間：${targetStr}\n\n## 一、本週推進成果 (What was done)\n${document.getElementById('sectionDone').innerText}\n\n## 二、遭遇問題與卡點 (Challenges & Blockers)\n${getSectionMarkdown('sectionBlockers')}\n\n## 三、預計與教授討論事項 (Discussion Points)\n${getSectionMarkdown('sectionDiscussions')}\n\n## 四、下週目標與規劃 (Next Steps)\n${getSectionMarkdown('sectionNextSteps')}`;
+
+      if (getIncludeAdminReport()) {
+        const adminText = getSectionMarkdown('sectionAdminTasks');
+        if (adminText) {
+          md += `\n\n## 五、實驗室行政與專案貢獻 (Lab Administration & Projects)\n${adminText}`;
+        }
+      }
+
+      md += `\n\n---\n*Generated by Reseaver*`;
+      return md;
     }
 
     function copyReportMarkdown() {
@@ -5019,10 +5179,13 @@ ${metaContext}${raw}
     }
     function filterLabLogs(type) {
       currentLabFilter = type;
-      ['all', 'run', 'gotcha'].forEach(t => {
-        document.getElementById(`labFilter-${t}`).className = t === type
-          ? 'flex-1 py-1.5 text-xs font-semibold rounded-lg text-white bg-emerald-600 shadow-sm transition'
-          : 'flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition';
+      ['all', 'run', 'gotcha', 'sop'].forEach(t => {
+        const btn = document.getElementById(`labFilter-${t}`);
+        if (btn) {
+          btn.className = t === type
+            ? (t === 'sop' ? 'flex-1 py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600 shadow-sm transition' : 'flex-1 py-1.5 text-xs font-semibold rounded-lg text-white bg-emerald-600 shadow-sm transition')
+            : 'flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition';
+        }
       });
       renderLabLogs();
     }
@@ -5039,9 +5202,9 @@ ${metaContext}${raw}
               <i data-lucide="flask-conical" class="w-6 h-6"></i>
             </div>
             <h4 class="text-xs font-bold text-slate-300 mb-1">尚無實驗快照或避坑記錄</h4>
-            <p class="text-[11px] text-slate-500 max-w-xs mx-auto mb-3">記錄一次跑實驗的超參數快照，或收錄一條寶貴的 Debug 避坑經驗。</p>
+            <p class="text-[11px] text-slate-500 max-w-xs mx-auto mb-3">記錄一次跑實驗的超參數快照，或收錄一條寶貴的 Debug 避坑經驗與行政 SOP。</p>
             <button onclick="openNewLabLogModal()" class="py-1.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-600/30 transition">
-              + 記第一筆實驗
+              + 記第一筆實驗 / SOP
             </button>
           </div>
         `;
@@ -5051,13 +5214,54 @@ ${metaContext}${raw}
 
       container.innerHTML = filtered.map(item => {
         const isRun = item.type === 'run';
+        const isSop = item.type === 'sop';
+        const badgeConfig = isRun
+          ? { label: '🧪 實驗快照', style: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' }
+          : (isSop 
+            ? { label: '📌 行政 SOP', style: 'bg-purple-500/10 text-purple-300 border-purple-500/30' }
+            : { label: '🪲 避坑 Gotcha', style: 'bg-rose-500/10 text-rose-400 border-rose-500/30' });
+
+        let contentHtml = '';
+        if (isRun) {
+          contentHtml = `
+            <div class="bg-slate-900/60 rounded-xl p-2.5 text-xs space-y-1 mb-2 border border-slate-800">
+              <div class="text-slate-400 text-[11px]">參數：Batch=${item.parameters?.batchSize || 'N/A'}, LR=${item.parameters?.learningRate || 'N/A'}</div>
+              <div class="text-emerald-400 font-semibold">${item.parameters?.metrics || ''}</div>
+            </div>
+            ${item.notes ? `<p class="text-xs text-slate-300 leading-relaxed">${escapeHtml(item.notes)}</p>` : ''}
+          `;
+        } else if (isSop) {
+          const stepsHtml = (item.sopSteps || '').split('\n').map(s => s.trim()).filter(Boolean).map(s => `<li class="leading-relaxed">${escapeHtml(s)}</li>`).join('');
+          contentHtml = `
+            <div class="space-y-2 text-xs">
+              ${stepsHtml ? `<ol class="list-decimal list-inside space-y-1 bg-purple-950/20 border border-purple-900/40 p-2.5 rounded-xl text-purple-200">${stepsHtml}</ol>` : ''}
+              ${item.sopNotes ? `
+                <div class="text-slate-300 bg-slate-900/60 border border-slate-800 p-2 rounded-xl flex items-start gap-1.5">
+                  <span class="text-purple-400 font-bold shrink-0">💡 備註:</span>
+                  <span>${escapeHtml(item.sopNotes)}</span>
+                </div>` : ''}
+            </div>
+          `;
+        } else {
+          contentHtml = `
+            <div class="space-y-1.5 text-xs">
+              <div class="text-rose-300 bg-rose-950/30 border border-rose-900/50 p-2.5 rounded-xl">
+                <span class="font-bold text-[10px] block text-rose-400 mb-0.5">症狀：</span>${escapeHtml(item.symptom || '')}
+              </div>
+              <div class="text-emerald-300 bg-emerald-950/30 border border-emerald-900/50 p-2.5 rounded-xl">
+                <span class="font-bold text-[10px] block text-emerald-400 mb-0.5">⚡ 一行解法：</span>${escapeHtml(item.solution || '')}
+              </div>
+            </div>
+          `;
+        }
+
         return `
-          <div class="bg-slate-850 bg-slate-800/70 border border-slate-700/70 rounded-2xl p-4 hover:border-emerald-500/30 transition flex flex-col justify-between">
+          <div class="bg-slate-850 bg-slate-800/70 border border-slate-700/70 rounded-2xl p-4 hover:border-slate-600 transition flex flex-col justify-between">
             <div>
               <div class="flex items-start justify-between gap-2 mb-2">
                 <div class="flex items-center gap-1.5">
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${isRun ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/30'}">
-                    ${isRun ? '🧪 實驗快照' : '🪲 避坑 Gotcha'}
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeConfig.style}">
+                    ${badgeConfig.label}
                   </span>
                   <span class="text-xs font-bold text-white truncate max-w-[200px]">${escapeHtml(item.title)}</span>
                 </div>
@@ -5065,23 +5269,7 @@ ${metaContext}${raw}
                   <i data-lucide="x" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
-
-              ${isRun ? `
-                <div class="bg-slate-900/60 rounded-xl p-2.5 text-xs space-y-1 mb-2 border border-slate-800">
-                  <div class="text-slate-400 text-[11px]">參數：Batch=${item.parameters?.batchSize || 'N/A'}, LR=${item.parameters?.learningRate || 'N/A'}</div>
-                  <div class="text-emerald-400 font-semibold">${item.parameters?.metrics || ''}</div>
-                </div>
-                ${item.notes ? `<p class="text-xs text-slate-300 leading-relaxed">${escapeHtml(item.notes)}</p>` : ''}
-              ` : `
-                <div class="space-y-1.5 text-xs">
-                  <div class="text-rose-300 bg-rose-950/30 border border-rose-900/50 p-2.5 rounded-xl">
-                    <span class="font-bold text-[10px] block text-rose-400 mb-0.5">症狀：</span>${escapeHtml(item.symptom || '')}
-                  </div>
-                  <div class="text-emerald-300 bg-emerald-950/30 border border-emerald-900/50 p-2.5 rounded-xl">
-                    <span class="font-bold text-[10px] block text-emerald-400 mb-0.5">⚡ 一行解法：</span>${escapeHtml(item.solution || '')}
-                  </div>
-                </div>
-              `}
+              ${contentHtml}
             </div>
           </div>
         `;
@@ -5093,16 +5281,30 @@ ${metaContext}${raw}
     function closeNewLabLogModal() { document.getElementById('newLabLogModal').classList.add('hidden'); }
     function selectLabLogType(type) {
       activeLabLogType = type;
+      const btnRun = document.getElementById('llTypeBtn-run');
+      const btnGotcha = document.getElementById('llTypeBtn-gotcha');
+      const btnSop = document.getElementById('llTypeBtn-sop');
+      const fRun = document.getElementById('llRunFields');
+      const fGotcha = document.getElementById('llGotchaFields');
+      const fSop = document.getElementById('llSopFields');
+
+      if (btnRun) btnRun.className = 'flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white';
+      if (btnGotcha) btnGotcha.className = 'flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white';
+      if (btnSop) btnSop.className = 'flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white';
+
+      if (fRun) fRun.classList.add('hidden');
+      if (fGotcha) fGotcha.classList.add('hidden');
+      if (fSop) fSop.classList.add('hidden');
+
       if (type === 'run') {
-        document.getElementById('llTypeBtn-run').className = 'flex-1 py-1 text-xs font-semibold rounded-lg bg-emerald-600 text-white shadow-sm';
-        document.getElementById('llTypeBtn-gotcha').className = 'flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white';
-        document.getElementById('llRunFields').classList.remove('hidden');
-        document.getElementById('llGotchaFields').classList.add('hidden');
-      } else {
-        document.getElementById('llTypeBtn-gotcha').className = 'flex-1 py-1 text-xs font-semibold rounded-lg bg-rose-600 text-white shadow-sm';
-        document.getElementById('llTypeBtn-run').className = 'flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white';
-        document.getElementById('llRunFields').classList.add('hidden');
-        document.getElementById('llGotchaFields').classList.remove('hidden');
+        if (btnRun) btnRun.className = 'flex-1 py-1 text-xs font-semibold rounded-lg bg-emerald-600 text-white shadow-sm';
+        if (fRun) fRun.classList.remove('hidden');
+      } else if (type === 'gotcha') {
+        if (btnGotcha) btnGotcha.className = 'flex-1 py-1 text-xs font-semibold rounded-lg bg-rose-600 text-white shadow-sm';
+        if (fGotcha) fGotcha.classList.remove('hidden');
+      } else if (type === 'sop') {
+        if (btnSop) btnSop.className = 'flex-1 py-1 text-xs font-semibold rounded-lg bg-purple-600 text-white shadow-sm';
+        if (fSop) fSop.classList.remove('hidden');
       }
     }
     function saveNewLabLogEntry() {
@@ -5110,6 +5312,8 @@ ${metaContext}${raw}
       if (!title) return showToast('請填寫標題！');
       const logs = getStoredLabLogs();
       const isRun = activeLabLogType === 'run';
+      const isGotcha = activeLabLogType === 'gotcha';
+      const isSop = activeLabLogType === 'sop';
       logs.unshift({
         id: `lab-${Date.now()}`,
         type: activeLabLogType,
@@ -5119,13 +5323,17 @@ ${metaContext}${raw}
           learningRate: document.getElementById('llLr').value.trim() || '1e-4',
           metrics: document.getElementById('llMetrics').value.trim() || 'Loss: 0.12'
         } : undefined,
-        symptom: !isRun ? document.getElementById('llSymptom').value.trim() : undefined,
-        solution: !isRun ? document.getElementById('llSolution').value.trim() : undefined,
+        symptom: isGotcha ? document.getElementById('llSymptom').value.trim() : undefined,
+        solution: isGotcha ? document.getElementById('llSolution').value.trim() : undefined,
+        sopSteps: isSop ? (document.getElementById('llSopSteps')?.value.trim() || '') : undefined,
+        sopNotes: isSop ? (document.getElementById('llSopNotes')?.value.trim() || '') : undefined,
         createdAt: new Date().toISOString()
       });
       saveLabLogs(logs);
       closeNewLabLogModal();
       document.getElementById('llTitle').value = '';
+      if (document.getElementById('llSopSteps')) document.getElementById('llSopSteps').value = '';
+      if (document.getElementById('llSopNotes')) document.getElementById('llSopNotes').value = '';
       showToast('🎉 已成功記錄實驗日誌！');
     }
 
