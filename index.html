@@ -2096,7 +2096,20 @@
     function getStoredMeetings() {
       try {
         const data = localStorage.getItem(STORAGE_KEY_MEETINGS);
-        if (data) return JSON.parse(data);
+        if (data) {
+          let parsed = JSON.parse(data);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            let dirty = false;
+            parsed.forEach(m => {
+              if (!m.updatedAt) {
+                m.updatedAt = new Date(0).toISOString();
+                dirty = true;
+              }
+            });
+            if (dirty) localStorage.setItem(STORAGE_KEY_MEETINGS, JSON.stringify(parsed));
+            return parsed;
+          }
+        }
       } catch (e) {}
 
       const initial = [
@@ -7318,7 +7331,7 @@ ${metaContext}${raw}
         try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
       };
       return {
-        version: '1.4.3',
+        version: '1.4.4',
         timestamp: new Date().toISOString(),
         logs: getLocal(STORAGE_KEY_LOGS),
         meetings: getLocal(STORAGE_KEY_MEETINGS),
@@ -7346,13 +7359,10 @@ ${metaContext}${raw}
             const remoteTime = new Date(item.updatedAt || item.createdAt || 0).getTime();
             const localTime = new Date(existing.updatedAt || existing.createdAt || 0).getTime();
             
-            // 嚴格比對更新時間：唯有遠端時間嚴格較新才覆寫；若時間相同且為會議資料有差異，進行同步更新
+            // 嚴格單向時間戳判定：只有當遠端修改時間嚴格大於本地時才覆寫
+            // 若 remoteTime <= localTime 絕對保留本地資料，徹底杜絕雙向同步時「時間互換或反向覆蓋」
             if (remoteTime > localTime) {
               map.set(item.id, { ...existing, ...item });
-            } else if (remoteTime === localTime && isMeeting) {
-              if (item.targetTime !== existing.targetTime || item.title !== existing.title || item.repeatWeekly !== existing.repeatWeekly) {
-                map.set(item.id, { ...existing, ...item });
-              }
             }
           }
         });
@@ -7368,8 +7378,17 @@ ${metaContext}${raw}
       if (remote.adminSnippets) mergeList(STORAGE_KEY_ADMIN_SNIPPETS, remote.adminSnippets);
       if (remote.minutes) mergeList(STORAGE_KEY_MINUTES, remote.minutes);
 
-      if (remote.activeMeetingId) {
-        localStorage.setItem(STORAGE_KEY_ACTIVE_MEETING, remote.activeMeetingId);
+      // 鎖定當前裝置的主倒數會議，絕不被對端強制換位
+      // 只有當本地目前無主倒數或該會議已不存在時，才接納遠端的主倒數
+      const curActiveId = localStorage.getItem(STORAGE_KEY_ACTIVE_MEETING);
+      const allMeetings = JSON.parse(localStorage.getItem(STORAGE_KEY_MEETINGS)) || [];
+      const hasValidActive = curActiveId && allMeetings.some(m => m.id === curActiveId);
+      if (!hasValidActive) {
+        if (remote.activeMeetingId && allMeetings.some(m => m.id === remote.activeMeetingId)) {
+          localStorage.setItem(STORAGE_KEY_ACTIVE_MEETING, remote.activeMeetingId);
+        } else if (allMeetings.length > 0) {
+          localStorage.setItem(STORAGE_KEY_ACTIVE_MEETING, allMeetings[0].id);
+        }
       }
     }
 
