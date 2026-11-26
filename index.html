@@ -2139,6 +2139,7 @@
       localStorage.setItem(STORAGE_KEY_ACTIVE_MEETING, id);
       renderMeetingsUI();
       generateReportFromLogs();
+      if (typeof triggerPersonalCloudSync === 'function') triggerPersonalCloudSync();
     }
 
     function renderMeetingsUI() {
@@ -7080,7 +7081,6 @@ ${metaContext}${raw}
     }
 
     function triggerAutoSyncPush() {
-      if (localStorage.getItem(STORAGE_KEY_AUTO_SYNC) !== 'true') return;
       if (activeSyncConn && activeSyncConn.open) {
         try {
           activeSyncConn.send({ type: 'SYNC_DATA', payload: exportAllPayload() });
@@ -7288,7 +7288,7 @@ ${metaContext}${raw}
         try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
       };
       return {
-        version: '1.4.1',
+        version: '1.4.2',
         timestamp: new Date().toISOString(),
         logs: getLocal(STORAGE_KEY_LOGS),
         meetings: getLocal(STORAGE_KEY_MEETINGS),
@@ -7313,12 +7313,16 @@ ${metaContext}${raw}
             map.set(item.id, item);
           } else {
             const existing = map.get(item.id);
-            const remoteTime = new Date(item.updatedAt || item.createdAt || (isMeeting ? remote.timestamp : 0) || 0).getTime();
+            const remoteTime = new Date(item.updatedAt || item.createdAt || 0).getTime();
             const localTime = new Date(existing.updatedAt || existing.createdAt || 0).getTime();
             
-            // 若遠端修改時間較新，或會議目標時間/標題有差異且遠端時間不落後，進行覆寫更新
-            if (remoteTime > localTime || (isMeeting && (item.targetTime !== existing.targetTime || item.title !== existing.title || item.repeatWeekly !== existing.repeatWeekly))) {
+            // 嚴格比對更新時間：唯有遠端時間嚴格較新才覆寫；若時間相同且為會議資料有差異，進行同步更新
+            if (remoteTime > localTime) {
               map.set(item.id, { ...existing, ...item });
+            } else if (remoteTime === localTime && isMeeting) {
+              if (item.targetTime !== existing.targetTime || item.title !== existing.title || item.repeatWeekly !== existing.repeatWeekly) {
+                map.set(item.id, { ...existing, ...item });
+              }
             }
           }
         });
