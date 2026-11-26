@@ -82,6 +82,39 @@
     * { transition: background-color 0.15s ease, border-color 0.15s ease; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* 側邊欄收合與抽屜過渡樣式 */
+    #appSidebar {
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+    }
+    @media (min-width: 1024px) {
+      aside.sidebar-collapsed {
+        width: 5rem !important; /* 80px */
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+      }
+      aside.sidebar-collapsed .sidebar-text {
+        display: none !important;
+      }
+      aside.sidebar-collapsed .sidebar-btn {
+        justify-content: center !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+      }
+      aside.sidebar-collapsed #sidebarSyncBtn {
+        padding: 0.65rem 0.5rem !important;
+        display: flex !important;
+        justify-content: center !important;
+      }
+      aside.sidebar-collapsed #sidebarFooter {
+        justify-content: center !important;
+      }
+    }
+    @media (max-width: 1023px) {
+      aside.mobile-open {
+        transform: translateX(0) !important;
+      }
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-start font-sans selection:bg-sky-500 selection:text-white">
@@ -102,67 +135,82 @@
   <!-- 全版大容器 (網頁端展開為三欄式大儀表板，手機端自動收合為單欄) -->
   <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col lg:flex-row lg:p-4 lg:gap-6 min-h-screen">
     
+    <!-- 側邊欄行動端遮罩 (Mobile Backdrop) -->
+    <div id="sidebarBackdrop" onclick="closeSidebarDrawer()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden transition-opacity duration-300"></div>
+
     <!-- ========================================== -->
-    <!-- 電腦網頁端專用側邊欄 (Desktop Sidebar) -->
+    <!-- 全平台響應式收合側邊欄 (Collapsible Sidebar for Desktop & Mobile) -->
     <!-- ========================================== -->
-    <aside class="hidden lg:flex w-64 flex-col justify-between bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-2xl sticky top-4 h-[calc(100vh-2rem)]">
-      <div class="space-y-6">
-        <!-- Logo & 品牌名 -->
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-sky-500/20 text-white font-black text-xl">
-            R
+    <aside id="appSidebar" class="fixed lg:sticky top-0 lg:top-4 left-0 z-50 h-full lg:h-[calc(100vh-2rem)] w-64 -translate-x-full lg:translate-x-0 flex flex-col justify-between bg-slate-900 border-r lg:border border-slate-800 lg:rounded-3xl p-4 lg:p-5 shadow-2xl transition-all duration-300 ease-in-out">
+      <div class="space-y-5">
+        <!-- Logo、品牌名與收合切換鈕 -->
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800/80">
+          <div class="flex items-center gap-3 overflow-hidden">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-sky-500/20 text-white font-black text-xl flex-shrink-0">
+              R
+            </div>
+            <div id="sidebarBrandText" class="sidebar-text min-w-0 transition-opacity duration-200">
+              <h1 class="text-base font-extrabold tracking-tight text-white flex items-center gap-1.5 truncate">
+                Reseaver
+                <span class="text-[9px] bg-sky-500/20 text-sky-400 font-semibold px-1.5 py-0.5 rounded-full border border-sky-500/30">v1.4</span>
+              </h1>
+              <p class="text-[10px] text-slate-400 truncate">研究生研究秘書</p>
+            </div>
           </div>
-          <div>
-            <h1 class="text-base font-extrabold tracking-tight text-white flex items-center gap-1.5">
-              Reseaver
-              <span class="text-[10px] bg-sky-500/20 text-sky-400 font-semibold px-2 py-0.5 rounded-full border border-sky-500/30">Web & Cloud</span>
-            </h1>
-            <p class="text-[11px] text-slate-400">研究生研究秘書 · 雙端即時同步</p>
-          </div>
+          <!-- 側邊欄內部收合按鈕 (電腦端切換，手機端關閉) -->
+          <button onclick="toggleSidebar()" class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition" title="收合側邊欄">
+            <i id="sidebarToggleIcon" data-lucide="panel-left-close" class="w-4 h-4"></i>
+          </button>
         </div>
 
-        <!-- 導航選單 -->
+        <!-- 導航選單 (6 大核心模組) -->
         <nav class="space-y-1.5 text-xs font-semibold">
-          <button onclick="navigateTab('today')" id="side-today" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sky-400 bg-sky-500/10 border border-sky-500/20 transition">
-            <i data-lucide="check-square" class="w-4 h-4"></i>
-            <span>今日動態</span>
+          <button onclick="navigateTab('today')" id="side-today" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sky-400 bg-sky-500/10 border border-sky-500/20 transition group" title="今日動態">
+            <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>
+            <span class="sidebar-text truncate">今日動態</span>
           </button>
-          <button onclick="navigateTab('report')" id="side-report" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition">
-            <i data-lucide="file-text" class="w-4 h-4"></i>
-            <span>咪挺週報</span>
+          <button onclick="navigateTab('report')" id="side-report" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition group" title="咪挺週報">
+            <i data-lucide="file-text" class="w-4 h-4 flex-shrink-0"></i>
+            <span class="sidebar-text truncate">咪挺週報</span>
           </button>
-          <button onclick="navigateTab('minutes')" id="side-minutes" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition">
-            <i data-lucide="mic" class="w-4 h-4"></i>
-            <span>咪挺摘要</span>
+          <button onclick="navigateTab('minutes')" id="side-minutes" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition group" title="咪挺摘要">
+            <i data-lucide="mic" class="w-4 h-4 flex-shrink-0"></i>
+            <span class="sidebar-text truncate">咪挺摘要</span>
           </button>
-          <button onclick="navigateTab('papers')" id="side-papers" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition">
-            <i data-lucide="book-open" class="w-4 h-4"></i>
-            <span>論文膠囊</span>
+          <button onclick="navigateTab('papers')" id="side-papers" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition group" title="論文膠囊">
+            <i data-lucide="book-open" class="w-4 h-4 flex-shrink-0"></i>
+            <span class="sidebar-text truncate">論文膠囊</span>
           </button>
-          <button onclick="navigateTab('lablog')" id="side-lablog" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition">
-            <i data-lucide="flask-conical" class="w-4 h-4"></i>
-            <span>實驗踩坑</span>
+          <button onclick="navigateTab('lablog')" id="side-lablog" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition group" title="實驗踩坑">
+            <i data-lucide="flask-conical" class="w-4 h-4 flex-shrink-0"></i>
+            <span class="sidebar-text truncate">實驗踩坑</span>
+          </button>
+          <button onclick="navigateTab('adminsop')" id="side-adminsop" class="sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition group" title="行政 SOP">
+            <i data-lucide="clipboard-list" class="w-4 h-4 flex-shrink-0"></i>
+            <span class="sidebar-text truncate">行政 SOP</span>
           </button>
         </nav>
       </div>
 
       <!-- 側邊欄底部：跨裝置同步卡片 & 會議狀態 -->
-      <div class="space-y-3 pt-4 border-t border-slate-800">
+      <div class="space-y-3 pt-3 border-t border-slate-800">
         <!-- 雲端跨裝置同步捷徑 -->
-        <button onclick="openSyncModal()" class="w-full bg-gradient-to-r from-indigo-900/40 to-sky-900/40 border border-indigo-500/30 hover:border-indigo-500/60 rounded-2xl p-3 text-left transition group">
-          <div class="flex items-center justify-between mb-1">
-            <span class="text-[11px] font-bold text-sky-300 flex items-center gap-1.5">
-              <i data-lucide="cloud" class="w-3.5 h-3.5 text-sky-400"></i>
-              個人雲端與跨裝置同步
+        <button id="sidebarSyncBtn" onclick="openSyncModal()" class="w-full bg-gradient-to-r from-indigo-900/40 to-sky-900/40 border border-indigo-500/30 hover:border-indigo-500/60 rounded-2xl p-2.5 text-left transition group" title="個人雲端與跨裝置同步">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-sky-300 flex items-center gap-1.5 truncate">
+              <i data-lucide="cloud" class="w-3.5 h-3.5 text-sky-400 flex-shrink-0"></i>
+              <span class="sidebar-text truncate">個人雲端同步</span>
             </span>
-            <span id="sidebarSyncDot" class="w-2 h-2 rounded-full bg-emerald-400" title="同步狀態"></span>
+            <span id="sidebarSyncDot" class="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" title="同步狀態"></span>
           </div>
-          <p class="text-[10px] text-slate-400" id="sidebarSyncStatusText">未綁定時本地儲存 · 點擊可連動雲端</p>
+          <p id="sidebarSyncStatusText" class="sidebar-text text-[10px] text-slate-400 truncate mt-1">本地安全儲存</p>
         </button>
 
-        <div class="flex items-center justify-between text-[11px] text-slate-500 px-1">
-          <span class="text-slate-500 text-[11px]">Reseaver 研究救星</span>
-          <button onclick="clearCurrentModuleData()" class="hover:text-rose-400">清空</button>
+        <div id="sidebarFooter" class="flex items-center justify-between text-[11px] text-slate-500 px-1">
+          <span id="sidebarFooterText" class="sidebar-text truncate text-slate-500 text-[11px]">Reseaver 研究救星</span>
+          <button onclick="clearCurrentModuleData()" class="hover:text-rose-400 transition" title="清空本頁資料">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
         </div>
       </div>
     </aside>
@@ -173,12 +221,13 @@
     <div class="flex-1 flex flex-col min-w-0">
       
       <!-- 頂部通用 Header (手機版與桌面版通用) -->
-      <header class="w-full flex items-center justify-between px-4 py-3 bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40 lg:rounded-2xl lg:mb-4 lg:border lg:shadow-md">
+      <header class="w-full flex items-center justify-between px-3 sm:px-4 py-3 bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40 lg:rounded-2xl lg:mb-4 lg:border lg:shadow-md">
         <div class="flex items-center gap-2.5">
-          <!-- 手機版 Logo -->
-          <div class="lg:hidden w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-sky-500/20 text-white font-black text-lg">
-            R
-          </div>
+          <!-- 側邊欄切換漢堡按鈕 (手機展開 Drawer，電腦切換收合) -->
+          <button id="headerSidebarToggleBtn" onclick="toggleSidebar()" class="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 hover:border-slate-700 transition flex items-center justify-center active:scale-95" title="切換側邊導覽列">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+
           <div>
             <h1 class="text-sm lg:text-base font-bold tracking-tight text-white flex items-center gap-1.5">
               <span id="headerViewTitle">Reseaver 研究救星</span>
@@ -230,7 +279,7 @@
       </header>
 
       <!-- 主要工作視窗主體 -->
-      <main class="flex-1 bg-slate-900 border-x lg:border border-slate-800 lg:rounded-3xl shadow-2xl flex flex-col pb-24 lg:pb-6 overflow-hidden relative">
+      <main class="flex-1 bg-slate-900 border-x lg:border border-slate-800 lg:rounded-3xl shadow-2xl flex flex-col pb-6 overflow-hidden relative">
 
         <!-- ========================================== -->
         <!-- TAB 1: 今日動態 (LabPulse 打卡 + 電腦端雙欄週報預覽) -->
@@ -861,12 +910,11 @@
               </button>
             </div>
 
-            <!-- 類型切換 (Run Snapshot vs Gotchas vs SOP) -->
-            <div class="flex bg-slate-900/80 p-1 rounded-xl border border-slate-700/60 mt-1 max-w-md">
+            <!-- 類型切換 (Run Snapshot vs Gotchas) -->
+            <div class="flex bg-slate-900/80 p-1 rounded-xl border border-slate-700/60 mt-1 max-w-sm">
               <button onclick="filterLabLogs('all')" id="labFilter-all" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-white bg-emerald-600 shadow-sm transition">全部</button>
               <button onclick="filterLabLogs('run')" id="labFilter-run" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition">🧪 實驗快照</button>
               <button onclick="filterLabLogs('gotcha')" id="labFilter-gotcha" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition">🪲 踩坑避雷</button>
-              <button onclick="filterLabLogs('sop')" id="labFilter-sop" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition">📌 行政 SOP</button>
             </div>
           </div>
 
@@ -874,42 +922,96 @@
           <div id="labLogListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
         </div>
 
+        <!-- ========================================== -->
+        <!-- TAB 6: 行政 SOP (Admin SOP 錦囊知識庫) -->
+        <!-- ========================================== -->
+        <div id="tabContent-adminsop" class="tab-pane flex flex-col flex-1 p-4 lg:p-6 space-y-4 hidden">
+          <!-- 頂部切換與統計 Banner -->
+          <div class="bg-gradient-to-br from-purple-950/60 via-slate-800 to-indigo-950/40 border border-purple-500/30 rounded-2xl p-4 lg:p-5 shadow-lg">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
+              <div>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+                  <i data-lucide="clipboard-list" class="w-3.5 h-3.5"></i>
+                  行政 SOP 錦囊庫
+                </span>
+                <div class="flex items-baseline gap-2 mt-0.5">
+                  <span id="adminSopTotalCount" class="text-3xl font-extrabold text-white tracking-tight">4</span>
+                  <span class="text-xs text-slate-300 font-medium">則標準流程指引</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-0.5">經費報帳 · 設備採購 · 伺服器管理 · 口試與公文指引</p>
+              </div>
+              
+              <div class="flex items-center gap-2">
+                <button onclick="openNewAdminSopModal()" class="py-1.5 px-3.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-purple-600/30 transition active:scale-95">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                  新增 SOP
+                </button>
+              </div>
+            </div>
+
+            <!-- 常用速查備忘 Bar (點擊即複製) -->
+            <div class="pt-3 border-t border-purple-500/20">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[10px] font-bold text-purple-300 flex items-center gap-1">
+                  <i data-lucide="zap" class="w-3 h-3 text-amber-400"></i>
+                  常用代碼與報帳備忘 (點擊一鍵複製)
+                </span>
+                <span class="text-[9px] text-slate-400">點擊標籤直接複製到剪貼簿</span>
+              </div>
+              <div id="sopQuickSnippetsBar" class="flex flex-wrap gap-1.5">
+                <button onclick="copySnippetText('03734000', '學校統一編號')" class="inline-flex items-center gap-1 text-[11px] bg-slate-900/80 hover:bg-purple-900/50 text-slate-200 border border-purple-500/30 px-2 py-0.5 rounded-lg transition active:scale-95" title="點擊複製統一編號">
+                  <span class="text-purple-400 font-bold">統編</span>
+                  <span class="font-mono">03734000</span>
+                  <i data-lucide="copy" class="w-2.5 h-2.5 text-slate-400"></i>
+                </button>
+                <button onclick="copySnippetText('國立臺灣大學', '報帳發票抬頭')" class="inline-flex items-center gap-1 text-[11px] bg-slate-900/80 hover:bg-purple-900/50 text-slate-200 border border-purple-500/30 px-2 py-0.5 rounded-lg transition active:scale-95" title="點擊複製發票抬頭">
+                  <span class="text-purple-400 font-bold">抬頭</span>
+                  <span>國立大學</span>
+                  <i data-lucide="copy" class="w-2.5 h-2.5 text-slate-400"></i>
+                </button>
+                <button onclick="copySnippetText('NSTC 113-2221-E-002-001', '計畫編號')" class="inline-flex items-center gap-1 text-[11px] bg-slate-900/80 hover:bg-purple-900/50 text-slate-200 border border-purple-500/30 px-2 py-0.5 rounded-lg transition active:scale-95" title="點擊複製常態計畫編號">
+                  <span class="text-purple-400 font-bold">國科會計畫編號</span>
+                  <span class="font-mono">NSTC-113...</span>
+                  <i data-lucide="copy" class="w-2.5 h-2.5 text-slate-400"></i>
+                </button>
+                <button onclick="copySnippetText('敬啟者：我是實驗室助理，想向您請教本月份專任/兼任助理薪資與計畫報帳核銷之審核進度，附件為黏存單影本，感謝您的協助！', '主計室核銷詢問信件範本')" class="inline-flex items-center gap-1 text-[11px] bg-slate-900/80 hover:bg-purple-900/50 text-slate-200 border border-purple-500/30 px-2 py-0.5 rounded-lg transition active:scale-95" title="點擊複製信件範本">
+                  <span class="text-purple-400 font-bold">✉️ 信件範本</span>
+                  <span>報帳進度詢問</span>
+                  <i data-lucide="copy" class="w-2.5 h-2.5 text-slate-400"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 分類切換與搜尋列 -->
+          <div class="flex flex-col sm:flex-row gap-2.5 justify-between items-stretch sm:items-center">
+            <!-- 搜尋框 -->
+            <div class="relative flex-1 max-w-md">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+              <input type="text" id="adminSopSearchInput" oninput="renderAdminSops()" placeholder="搜尋 SOP 標題、步驟或注意事項..." class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500">
+            </div>
+
+            <!-- 分類 Pills -->
+            <div class="flex bg-slate-900/90 p-1 rounded-xl border border-slate-800 overflow-x-auto text-xs font-semibold gap-1">
+              <button onclick="filterAdminSops('all')" id="sopFilter-all" class="px-2.5 py-1 rounded-lg text-white bg-purple-600 transition whitespace-nowrap shadow-sm">全部</button>
+              <button onclick="filterAdminSops('expense')" id="sopFilter-expense" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition whitespace-nowrap">💰 經費核銷</button>
+              <button onclick="filterAdminSops('procurement')" id="sopFilter-procurement" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition whitespace-nowrap">🛒 設備採購</button>
+              <button onclick="filterAdminSops('server')" id="sopFilter-server" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition whitespace-nowrap">💻 伺服器/資訊</button>
+              <button onclick="filterAdminSops('degree')" id="sopFilter-degree" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition whitespace-nowrap">🎓 口試與公文</button>
+            </div>
+          </div>
+
+          <!-- SOP 卡片列表 -->
+          <div id="adminSopListContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-4">
+            <!-- 動態渲染 SOP 卡片 -->
+          </div>
+        </div>
+
       </main>
 
     </div>
 
   </div>
-
-  <!-- ========================================== -->
-  <!-- 手機端專屬底部 5-Tab 導覽列 (只有手機螢幕顯示) -->
-  <!-- ========================================== -->
-  <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 py-1.5 px-2 z-40 flex justify-around items-center">
-    <!-- Tab 1: 今日動態 -->
-    <button onclick="navigateTab('today')" id="nav-today" class="nav-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-sky-400 transition">
-      <i data-lucide="check-square" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-      <span class="text-[9px] sm:text-[10px] font-semibold">今日動態</span>
-    </button>
-    <!-- Tab 2: 咪挺週報 -->
-    <button onclick="navigateTab('report')" id="nav-report" class="nav-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-slate-400 hover:text-slate-200 transition">
-      <i data-lucide="file-text" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-      <span class="text-[9px] sm:text-[10px] font-semibold">咪挺週報</span>
-    </button>
-    <!-- Tab 3: 咪挺摘要 -->
-    <button onclick="navigateTab('minutes')" id="nav-minutes" class="nav-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-slate-400 hover:text-slate-200 transition">
-      <i data-lucide="mic" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-      <span class="text-[9px] sm:text-[10px] font-semibold">咪挺摘要</span>
-    </button>
-    <!-- Tab 4: 論文膠囊 -->
-    <button onclick="navigateTab('papers')" id="nav-papers" class="nav-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-slate-400 hover:text-slate-200 transition">
-      <i data-lucide="book-open" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-      <span class="text-[9px] sm:text-[10px] font-semibold">論文膠囊</span>
-    </button>
-    <!-- Tab 5: 實驗踩坑 -->
-    <button onclick="navigateTab('lablog')" id="nav-lablog" class="nav-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-slate-400 hover:text-slate-200 transition">
-      <i data-lucide="flask-conical" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-      <span class="text-[9px] sm:text-[10px] font-semibold">實驗踩坑</span>
-    </button>
-  </nav>
 
   <!-- ========================================== -->
   <!-- MODAL: 現代化帳號登入與註冊視窗 (Modern Login & Register Modal) -->
@@ -1518,13 +1620,12 @@
       <div class="flex bg-slate-800 p-1 rounded-xl gap-1">
         <button type="button" onclick="selectLabLogType('run')" id="llTypeBtn-run" class="flex-1 py-1 text-xs font-semibold rounded-lg bg-emerald-600 text-white shadow-sm">🧪 實驗 Run 快照</button>
         <button type="button" onclick="selectLabLogType('gotcha')" id="llTypeBtn-gotcha" class="flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white">🪲 踩坑避雷</button>
-        <button type="button" onclick="selectLabLogType('sop')" id="llTypeBtn-sop" class="flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white">📌 行政 SOP</button>
       </div>
 
       <div class="space-y-2 text-xs">
         <div>
           <label class="block text-slate-400 mb-1">標題 / 描述</label>
-          <input id="llTitle" type="text" placeholder="例：ResNet-50 對比實驗 或 國科會經費核銷流程" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500">
+          <input id="llTitle" type="text" placeholder="例：ResNet-50 對比實驗 或 CUDA OOM 解決方法" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500">
         </div>
         <div id="llRunFields" class="space-y-2">
           <div class="grid grid-cols-2 gap-2">
@@ -1552,22 +1653,86 @@
             <textarea id="llSolution" rows="2" placeholder="例：設定 persistent_workers=True 或 del variable" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 resize-none"></textarea>
           </div>
         </div>
-        <div id="llSopFields" class="space-y-2 hidden">
-          <div>
-            <label class="block text-slate-400 mb-1">標準作業流程 SOP 步驟 (每行一步驟)</label>
-            <textarea id="llSopSteps" rows="3" placeholder="例：1. 登入校務經費核銷系統填寫黏存單&#10;2. 發票貼於單據正面並由受款人簽章&#10;3. 送至系辦公室與會計室收件" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 resize-none focus:outline-none focus:border-purple-500"></textarea>
-          </div>
-          <div>
-            <label class="block text-slate-400 mb-1">關鍵備註 / 統編 / 聯絡窗口 (Notes)</label>
-            <input id="llSopNotes" type="text" placeholder="例：學校統編：03744671，請款截止日為每月 25 號" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-purple-500">
-          </div>
-        </div>
       </div>
 
       <div class="pt-2 flex justify-end gap-2">
         <button onclick="closeNewLabLogModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs">取消</button>
         <button onclick="saveNewLabLogEntry()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-emerald-600/30">儲存記錄</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: 新增/編輯行政 SOP 錦囊 (Admin SOP Modal) -->
+  <!-- ========================================== -->
+  <div id="adminSopModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg p-5 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+        <h3 id="adminSopModalTitle" class="text-sm font-bold text-white flex items-center gap-1.5">
+          <i data-lucide="clipboard-list" class="w-4 h-4 text-purple-400"></i>
+          新增行政 SOP 錦囊
+        </h3>
+        <button onclick="closeAdminSopModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- 快速套用範本按鈕列 -->
+      <div class="p-2.5 bg-purple-950/30 border border-purple-500/20 rounded-xl space-y-1.5">
+        <span class="text-[10px] font-bold text-purple-300">⚡ 快速載入常用範本：</span>
+        <div class="flex flex-wrap gap-1.5 text-[11px]">
+          <button type="button" onclick="loadSopTemplate('expense')" class="px-2 py-0.5 bg-slate-800 hover:bg-purple-900/60 border border-purple-500/30 rounded-lg text-slate-300 transition">💰 經費核銷範本</button>
+          <button type="button" onclick="loadSopTemplate('server')" class="px-2 py-0.5 bg-slate-800 hover:bg-purple-900/60 border border-purple-500/30 rounded-lg text-slate-300 transition">💻 GPU 伺服器開通範本</button>
+          <button type="button" onclick="loadSopTemplate('degree')" class="px-2 py-0.5 bg-slate-800 hover:bg-purple-900/60 border border-purple-500/30 rounded-lg text-slate-300 transition">🎓 碩士口試流程範本</button>
+          <button type="button" onclick="loadSopTemplate('procurement')" class="px-2 py-0.5 bg-slate-800 hover:bg-purple-900/60 border border-purple-500/30 rounded-lg text-slate-300 transition">🛒 設備請購採購範本</button>
+        </div>
+      </div>
+
+      <form id="adminSopForm" onsubmit="event.preventDefault(); saveAdminSopItem();" class="space-y-3 text-xs">
+        <input type="hidden" id="sopEditId" value="">
+
+        <div>
+          <label class="block text-slate-400 text-[11px] mb-1">SOP 流程標題 *</label>
+          <input type="text" id="sopTitleInput" required placeholder="例如：【國科會計畫】經費報帳核銷步驟" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 text-[11px] mb-1">行政分類 *</label>
+            <select id="sopCategorySelect" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500">
+              <option value="expense">💰 經費報帳核銷</option>
+              <option value="procurement">🛒 設備採購請購</option>
+              <option value="server">💻 伺服器與資訊管理</option>
+              <option value="degree">🎓 學位口試與公文</option>
+              <option value="general">📌 其他常用 SOP</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 text-[11px] mb-1">標籤 (以逗號分隔)</label>
+            <input type="text" id="sopTagsInput" placeholder="#國科會, #發票報帳" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 text-[11px] mb-1">標準流程步驟 * (每行一個步驟，自動轉為條列式)</label>
+          <textarea id="sopStepsInput" rows="5" required placeholder="1. 核對發票抬頭與統一編號&#10;2. 進入學校主計動支系統填寫申請表&#10;3. 發票黏貼於黏存單並請計畫主持人簽章&#10;4. 送系所審核後轉陳主計室" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-mono text-xs"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 text-[11px] mb-1">⚠️ 避雷重點 / 常見退件原因 (選填)</label>
+          <textarea id="sopTipsInput" rows="2" placeholder="例如：跨月發票需在次月 5 號前送出；餐費請務必檢附簽到表；收據需有免用統一發票專用章。" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 text-[11px] mb-1">聯絡窗口 / 相關分機或常用代碼 (選填)</label>
+          <input type="text" id="sopContactsInput" placeholder="例如：系辦陳助教 (分機 1234) / 主計室第三組 (分機 5678)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+          <button type="button" onclick="closeAdminSopModal()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs">取消</button>
+          <button type="submit" class="px-4 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-purple-600/30">儲存 SOP</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -1632,6 +1797,7 @@
     const STORAGE_KEY_LOGS = 'reseaver_labpulse_logs';
     const STORAGE_KEY_PAPERS = 'reseaver_paper_capsules';
     const STORAGE_KEY_LABLOGS = 'reseaver_lab_logs';
+    const STORAGE_KEY_ADMIN_SOPS = 'reseaver_admin_sops_list';
     const STORAGE_KEY_MEETINGS = 'reseaver_meetings';
     const STORAGE_KEY_ACTIVE_MEETING = 'reseaver_active_meeting_id';
     const STORAGE_KEY_GH_TOKEN = 'reseaver_github_token';
@@ -1740,6 +1906,7 @@
     // 初始化
     document.addEventListener('DOMContentLoaded', () => {
       applyDeviceEnvironment();
+      initSidebarState();
       lucide.createIcons();
       initCleanData();
       renderAll();
@@ -1765,6 +1932,7 @@
         localStorage.removeItem(STORAGE_KEY_LOGS);
         localStorage.removeItem(STORAGE_KEY_PAPERS);
         localStorage.removeItem(STORAGE_KEY_LABLOGS);
+        localStorage.removeItem(STORAGE_KEY_ADMIN_SOPS);
         localStorage.setItem(CLEAN_INIT_FLAG, 'true');
       }
     }
@@ -1777,34 +1945,95 @@
       renderMinutesHistorySelect();
       renderPapers();
       renderLabLogs();
+      renderAdminSops();
       updateSidebarBadges();
+    }
+
+    // --- 側邊欄收合與抽屜切換 ---
+    function toggleSidebar() {
+      const sidebar = document.getElementById('appSidebar');
+      const isMobile = window.innerWidth < 1024;
+      if (isMobile) {
+        if (sidebar && sidebar.classList.contains('mobile-open')) {
+          closeSidebarDrawer();
+        } else {
+          openSidebarDrawer();
+        }
+      } else {
+        if (sidebar) {
+          sidebar.classList.toggle('sidebar-collapsed');
+          const isCollapsed = sidebar.classList.contains('sidebar-collapsed');
+          localStorage.setItem('reseaver_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+          updateSidebarToggleIcon(isCollapsed);
+        }
+      }
+    }
+
+    function openSidebarDrawer() {
+      const sidebar = document.getElementById('appSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (sidebar) {
+        sidebar.classList.add('mobile-open');
+        sidebar.classList.remove('-translate-x-full');
+        sidebar.classList.add('translate-x-0');
+      }
+      if (backdrop) backdrop.classList.remove('hidden');
+    }
+
+    function closeSidebarDrawer() {
+      const sidebar = document.getElementById('appSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (sidebar) {
+        sidebar.classList.remove('mobile-open');
+        sidebar.classList.remove('translate-x-0');
+        sidebar.classList.add('-translate-x-full');
+      }
+      if (backdrop) backdrop.classList.add('hidden');
+    }
+
+    function updateSidebarToggleIcon(isCollapsed) {
+      const icon = document.getElementById('sidebarToggleIcon');
+      if (icon) {
+        icon.setAttribute('data-lucide', isCollapsed ? 'panel-left-open' : 'panel-left-close');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+
+    function initSidebarState() {
+      const isMobile = window.innerWidth < 1024;
+      if (!isMobile) {
+        const isCollapsed = localStorage.getItem('reseaver_sidebar_collapsed') === 'true';
+        const sidebar = document.getElementById('appSidebar');
+        if (isCollapsed && sidebar) {
+          sidebar.classList.add('sidebar-collapsed');
+          updateSidebarToggleIcon(true);
+        }
+      }
     }
 
     // --- 導覽列與側邊欄切換 ---
     function navigateTab(tab) {
       currentTab = tab;
-      const tabs = ['today', 'report', 'minutes', 'papers', 'lablog'];
+      const tabs = ['today', 'report', 'minutes', 'papers', 'lablog', 'adminsop'];
       const badges = {
         today: { title: '今日動態', name: '今日動態', sub: '研究生日常速記 · 自動週報' },
         report: { title: '咪挺週報', name: '咪挺週報', sub: '四大標準區塊 · AI 潤飾匯出' },
         minutes: { title: '咪挺摘要', name: '咪挺摘要', sub: '錄音與打字速記 · 背景持續錄音 · AI 重點整理' },
         papers: { title: '論文膠囊', name: '論文膠囊', sub: '四維度文獻卡 · 間隔記憶複習' },
-        lablog: { title: '實驗踩坑', name: '實驗踩坑', sub: '實驗 Run 快照 · 避坑知識庫' }
+        lablog: { title: '實驗踩坑', name: '實驗踩坑', sub: '實驗 Run 快照 · 避坑知識庫' },
+        adminsop: { title: '行政 SOP', name: '行政 SOP', sub: '計畫報帳 · 採購流程 · 伺服器管理 · 口試與公文指引' }
       };
 
       tabs.forEach(t => {
         const pane = document.getElementById(`tabContent-${t}`);
-        const mobBtn = document.getElementById(`nav-${t}`);
         const sideBtn = document.getElementById(`side-${t}`);
 
         if (t === tab) {
           if (pane) pane.classList.remove('hidden');
-          if (mobBtn) mobBtn.className = 'nav-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-sky-400 transition';
-          if (sideBtn) sideBtn.className = 'sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sky-400 bg-sky-500/10 border border-sky-500/20 transition';
+          if (sideBtn) sideBtn.className = 'sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sky-400 bg-sky-500/10 border border-sky-500/20 font-semibold transition group';
         } else {
           if (pane) pane.classList.add('hidden');
-          if (mobBtn) mobBtn.className = 'nav-tab-btn flex flex-col items-center gap-0.5 py-1 px-1.5 text-slate-400 hover:text-slate-200 transition';
-          if (sideBtn) sideBtn.className = 'sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition';
+          if (sideBtn) sideBtn.className = 'sidebar-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent transition group';
         }
       });
 
@@ -1816,7 +2045,13 @@
 
       if (tab === 'report') generateReportFromLogs(false);
       if (tab === 'minutes') initMinutesTab();
+      if (tab === 'adminsop') renderAdminSops();
       if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      // 在手機端切換分頁時，自動收合側邊抽屜
+      if (window.innerWidth < 1024) {
+        closeSidebarDrawer();
+      }
     }
 
     function updateSidebarBadges() {
@@ -5283,18 +5518,14 @@ ${metaContext}${raw}
       activeLabLogType = type;
       const btnRun = document.getElementById('llTypeBtn-run');
       const btnGotcha = document.getElementById('llTypeBtn-gotcha');
-      const btnSop = document.getElementById('llTypeBtn-sop');
       const fRun = document.getElementById('llRunFields');
       const fGotcha = document.getElementById('llGotchaFields');
-      const fSop = document.getElementById('llSopFields');
 
       if (btnRun) btnRun.className = 'flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white';
       if (btnGotcha) btnGotcha.className = 'flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white';
-      if (btnSop) btnSop.className = 'flex-1 py-1 text-xs font-semibold rounded-lg text-slate-400 hover:text-white';
 
       if (fRun) fRun.classList.add('hidden');
       if (fGotcha) fGotcha.classList.add('hidden');
-      if (fSop) fSop.classList.add('hidden');
 
       if (type === 'run') {
         if (btnRun) btnRun.className = 'flex-1 py-1 text-xs font-semibold rounded-lg bg-emerald-600 text-white shadow-sm';
@@ -5302,9 +5533,6 @@ ${metaContext}${raw}
       } else if (type === 'gotcha') {
         if (btnGotcha) btnGotcha.className = 'flex-1 py-1 text-xs font-semibold rounded-lg bg-rose-600 text-white shadow-sm';
         if (fGotcha) fGotcha.classList.remove('hidden');
-      } else if (type === 'sop') {
-        if (btnSop) btnSop.className = 'flex-1 py-1 text-xs font-semibold rounded-lg bg-purple-600 text-white shadow-sm';
-        if (fSop) fSop.classList.remove('hidden');
       }
     }
     function saveNewLabLogEntry() {
@@ -5312,8 +5540,6 @@ ${metaContext}${raw}
       if (!title) return showToast('請填寫標題！');
       const logs = getStoredLabLogs();
       const isRun = activeLabLogType === 'run';
-      const isGotcha = activeLabLogType === 'gotcha';
-      const isSop = activeLabLogType === 'sop';
       logs.unshift({
         id: `lab-${Date.now()}`,
         type: activeLabLogType,
@@ -5323,18 +5549,478 @@ ${metaContext}${raw}
           learningRate: document.getElementById('llLr').value.trim() || '1e-4',
           metrics: document.getElementById('llMetrics').value.trim() || 'Loss: 0.12'
         } : undefined,
-        symptom: isGotcha ? document.getElementById('llSymptom').value.trim() : undefined,
-        solution: isGotcha ? document.getElementById('llSolution').value.trim() : undefined,
-        sopSteps: isSop ? (document.getElementById('llSopSteps')?.value.trim() || '') : undefined,
-        sopNotes: isSop ? (document.getElementById('llSopNotes')?.value.trim() || '') : undefined,
+        symptom: !isRun ? document.getElementById('llSymptom').value.trim() : undefined,
+        solution: !isRun ? document.getElementById('llSolution').value.trim() : undefined,
         createdAt: new Date().toISOString()
       });
       saveLabLogs(logs);
       closeNewLabLogModal();
       document.getElementById('llTitle').value = '';
-      if (document.getElementById('llSopSteps')) document.getElementById('llSopSteps').value = '';
-      if (document.getElementById('llSopNotes')) document.getElementById('llSopNotes').value = '';
+      if (document.getElementById('llSymptom')) document.getElementById('llSymptom').value = '';
+      if (document.getElementById('llSolution')) document.getElementById('llSolution').value = '';
       showToast('🎉 已成功記錄實驗日誌！');
+    }
+
+    // ==========================================
+    // 模組：行政 SOP 錦囊知識庫 (Admin SOP Module)
+    // ==========================================
+    const DEFAULT_ADMIN_SOPS = [
+      {
+        id: 'sop-1',
+        title: '【國科會/產學計畫】經費報帳核銷 SOP',
+        category: 'expense',
+        tags: ['國科會', '發票報帳', '核銷審核'],
+        steps: [
+          '確認發票/收據包含學校統一編號 (03734000) 與正確買受人抬頭。',
+          '登入校務主計動支管理系統，填寫動支請款單，填列計畫代號與動支科目。',
+          '將實體發票或電子發票證明聯平整黏貼於黏存單，並由經手人簽名或蓋章。',
+          '送交計畫主持人（指導教授）親簽或系統電子簽核。',
+          '備齊佐證文件（如差旅證明、簽到表、比價單），送系辦初審後送主計室審查撥款。'
+        ],
+        tips: '餐費報帳務必檢附會議簽到表與議程；跨月發票請注意會計年度請款截止期限；高鐵與機票需檢附票根證明乘車時間。',
+        contacts: '主計室計畫組分機 #1234 / 系辦行政助教分機 #5678',
+        checkedSteps: [],
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: 'sop-2',
+        title: '【伺服器與運算】GPU 算力集群開通與環境配置 SOP',
+        category: 'server',
+        tags: ['GPU', 'SSH金鑰', '伺服器借用', 'Conda'],
+        steps: [
+          '向實驗室網管或系所管理者登記申請帳號，取得伺服器 Host IP 與專屬 Port。',
+          '在本地終端機執行 ssh-keygen -t ed25519 生成公私鑰對，將公鑰傳送給管理員配置。',
+          '透過 SSH 登入伺服器，使用 tmux 或 screen 開啟長效背景會話，防止網路中斷工作中斷。',
+          '透過 Conda 建立隔離虛擬環境：conda create -n my_research python=3.10。',
+          '執行 nvidia-smi 與 nvcc --version 檢測 CUDA 驅動版本，並安裝對應 PyTorch。'
+        ],
+        tips: '嚴禁在 Login/Master 節點直接執行密集訓練；程式碼內請務必顯式設定 CUDA_VISIBLE_DEVICES，勿占用未預約卡槽。',
+        contacts: '實驗室網管：林學長 (分機 #3301 / Slack: @sysadmin)',
+        checkedSteps: [],
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: 'sop-3',
+        title: '【畢業與學位】碩士學位口試申請與試務流程 SOP',
+        category: 'degree',
+        tags: ['畢業口試', '學位考試', '口試委員', '研教組'],
+        steps: [
+          '確認已修畢畢業學分門檻，並與指導教授討論口試委員名單（至少 3 位，校內外比例需合規）。',
+          '提前至少 3 週於學校學位考試系統登錄申請，列印「口試申請書」請指導教授簽名送系辦。',
+          '寄送邀請函、口試通知、交通停車證資訊以及論文初稿給全體口試委員。',
+          '口試當日準備：委員審查評分表、口試及格證明單、口試費與交通費領款收據。',
+          '口試完成後將委員簽名正本送回系辦，並依委員意見完成論文修訂與 Turnitin 論文比對。'
+        ],
+        tips: '校外委員領據需當天請委員親簽並填寫身分證字號與匯款帳號；口試錄音請全程備份備查。',
+        contacts: '系所學務與研教組：張助教 (分機 #4402)',
+        checkedSteps: [],
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: 'sop-4',
+        title: '【設備與耗材採購】實驗室器材與單價一萬元以上採購 SOP',
+        category: 'procurement',
+        tags: ['設備請購', '共同供應契約', '驗收登記'],
+        steps: [
+          '核對計畫採購預算額度，確認可支出金額與耗材/設備品項分類。',
+          '向廠商索取正式估價單（若達共同供應契約規範需註明契約案號；逾額需附三家比價單）。',
+          '至校務採購請購系統登錄請購單，陳核計畫主持人與總務處採購組。',
+          '採購組核定發發訂購通知後，廠商始得送貨並開立抬頭發票。',
+          '收貨後會同保管組實地驗收，黏貼財產標籤後填寫驗收紀錄單送保管組登帳。'
+        ],
+        tips: '嚴禁先自行墊款購買後再補請購手續；切勿故意拆單以規避公開招標規範。',
+        contacts: '總務處採購組分機 #2234 / 保管組財產管理分機 #2250',
+        checkedSteps: [],
+        updatedAt: new Date().toISOString()
+      }
+    ];
+
+    let activeAdminSopFilter = 'all';
+
+    function getStoredAdminSops() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_ADMIN_SOPS);
+        if (!raw) {
+          let initialSops = [...DEFAULT_ADMIN_SOPS];
+          try {
+            const oldLogs = JSON.parse(localStorage.getItem(STORAGE_KEY_LABLOGS)) || [];
+            const sopLogs = oldLogs.filter(l => l.type === 'sop');
+            if (sopLogs.length > 0) {
+              const migrated = sopLogs.map(l => ({
+                id: `sop-migrated-${l.id}`,
+                title: l.title,
+                category: 'expense',
+                tags: l.tags || ['#行政SOP'],
+                steps: (l.sopSteps || '').split('\n').map(s => s.trim()).filter(Boolean),
+                tips: l.sopNotes || '',
+                contacts: '',
+                checkedSteps: [],
+                updatedAt: l.createdAt || new Date().toISOString()
+              }));
+              initialSops = [...migrated, ...initialSops];
+            }
+          } catch {}
+          localStorage.setItem(STORAGE_KEY_ADMIN_SOPS, JSON.stringify(initialSops));
+          return initialSops;
+        }
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_ADMIN_SOPS;
+      } catch {
+        return DEFAULT_ADMIN_SOPS;
+      }
+    }
+
+    function saveAdminSops(sops) {
+      localStorage.setItem(STORAGE_KEY_ADMIN_SOPS, JSON.stringify(sops));
+      renderAdminSops();
+      if (typeof triggerPersonalCloudSync === 'function') triggerPersonalCloudSync();
+    }
+
+    function filterAdminSops(cat) {
+      activeAdminSopFilter = cat;
+      const cats = ['all', 'expense', 'procurement', 'server', 'degree'];
+      cats.forEach(c => {
+        const btn = document.getElementById(`sopFilter-${c}`);
+        if (!btn) return;
+        if (c === cat) {
+          btn.className = 'px-2.5 py-1 rounded-lg text-white bg-purple-600 transition whitespace-nowrap shadow-sm';
+        } else {
+          btn.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition whitespace-nowrap';
+        }
+      });
+      renderAdminSops();
+    }
+
+    function renderAdminSops() {
+      const container = document.getElementById('adminSopListContainer');
+      if (!container) return;
+      const sops = getStoredAdminSops();
+      const countEl = document.getElementById('adminSopTotalCount');
+      if (countEl) countEl.textContent = sops.length;
+
+      const searchInput = document.getElementById('adminSopSearchInput');
+      const query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+
+      const categoryMap = {
+        expense: { name: '💰 經費核銷', color: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' },
+        procurement: { name: '🛒 設備採購', color: 'bg-amber-500/10 text-amber-300 border-amber-500/20' },
+        server: { name: '💻 伺服器/資訊', color: 'bg-sky-500/10 text-sky-300 border-sky-500/20' },
+        degree: { name: '🎓 口試與公文', color: 'bg-purple-500/10 text-purple-300 border-purple-500/20' },
+        general: { name: '📌 其他常用', color: 'bg-slate-500/10 text-slate-300 border-slate-500/20' }
+      };
+
+      const filtered = sops.filter(s => {
+        if (activeAdminSopFilter !== 'all' && s.category !== activeAdminSopFilter) return false;
+        if (!query) return true;
+        const matchTitle = (s.title || '').toLowerCase().includes(query);
+        const matchSteps = (s.steps || []).some(st => st.toLowerCase().includes(query));
+        const matchTips = (s.tips || '').toLowerCase().includes(query);
+        const matchTags = (s.tags || []).some(t => t.toLowerCase().includes(query));
+        return matchTitle || matchSteps || matchTips || matchTags;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-12 text-center text-slate-500 text-xs border border-dashed border-slate-800 rounded-2xl">
+            <i data-lucide="clipboard-x" class="w-8 h-8 mx-auto text-slate-600 mb-2"></i>
+            查無符合條件的行政 SOP 流程記錄
+          </div>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => {
+        const catInfo = categoryMap[item.category] || categoryMap.general;
+        const checkedSet = new Set(item.checkedSteps || []);
+        const totalSteps = (item.steps || []).length;
+        const completedSteps = (item.steps || []).filter((_, idx) => checkedSet.has(idx)).length;
+        const progressPct = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+
+        const stepsHtml = (item.steps || []).map((step, idx) => {
+          const isDone = checkedSet.has(idx);
+          return `
+            <div class="flex items-start gap-2.5 text-xs group cursor-pointer" onclick="toggleSopStepCheck('${item.id}', ${idx})">
+              <input type="checkbox" ${isDone ? 'checked' : ''} onclick="event.stopPropagation(); toggleSopStepCheck('${item.id}', ${idx})" class="mt-0.5 rounded border-slate-600 text-purple-600 focus:ring-0 bg-slate-800 cursor-pointer">
+              <span class="flex-1 ${isDone ? 'line-through text-slate-500' : 'text-slate-300'} leading-relaxed">${escapeHtml(step)}</span>
+            </div>
+          `;
+        }).join('');
+
+        const tagsHtml = (item.tags || []).map(t => `
+          <span class="text-[10px] bg-slate-800/80 text-purple-300 px-2 py-0.5 rounded-md border border-purple-500/20">#${escapeHtml(t.replace(/^#/, ''))}</span>
+        `).join('');
+
+        return `
+          <div class="bg-slate-800/60 hover:bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 lg:p-5 flex flex-col justify-between space-y-3.5 shadow-md transition group">
+            <div class="space-y-2.5">
+              <!-- 頂部標籤與操作按鈕 -->
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full border ${catInfo.color}">
+                    ${catInfo.name}
+                  </span>
+                  ${tagsHtml}
+                </div>
+                <div class="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition">
+                  <button onclick="copyFullSopText('${item.id}')" class="p-1.5 text-slate-400 hover:text-purple-400 hover:bg-slate-700/60 rounded-lg text-xs" title="複製完整流程">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button onclick="editAdminSopItem('${item.id}')" class="p-1.5 text-slate-400 hover:text-sky-400 hover:bg-slate-700/60 rounded-lg text-xs" title="編輯 SOP">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button onclick="deleteAdminSopItem('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-700/60 rounded-lg text-xs" title="刪除 SOP">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 標題 -->
+              <h4 class="text-sm font-bold text-white leading-snug tracking-tight">
+                ${escapeHtml(item.title)}
+              </h4>
+
+              <!-- 執行進度條 -->
+              ${totalSteps > 0 ? `
+                <div class="space-y-1">
+                  <div class="flex justify-between text-[10px] text-slate-400">
+                    <span>執行進度 (${completedSteps}/${totalSteps})</span>
+                    <span class="font-mono ${progressPct === 100 ? 'text-emerald-400 font-bold' : ''}">${progressPct}%</span>
+                  </div>
+                  <div class="w-full bg-slate-700/60 rounded-full h-1.5 overflow-hidden">
+                    <div class="bg-gradient-to-r from-purple-500 to-indigo-500 h-1.5 rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
+                  </div>
+                </div>
+              ` : ''}
+
+              <!-- 核心步驟清單 -->
+              <div class="bg-slate-900/60 border border-slate-700/40 rounded-xl p-3 space-y-2">
+                <span class="text-[10px] font-bold text-purple-300 uppercase tracking-wider block">📌 流程步驟 (點擊可標記完成)：</span>
+                <div class="space-y-2">
+                  ${stepsHtml}
+                </div>
+              </div>
+
+              <!-- 避雷提醒 (若有) -->
+              ${item.tips ? `
+                <div class="bg-amber-950/30 border border-amber-500/20 rounded-xl p-2.5 text-xs text-amber-200/90 flex items-start gap-2">
+                  <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5"></i>
+                  <span class="leading-relaxed"><strong>避雷備忘：</strong>${escapeHtml(item.tips)}</span>
+                </div>
+              ` : ''}
+
+              <!-- 窗口分機 (若有) -->
+              ${item.contacts ? `
+                <div class="text-[11px] text-slate-400 flex items-center gap-1.5 pt-1">
+                  <i data-lucide="phone" class="w-3 h-3 text-slate-500 flex-shrink-0"></i>
+                  <span>${escapeHtml(item.contacts)}</span>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- 卡片底部快捷按鈕 -->
+            <div class="pt-2 border-t border-slate-700/40 flex items-center justify-between text-xs">
+              <span class="text-[10px] text-slate-500">更新於 ${item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : '近日'}</span>
+              <button onclick="addSopToWeeklyReport('${item.id}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold text-purple-300 hover:text-white bg-purple-900/40 hover:bg-purple-800/60 border border-purple-500/30 transition active:scale-95">
+                <i data-lucide="briefcase" class="w-3 h-3"></i>
+                記錄為本週行政成果
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function toggleSopStepCheck(sopId, stepIdx) {
+      const sops = getStoredAdminSops();
+      const sop = sops.find(s => s.id === sopId);
+      if (!sop) return;
+      if (!sop.checkedSteps) sop.checkedSteps = [];
+      const set = new Set(sop.checkedSteps);
+      if (set.has(stepIdx)) set.delete(stepIdx);
+      else set.add(stepIdx);
+      sop.checkedSteps = Array.from(set);
+      saveAdminSops(sops);
+    }
+
+    function copySnippetText(text, label) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(`✅ 已複製${label}：${text.slice(0, 24)}${text.length > 24 ? '...' : ''}`);
+        }).catch(() => fallbackCopy(text, label));
+      } else {
+        fallbackCopy(text, label);
+      }
+    }
+
+    function fallbackCopy(text, label) {
+      const t = document.createElement('textarea');
+      t.value = text;
+      document.body.appendChild(t);
+      t.select();
+      document.execCommand('copy');
+      document.body.removeChild(t);
+      showToast(`✅ 已複製${label}！`);
+    }
+
+    function copyFullSopText(id) {
+      const sops = getStoredAdminSops();
+      const item = sops.find(s => s.id === id);
+      if (!item) return;
+      const stepsMd = (item.steps || []).map((st, i) => `${i + 1}. ${st}`).join('\n');
+      const text = `### 📋 行政 SOP 指引：${item.title}\n\n**【核心流程步驟】**\n${stepsMd}\n\n${item.tips ? `**【避雷注意事項】**\n${item.tips}\n\n` : ''}${item.contacts ? `**【聯絡窗口】**\n${item.contacts}` : ''}`.trim();
+      copySnippetText(text, '完整 SOP 流程 Markdown');
+    }
+
+    function addSopToWeeklyReport(id) {
+      const sops = getStoredAdminSops();
+      const item = sops.find(s => s.id === id);
+      if (!item) return;
+      const logs = getStoredLogs();
+      const now = new Date();
+      const newLog = {
+        id: `admin-sop-${Date.now()}`,
+        content: `【行政 SOP 執行】${item.title}`,
+        category: 'admin',
+        createdAt: now.toISOString(),
+        tags: item.tags || ['#行政SOP', '#專案貢獻']
+      };
+      logs.unshift(newLog);
+      saveLogs(logs);
+      showToast(`🎉 已成功將「${item.title}」記錄為今日行政動態與週報！`);
+    }
+
+    function openNewAdminSopModal() {
+      document.getElementById('sopEditId').value = '';
+      document.getElementById('adminSopModalTitle').innerHTML = '<i data-lucide="clipboard-list" class="w-4 h-4 text-purple-400"></i> 新增行政 SOP 錦囊';
+      document.getElementById('sopTitleInput').value = '';
+      document.getElementById('sopCategorySelect').value = 'expense';
+      document.getElementById('sopTagsInput').value = '';
+      document.getElementById('sopStepsInput').value = '';
+      document.getElementById('sopTipsInput').value = '';
+      document.getElementById('sopContactsInput').value = '';
+      document.getElementById('adminSopModal').classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeAdminSopModal() {
+      document.getElementById('adminSopModal').classList.add('hidden');
+    }
+
+    function editAdminSopItem(id) {
+      const sops = getStoredAdminSops();
+      const item = sops.find(s => s.id === id);
+      if (!item) return;
+      document.getElementById('sopEditId').value = item.id;
+      document.getElementById('adminSopModalTitle').innerHTML = '<i data-lucide="edit-3" class="w-4 h-4 text-purple-400"></i> 編輯行政 SOP 錦囊';
+      document.getElementById('sopTitleInput').value = item.title || '';
+      document.getElementById('sopCategorySelect').value = item.category || 'expense';
+      document.getElementById('sopTagsInput').value = (item.tags || []).join(', ');
+      document.getElementById('sopStepsInput').value = (item.steps || []).join('\n');
+      document.getElementById('sopTipsInput').value = item.tips || '';
+      document.getElementById('sopContactsInput').value = item.contacts || '';
+      document.getElementById('adminSopModal').classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function deleteAdminSopItem(id) {
+      if (confirm('確定要刪除這筆行政 SOP 流程嗎？')) {
+        const sops = getStoredAdminSops().filter(s => s.id !== id);
+        saveAdminSops(sops);
+        showToast('已刪除行政 SOP 記錄');
+      }
+    }
+
+    function saveAdminSopItem() {
+      const title = document.getElementById('sopTitleInput').value.trim();
+      if (!title) return showToast('請填寫 SOP 標題！');
+      const category = document.getElementById('sopCategorySelect').value;
+      const tagsRaw = document.getElementById('sopTagsInput').value;
+      const tags = tagsRaw.split(/[,，]/).map(t => t.trim()).filter(Boolean);
+      const stepsRaw = document.getElementById('sopStepsInput').value;
+      const steps = stepsRaw.split('\n').map(s => s.replace(/^\d+[\.、]\s*/, '').trim()).filter(Boolean);
+      if (steps.length === 0) return showToast('請至少輸入一項流程步驟！');
+      const tips = document.getElementById('sopTipsInput').value.trim();
+      const contacts = document.getElementById('sopContactsInput').value.trim();
+      const editId = document.getElementById('sopEditId').value;
+
+      const sops = getStoredAdminSops();
+      if (editId) {
+        const existing = sops.find(s => s.id === editId);
+        if (existing) {
+          existing.title = title;
+          existing.category = category;
+          existing.tags = tags;
+          existing.steps = steps;
+          existing.tips = tips;
+          existing.contacts = contacts;
+          existing.updatedAt = new Date().toISOString();
+        }
+      } else {
+        sops.unshift({
+          id: `sop-${Date.now()}`,
+          title,
+          category,
+          tags,
+          steps,
+          tips,
+          contacts,
+          checkedSteps: [],
+          updatedAt: new Date().toISOString()
+        });
+      }
+      saveAdminSops(sops);
+      closeAdminSopModal();
+      showToast('🎉 已成功儲存行政 SOP 流程！');
+    }
+
+    function loadSopTemplate(type) {
+      const templates = {
+        expense: {
+          title: '【國科會/產學計畫】經費報帳核銷 SOP',
+          category: 'expense',
+          tags: '#國科會, #發票報帳, #核銷',
+          steps: '1. 核對發票抬頭與統一編號 (03734000)\n2. 進入學校主計動支系統填寫申請表並列印動支單\n3. 發票平整黏貼於黏存單，經手人簽名或蓋章\n4. 送交指導教授簽名，附齊相關簽到表或證明文件\n5. 送系辦初審後轉陳主計室審查撥款',
+          tips: '餐費需附簽到表與事由說明；跨月發票注意會計年度截止期限；高鐵票需檢附票根證明乘車時間。',
+          contacts: '主計室計畫組分機 #1234 / 系辦行政助教分機 #5678'
+        },
+        server: {
+          title: '【GPU 伺服器與集群】帳號開通與運算借用 SOP',
+          category: 'server',
+          tags: '#GPU, #SSH金鑰, #伺服器, #Conda',
+          steps: '1. 向實驗室網管登記申請帳號並確認可分配之 GPU 卡號\n2. 本端生成 ED25519 金鑰並提供公鑰加入 authorized_keys\n3. 透過 SSH 登入伺服器，使用 tmux 保持背景執行階段\n4. 建立隔離 Conda 虛擬環境並安裝指定 PyTorch 與 CUDA 驅動\n5. 執行訓練程式碼時顯式指定 CUDA_VISIBLE_DEVICES',
+          tips: '切勿在 Master 節點直接執行大運算；離線前請檢視 nvidia-smi 確保無殘留死鎖行程。',
+          contacts: '實驗室伺服器網管：林學長 (分機 #3301)'
+        },
+        degree: {
+          title: '【學位與畢業】碩士學位口試申請與試務流程 SOP',
+          category: 'degree',
+          tags: '#畢業口試, #學位考試, #口試委員',
+          steps: '1. 確認修畢應修學分與論文初稿，與指導教授敲定 3 位口委與口試時段\n2. 提前 3 週於學校學位考試系統登錄申請並印出申請書送系辦\n3. 寄送口試通知、邀請函、初稿與校園停車資訊給口試委員\n4. 當日備齊審查評分表、口試及格證明單與委員交通/審查費領據\n5. 口試後將成績單正本送系辦，依委員意見修訂論文並完成比對',
+          tips: '校外委員領據當日需簽名並提供身分證號及匯款帳號；口試錄音請妥善備份保存。',
+          contacts: '系所研教組：張助教 (分機 #4402)'
+        },
+        procurement: {
+          title: '【設備請購】實驗室單價一萬元以上設備/耗材採購 SOP',
+          category: 'procurement',
+          tags: '#設備採購, #共同供應契約, #財產驗收',
+          steps: '1. 核對計畫可動支科目餘額，確認設備採購額度\n2. 向廠商索取正式估價單（若逾額需檢附三家廠商比價單）\n3. 於學校採購請購系統登錄請購單，送主管與總務處採購組審核\n4. 採購組核定發發訂購通知後，廠商送貨並開立統一發票\n5. 收貨後會同保管組驗收，貼上財產標籤後登錄財產帳',
+          tips: '嚴禁先自行墊款購買後補請購手續；切勿故意拆單以規避公開招標比價規範。',
+          contacts: '總務處採購組分機 #2234 / 保管組財產管理分機 #2250'
+        }
+      };
+
+      const tpl = templates[type];
+      if (!tpl) return;
+      document.getElementById('sopTitleInput').value = tpl.title;
+      document.getElementById('sopCategorySelect').value = tpl.category;
+      document.getElementById('sopTagsInput').value = tpl.tags;
+      document.getElementById('sopStepsInput').value = tpl.steps;
+      document.getElementById('sopTipsInput').value = tpl.tips;
+      document.getElementById('sopContactsInput').value = tpl.contacts;
+      showToast('已載入範本內容，可依需求進一步自訂！');
     }
 
     // ==========================================
@@ -6399,13 +7085,14 @@ ${metaContext}${raw}
         try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
       };
       return {
-        version: '1.0.0',
+        version: '1.4.0',
         timestamp: new Date().toISOString(),
         logs: getLocal(STORAGE_KEY_LOGS),
         meetings: getLocal(STORAGE_KEY_MEETINGS),
         activeMeetingId: localStorage.getItem(STORAGE_KEY_ACTIVE_MEETING) || null,
         papers: getLocal(STORAGE_KEY_PAPERS),
         labLogs: getLocal(STORAGE_KEY_LABLOGS),
+        adminSops: getLocal(STORAGE_KEY_ADMIN_SOPS),
         minutes: getLocal(STORAGE_KEY_MINUTES)
       };
     }
@@ -6439,6 +7126,7 @@ ${metaContext}${raw}
       mergeList(STORAGE_KEY_MEETINGS, remote.meetings, true);
       mergeList(STORAGE_KEY_PAPERS, remote.papers);
       mergeList(STORAGE_KEY_LABLOGS, remote.labLogs);
+      if (remote.adminSops) mergeList(STORAGE_KEY_ADMIN_SOPS, remote.adminSops);
       if (remote.minutes) mergeList(STORAGE_KEY_MINUTES, remote.minutes);
 
       if (remote.activeMeetingId) {
@@ -6462,6 +7150,7 @@ ${metaContext}${raw}
         else if (currentTab === 'minutes') localStorage.removeItem(STORAGE_KEY_MINUTES);
         else if (currentTab === 'papers') localStorage.removeItem(STORAGE_KEY_PAPERS);
         else if (currentTab === 'lablog') localStorage.removeItem(STORAGE_KEY_LABLOGS);
+        else if (currentTab === 'adminsop') localStorage.removeItem(STORAGE_KEY_ADMIN_SOPS);
         renderAll();
         showToast('已清空當前模組資料');
       }

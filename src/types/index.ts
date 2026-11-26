@@ -73,7 +73,7 @@ export interface PaperCapsule {
   };
 }
 
-// --- LabLog (實驗日誌、避坑與行政 SOP) ---
+// --- LabLog (實驗日誌與避坑) ---
 export type LabLogType = 'run' | 'gotcha' | 'sop';
 
 export interface LabLogEntry {
@@ -94,7 +94,23 @@ export interface LabLogEntry {
   symptom?: string;
   rootCause?: string;
   solution?: string;
-  // 行政 SOP 模式擴充欄位 (NEW)
+  // 向下相容欄位
   sopSteps?: string[];
   sopNotes?: string;
+}
+
+// --- 行政 SOP (獨立模組) ---
+export type AdminSopCategory = 'expense' | 'procurement' | 'server' | 'degree' | 'general';
+
+export interface AdminSopItem {
+  id: string;
+  title: string;
+  category: AdminSopCategory;
+  tags: string[];
+  steps: string[];
+  tips?: string;        // 避雷提醒 / 常見退件原因
+  contacts?: string;    // 聯絡窗口與分機
+  snippets?: { label: string; text: string }[]; // 常用速查代碼/抬頭
+  checkedSteps?: number[]; // 已勾選完成之步驟索引
+  updatedAt: string;
 }
