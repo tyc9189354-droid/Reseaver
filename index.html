@@ -6234,15 +6234,11 @@ ${metaContext}${raw}
     let currentDeviceRole = '';
     let activeSyncConn = null;
 
-    // 即時偵測當前環境是手機還是電腦網頁端 (打開瞬間執行)
+    // 即時偵測當前環境是手機還是電腦網頁端 (精準依據 User-Agent 判定，不因螢幕寬度縮放或觸控螢幕誤判)
     function applyDeviceEnvironment() {
       const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
-      const isMobileScreen = window.innerWidth < 1024;
-      const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-      const isDetectedMobile = isMobileUA || (isMobileScreen && hasTouch) || (window.matchMedia && window.matchMedia('(max-width: 1023px)').matches);
-
       const savedRole = localStorage.getItem(STORAGE_KEY_DEVICE_ROLE);
-      const role = savedRole || (isDetectedMobile ? 'mob' : 'pc');
+      const role = savedRole || (isMobileUA ? 'mob' : 'pc');
       currentDeviceRole = role;
       window.__DEVICE_ENV__ = role;
       window.__DEVICE_NAME__ = (role === 'mob') ? '手機端' : '電腦網頁端';
@@ -6257,7 +6253,7 @@ ${metaContext}${raw}
     }
 
     function getAutoDeviceRole() {
-      const isMob = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent) || window.innerWidth < 1024;
+      const isMob = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
       return isMob ? 'mob' : 'pc';
     }
 
@@ -6343,6 +6339,8 @@ ${metaContext}${raw}
         peerInstance.on('open', (id) => {
           myPeerId = id;
           updateGmailStatusUI(true);
+          // 兩端在線時背景自動無感連線同步
+          setTimeout(() => tryAutoConnectPeer(), 1000);
         });
 
         peerInstance.on('connection', (conn) => {
@@ -6358,9 +6356,27 @@ ${metaContext}${raw}
       }
     }
 
+    async function tryAutoConnectPeer() {
+      if (!currentGmail || !peerInstance || peerInstance.destroyed) return;
+      if (activeSyncConn && activeSyncConn.open) return;
+
+      const role = getCurrentDeviceRole();
+      const targetRole = role === 'mob' ? 'pc' : 'mob';
+      const hash = await getGmailChannelHash(currentGmail);
+      const targetId = `res-gm-${hash}-${targetRole}`;
+
+      try {
+        const conn = peerInstance.connect(targetId);
+        setupPeerEvents(conn);
+      } catch (err) {
+        // 背景靜默嘗試連線，對端離線時不發送報錯打擾
+      }
+    }
+
     function setupPeerEvents(conn) {
       conn.on('open', () => {
-        showToast('🔗 已連線至您的 Gmail 設備，雙向同步中...');
+        activeSyncConn = conn;
+        showToast('🔗 已連線至您的跨裝置設備，雙向同步中...');
         conn.send({ type: 'SYNC_DATA', payload: exportAllPayload() });
       });
 
@@ -6368,14 +6384,28 @@ ${metaContext}${raw}
         if (data && data.type === 'SYNC_DATA') {
           mergeRemotePayload(data.payload);
           renderAll();
-          showToast('🎉 已與您的 Gmail 設備完成雙向同步！');
+          showToast('🎉 已與您的設備完成雙向即時同步！');
         }
       });
 
       conn.on('close', () => {
         if (activeSyncConn === conn) activeSyncConn = null;
       });
+      conn.on('error', () => {
+        if (activeSyncConn === conn) activeSyncConn = null;
+      });
     }
+
+    // 當使用者切回 Reseaver 分頁或喚醒手機螢幕時，自動重新檢測並同步
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && currentGmail) {
+        if (!peerInstance || peerInstance.destroyed) {
+          initGmailPeer(currentGmail);
+        } else if (!activeSyncConn || !activeSyncConn.open) {
+          tryAutoConnectPeer();
+        }
+      }
+    });
 
     function updateGmailStatusUI(isReady) {
       updateHeaderAccountUI();
@@ -7288,7 +7318,7 @@ ${metaContext}${raw}
         try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
       };
       return {
-        version: '1.4.2',
+        version: '1.4.3',
         timestamp: new Date().toISOString(),
         logs: getLocal(STORAGE_KEY_LOGS),
         meetings: getLocal(STORAGE_KEY_MEETINGS),
