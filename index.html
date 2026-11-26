@@ -309,8 +309,8 @@
                       </button>
                     </div>
                   </div>
-                  <div class="flex items-baseline gap-2 mt-1">
-                    <span id="countdownDays" class="text-3xl font-extrabold text-white tracking-tight">--</span>
+                  <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 mt-1">
+                    <div id="countdownDays" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-baseline">--</div>
                     <span id="countdownUnitText" class="text-xs text-slate-300 font-medium">計算中...</span>
                   </div>
                 </div>
@@ -1950,6 +1950,8 @@
       // 安靜預載 Google 憑證服務（triggerPrompt = false，絕不主動彈窗打擾使用者）
       initGoogleIdentityServices(false);
       window.addEventListener('resize', applyDeviceEnvironment);
+      // 每 30 秒自動更新一次會議倒計時（確保分鐘級精確倒數實時跳動）
+      setInterval(renderMeetingsUI, 30000);
 
       document.getElementById('noteInput').addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -2200,7 +2202,7 @@
       } else {
         document.getElementById('activeMeetingTitle').textContent = activeMeeting.title;
         const info = getDetailedCountdown(activeMeeting.targetTime, activeMeeting.repeatWeekly);
-        document.getElementById('countdownDays').textContent = info.number;
+        document.getElementById('countdownDays').innerHTML = info.displayHtml || info.number;
         document.getElementById('countdownUnitText').textContent = info.unitText;
         document.getElementById('meetingTargetDateText').textContent = `目標時間：${info.formattedDate}${activeMeeting.repeatWeekly ? ' (每週循環)' : ''}`;
       }
@@ -2215,10 +2217,18 @@
       }
       const diffMs = target - now;
       if (diffMs <= 0) return { badge: '進行中' };
-      const diffHours = Math.floor(diffMs / 3600000);
-      if (diffHours < 24) return { badge: `${Math.max(1, diffHours)}小時` };
-      const diffDays = Math.ceil(diffMs / 86400000);
-      return { badge: `${diffDays}天後` };
+      const totalMinutes = Math.floor(diffMs / 60000);
+      const days = Math.floor(totalMinutes / (24 * 60));
+      const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
+      const minutes = totalMinutes % 60;
+
+      if (days > 0) {
+        return { badge: `${days}天${hours > 0 ? `${hours}時` : ''}${minutes > 0 ? `${minutes}分` : ''}` };
+      }
+      if (hours > 0) {
+        return { badge: `${hours}時${minutes}分` };
+      }
+      return { badge: `${Math.max(1, minutes)}分後` };
     }
 
     function getDetailedCountdown(timeStr, repeatWeekly) {
@@ -2234,13 +2244,57 @@
       const hh = target.getHours().toString().padStart(2, '0');
       const mm = target.getMinutes().toString().padStart(2, '0');
       const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
-      const formattedDate = `${y}/${m}/${d} (${weekDays[target.getDay()]}) ${hh}:${mm}`;
+      const dayName = weekDays[target.getDay()];
+      const formattedDate = `${y}/${m}/${d} (${dayName}) ${hh}:${mm}`;
 
-      if (diffMs <= 0) return { number: '0', unitText: '倒數結束 / 進行中', formattedDate };
-      const diffHours = Math.floor(diffMs / 3600000);
-      if (diffHours < 24) return { number: Math.max(1, diffHours).toString(), unitText: `小時後咪挺 (${hh}:${mm})`, formattedDate };
-      const diffDays = Math.ceil(diffMs / 86400000);
-      return { number: diffDays.toString(), unitText: `天後咪挺 (${weekDays[target.getDay()]} ${hh}:${mm})`, formattedDate };
+      if (diffMs <= 0) {
+        return {
+          number: '進行中',
+          displayHtml: '<span class="text-emerald-400 font-bold">進行中</span>',
+          unitText: '倒數結束 · 咪挺進行中',
+          summaryText: '進行中',
+          formattedDate
+        };
+      }
+
+      const totalMinutes = Math.floor(diffMs / 60000);
+      const days = Math.floor(totalMinutes / (24 * 60));
+      const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
+      const minutes = totalMinutes % 60;
+
+      let displayHtml = '';
+      let number = '';
+      let summaryText = '';
+      let unitText = '';
+
+      if (days > 0) {
+        displayHtml = `<span>${days}</span><span class="text-xs sm:text-sm font-semibold text-indigo-300 ml-0.5 mr-1.5">天</span><span>${hours}</span><span class="text-xs sm:text-sm font-semibold text-indigo-300 ml-0.5 mr-1.5">時</span><span>${minutes}</span><span class="text-xs sm:text-sm font-semibold text-indigo-300 ml-0.5">分</span>`;
+        number = `${days}天 ${hours}時 ${minutes}分`;
+        summaryText = `${days}天${hours}小時${minutes}分後`;
+        unitText = `後咪挺 (${dayName} ${hh}:${mm})`;
+      } else if (hours > 0) {
+        displayHtml = `<span>${hours}</span><span class="text-xs sm:text-sm font-semibold text-indigo-300 ml-0.5 mr-1.5">小時</span><span>${minutes}</span><span class="text-xs sm:text-sm font-semibold text-indigo-300 ml-0.5">分</span>`;
+        number = `${hours}小時 ${minutes}分`;
+        summaryText = `${hours}小時${minutes}分後`;
+        unitText = `後咪挺 (今日 ${hh}:${mm})`;
+      } else {
+        const minVal = Math.max(1, minutes);
+        displayHtml = `<span class="text-amber-400 font-extrabold">${minVal}</span><span class="text-xs sm:text-sm font-semibold text-amber-300 ml-1">分鐘</span>`;
+        number = `${minVal}分鐘`;
+        summaryText = `${minVal}分鐘後`;
+        unitText = `後咪挺 (今日 ${hh}:${mm})`;
+      }
+
+      return {
+        number,
+        displayHtml,
+        unitText,
+        summaryText,
+        formattedDate,
+        days,
+        hours,
+        minutes
+      };
     }
 
     function openMeetingModal() {
@@ -2276,7 +2330,7 @@
                 ${m.repeatWeekly ? '<span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded">每週循環</span>' : ''}
                 ${isActive ? '<span class="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.2 rounded font-bold">目前主倒數</span>' : ''}
               </div>
-              <div class="text-[11px] text-slate-400 mt-0.5 truncate">${info.formattedDate} · <span class="text-indigo-400 font-semibold">${info.number} ${info.unitText.split(' ')[0]}</span></div>
+              <div class="text-[11px] text-slate-400 mt-0.5 truncate">${info.formattedDate} · <span class="text-indigo-400 font-semibold">${info.summaryText || info.number}</span></div>
             </div>
             <div class="flex items-center gap-1">
               <button onclick="setActiveMeetingId('${m.id}'); renderMeetingListInModal();" title="設為主顯示" class="p-1.5 text-slate-400 hover:text-amber-400 rounded">
@@ -7331,7 +7385,7 @@ ${metaContext}${raw}
         try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
       };
       return {
-        version: '1.4.4',
+        version: '1.4.5',
         timestamp: new Date().toISOString(),
         logs: getLocal(STORAGE_KEY_LOGS),
         meetings: getLocal(STORAGE_KEY_MEETINGS),
