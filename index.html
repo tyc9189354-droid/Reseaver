@@ -956,29 +956,16 @@
                   <i data-lucide="zap" class="w-3 h-3 text-amber-400"></i>
                   常用代碼與報帳備忘 (點擊一鍵複製)
                 </span>
-                <span class="text-[9px] text-slate-400">點擊標籤直接複製到剪貼簿</span>
+                <div class="flex items-center gap-2">
+                  <span class="text-[9px] text-slate-400 hidden sm:inline">點擊標籤直接複製到剪貼簿</span>
+                  <button type="button" onclick="openManageSnippetsModal()" class="text-[10px] font-medium text-purple-300 hover:text-white bg-purple-950/80 hover:bg-purple-800/60 border border-purple-500/30 px-2 py-0.5 rounded-md flex items-center gap-1 transition active:scale-95" title="管理與自訂常用代碼備忘">
+                    <i data-lucide="settings" class="w-2.5 h-2.5"></i>
+                    編輯備忘
+                  </button>
+                </div>
               </div>
               <div id="sopQuickSnippetsBar" class="flex flex-wrap gap-1.5">
-                <button onclick="copySnippetText('03734000', '學校統一編號')" class="inline-flex items-center gap-1 text-[11px] bg-slate-900/80 hover:bg-purple-900/50 text-slate-200 border border-purple-500/30 px-2 py-0.5 rounded-lg transition active:scale-95" title="點擊複製統一編號">
-                  <span class="text-purple-400 font-bold">統編</span>
-                  <span class="font-mono">03734000</span>
-                  <i data-lucide="copy" class="w-2.5 h-2.5 text-slate-400"></i>
-                </button>
-                <button onclick="copySnippetText('國立臺灣大學', '報帳發票抬頭')" class="inline-flex items-center gap-1 text-[11px] bg-slate-900/80 hover:bg-purple-900/50 text-slate-200 border border-purple-500/30 px-2 py-0.5 rounded-lg transition active:scale-95" title="點擊複製發票抬頭">
-                  <span class="text-purple-400 font-bold">抬頭</span>
-                  <span>國立大學</span>
-                  <i data-lucide="copy" class="w-2.5 h-2.5 text-slate-400"></i>
-                </button>
-                <button onclick="copySnippetText('NSTC 113-2221-E-002-001', '計畫編號')" class="inline-flex items-center gap-1 text-[11px] bg-slate-900/80 hover:bg-purple-900/50 text-slate-200 border border-purple-500/30 px-2 py-0.5 rounded-lg transition active:scale-95" title="點擊複製常態計畫編號">
-                  <span class="text-purple-400 font-bold">國科會計畫編號</span>
-                  <span class="font-mono">NSTC-113...</span>
-                  <i data-lucide="copy" class="w-2.5 h-2.5 text-slate-400"></i>
-                </button>
-                <button onclick="copySnippetText('敬啟者：我是實驗室助理，想向您請教本月份專任/兼任助理薪資與計畫報帳核銷之審核進度，附件為黏存單影本，感謝您的協助！', '主計室核銷詢問信件範本')" class="inline-flex items-center gap-1 text-[11px] bg-slate-900/80 hover:bg-purple-900/50 text-slate-200 border border-purple-500/30 px-2 py-0.5 rounded-lg transition active:scale-95" title="點擊複製信件範本">
-                  <span class="text-purple-400 font-bold">✉️ 信件範本</span>
-                  <span>報帳進度詢問</span>
-                  <i data-lucide="copy" class="w-2.5 h-2.5 text-slate-400"></i>
-                </button>
+                <!-- 動態渲染常用代碼標籤 -->
               </div>
             </div>
           </div>
@@ -1736,6 +1723,50 @@
     </div>
   </div>
 
+  <!-- MODAL: 常用代碼與報帳備忘管理 (Manage Admin Quick Snippets Modal) -->
+  <div id="manageSnippetsModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+          常用代碼與報帳備忘管理
+        </h3>
+        <button onclick="closeManageSnippetsModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-400 leading-relaxed">
+        可自訂學校統編、計畫編號、發票抬頭、常用詢問信範本或帳號資訊。點擊外層標籤即可秒速複製到剪貼簿！
+      </p>
+
+      <!-- 備忘清單 (可滾動) -->
+      <div id="snippetsManageList" class="space-y-3 overflow-y-auto pr-1 flex-1 max-h-[55vh]">
+        <!-- 動態渲染每個 snippet 編輯卡片 -->
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800 text-xs">
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="addNewSnippetDraftItem()" class="px-3 py-1.5 bg-purple-900/50 hover:bg-purple-800/70 text-purple-200 border border-purple-500/40 rounded-xl text-xs font-medium flex items-center gap-1.5 transition active:scale-95">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            新增備忘
+          </button>
+          <button type="button" onclick="resetSnippetsToDefault()" class="px-2 py-1.5 text-slate-400 hover:text-rose-400 text-xs transition" title="恢復系統初始預設備忘項目">
+            恢復預設
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeManageSnippetsModal()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs transition">
+            取消
+          </button>
+          <button type="button" onclick="saveManagedSnippets()" class="px-4 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-xl text-xs shadow-md shadow-purple-600/30 transition active:scale-95">
+            儲存變更
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: 會議與倒數管理 -->
   <div id="meetingModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
@@ -1798,6 +1829,7 @@
     const STORAGE_KEY_PAPERS = 'reseaver_paper_capsules';
     const STORAGE_KEY_LABLOGS = 'reseaver_lab_logs';
     const STORAGE_KEY_ADMIN_SOPS = 'reseaver_admin_sops_list';
+    const STORAGE_KEY_ADMIN_SNIPPETS = 'reseaver_admin_snippets';
     const STORAGE_KEY_MEETINGS = 'reseaver_meetings';
     const STORAGE_KEY_ACTIVE_MEETING = 'reseaver_active_meeting_id';
     const STORAGE_KEY_GH_TOKEN = 'reseaver_github_token';
@@ -5583,23 +5615,6 @@ ${metaContext}${raw}
         updatedAt: new Date().toISOString()
       },
       {
-        id: 'sop-2',
-        title: '【伺服器與運算】GPU 算力集群開通與環境配置 SOP',
-        category: 'server',
-        tags: ['GPU', 'SSH金鑰', '伺服器借用', 'Conda'],
-        steps: [
-          '向實驗室網管或系所管理者登記申請帳號，取得伺服器 Host IP 與專屬 Port。',
-          '在本地終端機執行 ssh-keygen -t ed25519 生成公私鑰對，將公鑰傳送給管理員配置。',
-          '透過 SSH 登入伺服器，使用 tmux 或 screen 開啟長效背景會話，防止網路中斷工作中斷。',
-          '透過 Conda 建立隔離虛擬環境：conda create -n my_research python=3.10。',
-          '執行 nvidia-smi 與 nvcc --version 檢測 CUDA 驅動版本，並安裝對應 PyTorch。'
-        ],
-        tips: '嚴禁在 Login/Master 節點直接執行密集訓練；程式碼內請務必顯式設定 CUDA_VISIBLE_DEVICES，勿占用未預約卡槽。',
-        contacts: '實驗室網管：林學長 (分機 #3301 / Slack: @sysadmin)',
-        checkedSteps: [],
-        updatedAt: new Date().toISOString()
-      },
-      {
         id: 'sop-3',
         title: '【畢業與學位】碩士學位口試申請與試務流程 SOP',
         category: 'degree',
@@ -5635,6 +5650,185 @@ ${metaContext}${raw}
       }
     ];
 
+    // 常用代碼與報帳備忘初始預設值
+    const DEFAULT_ADMIN_SNIPPETS = [
+      { id: 'snip-1', label: '統編', display: '03734000', value: '03734000', desc: '學校統一編號' },
+      { id: 'snip-2', label: '抬頭', display: '國立大學', value: '國立臺灣大學', desc: '報帳發票抬頭' },
+      { id: 'snip-3', label: '國科會計畫編號', display: 'NSTC-113...', value: 'NSTC 113-2221-E-002-001', desc: '國科會常態計畫編號' },
+      { id: 'snip-4', label: '✉️ 信件範本', display: '報帳進度詢問', value: '敬啟者：我是實驗室助理，想向您請教本月份專任/兼任助理薪資與計畫報帳核銷之審核進度，附件為黏存單影本，感謝您的協助！', desc: '主計室核銷詢問信件範本' }
+    ];
+
+    let draftSnippetsList = [];
+
+    function getStoredAdminSnippets() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_ADMIN_SNIPPETS);
+        if (!raw) {
+          localStorage.setItem(STORAGE_KEY_ADMIN_SNIPPETS, JSON.stringify(DEFAULT_ADMIN_SNIPPETS));
+          return [...DEFAULT_ADMIN_SNIPPETS];
+        }
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) && parsed.length > 0 ? parsed : [...DEFAULT_ADMIN_SNIPPETS];
+      } catch {
+        return [...DEFAULT_ADMIN_SNIPPETS];
+      }
+    }
+
+    function saveAdminSnippets(snippets) {
+      localStorage.setItem(STORAGE_KEY_ADMIN_SNIPPETS, JSON.stringify(snippets));
+      renderAdminSnippetsBar();
+      if (typeof triggerPersonalCloudSync === 'function') triggerPersonalCloudSync();
+    }
+
+    function renderAdminSnippetsBar() {
+      const container = document.getElementById('sopQuickSnippetsBar');
+      if (!container) return;
+      const snippets = getStoredAdminSnippets();
+
+      if (snippets.length === 0) {
+        container.innerHTML = `
+          <div class="flex items-center gap-2 py-1 text-xs text-slate-500">
+            <span>尚無常用備忘代碼</span>
+            <button onclick="openManageSnippetsModal()" class="text-purple-400 hover:text-purple-300 underline text-[11px]">立即新增</button>
+          </div>
+        `;
+        return;
+      }
+
+      const buttonsHtml = snippets.map((s, idx) => {
+        const label = escapeHtml(s.label || '備忘');
+        const displayVal = escapeHtml(s.display || (s.value && s.value.length > 18 ? s.value.slice(0, 16) + '...' : s.value) || '');
+        const desc = escapeHtml(s.desc || s.label || '備忘');
+        return `
+          <button onclick="copySnippetByIndex(${idx})" class="inline-flex items-center gap-1.5 text-[11px] bg-slate-900/80 hover:bg-purple-900/50 text-slate-200 border border-purple-500/30 px-2.5 py-1 rounded-lg transition active:scale-95 group shadow-sm" title="點擊複製 ${desc}">
+            <span class="text-purple-400 font-bold">${label}</span>
+            <span class="font-mono text-slate-300">${displayVal}</span>
+            <i data-lucide="copy" class="w-2.5 h-2.5 text-slate-400 group-hover:text-purple-300"></i>
+          </button>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        ${buttonsHtml}
+        <button onclick="openManageSnippetsModal()" class="inline-flex items-center gap-1 text-[11px] bg-purple-950/60 hover:bg-purple-900/80 text-purple-300 hover:text-white border border-purple-500/40 px-2.5 py-1 rounded-lg transition active:scale-95 shadow-sm" title="自訂與編輯常用代碼備忘">
+          <i data-lucide="settings" class="w-3 h-3 text-purple-400"></i>
+          <span>管理備忘</span>
+        </button>
+      `;
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function copySnippetByIndex(idx) {
+      const snippets = getStoredAdminSnippets();
+      const s = snippets[idx];
+      if (!s) return;
+      copySnippetText(s.value, s.desc || s.label || '備忘內容');
+    }
+
+    function openManageSnippetsModal() {
+      draftSnippetsList = JSON.parse(JSON.stringify(getStoredAdminSnippets()));
+      renderManageSnippetsList();
+      const modal = document.getElementById('manageSnippetsModal');
+      if (modal) modal.classList.remove('hidden');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeManageSnippetsModal() {
+      const modal = document.getElementById('manageSnippetsModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function renderManageSnippetsList() {
+      const listEl = document.getElementById('snippetsManageList');
+      if (!listEl) return;
+      if (draftSnippetsList.length === 0) {
+        listEl.innerHTML = `
+          <div class="py-8 text-center text-slate-500 text-xs border border-dashed border-slate-800 rounded-2xl">
+            目前無任何備忘項目，請點擊下方「新增備忘」按鈕建立！
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = draftSnippetsList.map((item, idx) => `
+        <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-3.5 space-y-2.5 relative group transition hover:border-purple-500/40 shadow-sm">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div>
+                <label class="block text-[10px] font-semibold text-purple-300 mb-0.5">標籤名稱 *</label>
+                <input type="text" value="${escapeHtml(item.label || '')}" oninput="updateSnippetDraftItem(${idx}, 'label', this.value)" placeholder="例：統編、計畫編號" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-semibold">
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-[10px] text-slate-400 mb-0.5">備忘項目描述 / 用途說明</label>
+                <input type="text" value="${escapeHtml(item.desc || '')}" oninput="updateSnippetDraftItem(${idx}, 'desc', this.value)" placeholder="例：學校統一編號、主計室核銷窗口 (選填)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 placeholder-slate-500 focus:outline-none focus:border-purple-500">
+              </div>
+            </div>
+            <button type="button" onclick="deleteSnippetDraftItem(${idx})" class="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-700/60 rounded-lg transition self-end mb-0.5" title="刪除此筆備忘">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-0.5">按鈕縮寫顯示 (選填)</label>
+              <input type="text" value="${escapeHtml(item.display || '')}" oninput="updateSnippetDraftItem(${idx}, 'display', this.value)" placeholder="預設使用內容縮寫" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 placeholder-slate-500 focus:outline-none focus:border-purple-500">
+            </div>
+            <div class="sm:col-span-3">
+              <label class="block text-[10px] font-semibold text-purple-300 mb-0.5">一鍵複製完整內容 (字串、代碼或信件範本) *</label>
+              <textarea rows="${(item.value && (item.value.includes('\n') || item.value.length > 50)) ? 2 : 1}" oninput="updateSnippetDraftItem(${idx}, 'value', this.value)" placeholder="輸入點擊後要複製至剪貼簿的完整內容..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono text-purple-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 leading-relaxed">${escapeHtml(item.value || '')}</textarea>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function updateSnippetDraftItem(idx, field, val) {
+      if (!draftSnippetsList[idx]) return;
+      draftSnippetsList[idx][field] = val;
+    }
+
+    function addNewSnippetDraftItem() {
+      draftSnippetsList.push({
+        id: `snip-${Date.now()}`,
+        label: '',
+        display: '',
+        desc: '',
+        value: ''
+      });
+      renderManageSnippetsList();
+      const listEl = document.getElementById('snippetsManageList');
+      if (listEl) listEl.scrollTop = listEl.scrollHeight;
+    }
+
+    function deleteSnippetDraftItem(idx) {
+      draftSnippetsList.splice(idx, 1);
+      renderManageSnippetsList();
+    }
+
+    function resetSnippetsToDefault() {
+      if (confirm('確定要將常用代碼與報帳備忘恢復為預設項目嗎？')) {
+        draftSnippetsList = JSON.parse(JSON.stringify(DEFAULT_ADMIN_SNIPPETS));
+        renderManageSnippetsList();
+      }
+    }
+
+    function saveManagedSnippets() {
+      const cleaned = draftSnippetsList.filter(s => (s.label || '').trim() || (s.value || '').trim()).map(s => ({
+        id: s.id || `snip-${Date.now()}`,
+        label: (s.label || '備忘').trim(),
+        display: (s.display || '').trim(),
+        desc: (s.desc || '').trim(),
+        value: (s.value || '').trim()
+      }));
+
+      saveAdminSnippets(cleaned);
+      closeManageSnippetsModal();
+      showToast('🎉 已成功更新常用代碼與報帳備忘！');
+    }
+
     let activeAdminSopFilter = 'all';
 
     function getStoredAdminSops() {
@@ -5663,8 +5857,16 @@ ${metaContext}${raw}
           localStorage.setItem(STORAGE_KEY_ADMIN_SOPS, JSON.stringify(initialSops));
           return initialSops;
         }
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_ADMIN_SOPS;
+        let parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // 若先前快取有 sop-2 (伺服器與運算 SOP)，依需求自動清除
+          if (parsed.some(s => s.id === 'sop-2')) {
+            parsed = parsed.filter(s => s.id !== 'sop-2');
+            localStorage.setItem(STORAGE_KEY_ADMIN_SOPS, JSON.stringify(parsed));
+          }
+          return parsed;
+        }
+        return DEFAULT_ADMIN_SOPS;
       } catch {
         return DEFAULT_ADMIN_SOPS;
       }
@@ -5692,6 +5894,7 @@ ${metaContext}${raw}
     }
 
     function renderAdminSops() {
+      renderAdminSnippetsBar();
       const container = document.getElementById('adminSopListContainer');
       if (!container) return;
       const sops = getStoredAdminSops();
@@ -7085,7 +7288,7 @@ ${metaContext}${raw}
         try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
       };
       return {
-        version: '1.4.0',
+        version: '1.4.1',
         timestamp: new Date().toISOString(),
         logs: getLocal(STORAGE_KEY_LOGS),
         meetings: getLocal(STORAGE_KEY_MEETINGS),
@@ -7093,6 +7296,7 @@ ${metaContext}${raw}
         papers: getLocal(STORAGE_KEY_PAPERS),
         labLogs: getLocal(STORAGE_KEY_LABLOGS),
         adminSops: getLocal(STORAGE_KEY_ADMIN_SOPS),
+        adminSnippets: getLocal(STORAGE_KEY_ADMIN_SNIPPETS),
         minutes: getLocal(STORAGE_KEY_MINUTES)
       };
     }
@@ -7127,6 +7331,7 @@ ${metaContext}${raw}
       mergeList(STORAGE_KEY_PAPERS, remote.papers);
       mergeList(STORAGE_KEY_LABLOGS, remote.labLogs);
       if (remote.adminSops) mergeList(STORAGE_KEY_ADMIN_SOPS, remote.adminSops);
+      if (remote.adminSnippets) mergeList(STORAGE_KEY_ADMIN_SNIPPETS, remote.adminSnippets);
       if (remote.minutes) mergeList(STORAGE_KEY_MINUTES, remote.minutes);
 
       if (remote.activeMeetingId) {
@@ -7150,7 +7355,10 @@ ${metaContext}${raw}
         else if (currentTab === 'minutes') localStorage.removeItem(STORAGE_KEY_MINUTES);
         else if (currentTab === 'papers') localStorage.removeItem(STORAGE_KEY_PAPERS);
         else if (currentTab === 'lablog') localStorage.removeItem(STORAGE_KEY_LABLOGS);
-        else if (currentTab === 'adminsop') localStorage.removeItem(STORAGE_KEY_ADMIN_SOPS);
+        else if (currentTab === 'adminsop') {
+          localStorage.removeItem(STORAGE_KEY_ADMIN_SOPS);
+          localStorage.removeItem(STORAGE_KEY_ADMIN_SNIPPETS);
+        }
         renderAll();
         showToast('已清空當前模組資料');
       }
